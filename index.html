@@ -319,13 +319,17 @@
       </div>
       <div class="weather-grid">
         <div class="weather-panel">
-          <div class="weather-panel-title">Précipitations prochaines 24h (mm/h)</div>
+          <div class="weather-panel-title">Pluie tombée</div>
+          <div style="display:flex;gap:.5rem;margin-bottom:.5rem" id="weatherPast"></div>
+          <div class="weather-panel-title">Prévisions prochaines 24h (mm/h)</div>
           <div class="weather-bars" id="weatherBars"></div>
           <div class="weather-hours" id="weatherHours"></div>
         </div>
         <div class="weather-panel">
           <div class="weather-panel-title">Prévisions 3 jours</div>
           <div class="weather-days" id="weatherDays"></div>
+          <div class="weather-panel-title" style="margin-top:.6rem">Historique pluviométrie</div>
+          <div class="weather-days" id="weatherHistory"></div>
         </div>
       </div>
       <div id="weatherAlert"></div>
@@ -566,7 +570,43 @@ CONTEXTE EXIGÉ pour chaque mouvement :
 — Économique : Fed/BCE, résultats trimestriels, emploi/inflation, faillites, levées de fonds
 Pas "le Brent baisse" → "le Brent recule à 72$ : OPEP+ annonce +500k b/j + demande chinoise faible (PMI sous 50)"
 
-Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
+Ne mentionner QUE ce qui bouge ou a une cause identifiable.
+
+FORMAT DE RÉPONSE OBLIGATOIRE — ta réponse DOIT commencer par [NIVEAU:X] et suivre exactement cette structure :
+
+[NIVEAU:X]
+(1=calme 2=vigilance 3=alerte 4=crise)
+[RESUME_NIVEAU]
+(une phrase)
+[STATUS]
+stress:X
+energy:X
+food:X
+markets:X
+currencies:X
+[/STATUS]
+[ACTIONS]
+• action concrète 1
+• action concrète 2
+• action concrète 3
+[/ACTIONS]
+[ANALYSE]
+🚨 Stress du marché [X]
+• bullet avec fait + chiffre + contexte géopolitique/politique
+• bullet
+
+⚡ Énergie [X]
+• bullet
+• bullet
+
+(autres catégories dynamiques avec emoji, chacune avec [1-4])
+
+👀 À surveiller
+• échéance 1
+• échéance 2
+[/ANALYSE]
+
+COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
 
       return {sysPrompt, userPrompt};
     }
@@ -716,12 +756,19 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
       const lines=analyseText.split('\n');
       let current=null;
       const emojiHeaderRe=/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s+(.+)/u;
+      const plainHeaderRe=/^([A-ZÀ-Ü][a-zà-ÿA-ZÀ-Ü\s&]+?)\s*(?:\[(\d)\])?\s*:\s*$/;
 
       for(const line of lines){
-        const m=line.trim().match(emojiHeaderRe);
-        if(m && !line.trim().startsWith('•') && !line.trim().startsWith('-')){
+        const trimmed=line.trim();
+        const m=trimmed.match(emojiHeaderRe);
+        const mp=!m?trimmed.match(plainHeaderRe):null;
+        if((m||mp) && !trimmed.startsWith('•') && !trimmed.startsWith('-')){
           if(current)blocks.push(current);
-          current={emoji:m[1],title:m[2].replace(/:$/,'').trim(),bullets:[]};
+          if(m){
+            current={emoji:m[1],title:m[2].replace(/:$/,'').trim(),bullets:[]};
+          }else{
+            current={emoji:'📌',title:mp[1].trim()+(mp[2]?' ['+mp[2]+']':''),bullets:[]};
+          }
         }else if(current){
           const bullet=line.trim().replace(/^[-•*]\s*/,'').trim();
           if(bullet.length>3)current.bullets.push(bullet);
@@ -832,19 +879,34 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
     async function loadWeather(){
       try{
         const lat=44.58,lon=2.07;
-        const r=await fetch(`https://api.open-meteo.com/v1/meteofrance?latitude=${lat}&longitude=${lon}&hourly=precipitation,weather_code,precipitation_probability&daily=precipitation_sum,weather_code,precipitation_probability_max&timezone=Europe/Paris&forecast_days=4`);
+        const r=await fetch(`https://api.open-meteo.com/v1/meteofrance?latitude=${lat}&longitude=${lon}&hourly=precipitation,weather_code,precipitation_probability&daily=precipitation_sum,weather_code,precipitation_probability_max&timezone=Europe/Paris&forecast_days=4&past_days=2`);
         if(!r.ok)return;
         const d=await r.json();
         const h=d.hourly, daily=d.daily;
         const now=new Date();
 
-        // Find current hour index
+        // ── Past 24h and 48h totals ──
         let startIdx=0;
         for(let i=0;i<h.time.length;i++){
           if(new Date(h.time[i])>=now){startIdx=Math.max(0,i-1);break}
         }
+        const past48=h.precipitation.slice(Math.max(0,startIdx-48),startIdx);
+        const past24=past48.slice(-24);
+        const total24=past24.reduce((a,b)=>a+b,0);
+        const total48=past48.reduce((a,b)=>a+b,0);
+        const mmClass=(mm)=>mm===0?'dry':mm<2?'light':mm<10?'moderate':mm<30?'heavy':'extreme';
 
-        // Next 24h bars
+        const pastEl=document.getElementById('weatherPast');
+        const needWater=total48<2;
+        pastEl.innerHTML=
+          `<div class="weather-day" style="flex:1"><div class="weather-day-label">Dernières 24h</div><div class="weather-day-mm ${mmClass(total24)}">${total24.toFixed(1)} mm</div></div>`+
+          `<div class="weather-day" style="flex:1"><div class="weather-day-label">Dernières 48h</div><div class="weather-day-mm ${mmClass(total48)}">${total48.toFixed(1)} mm</div></div>`+
+          `<div class="weather-day" style="flex:1"><div class="weather-day-label">Arrosage</div><div style="font-size:.75rem">${needWater?'💧 À prévoir':'✅ OK'}</div></div>`;
+
+        // ── Save today's total to history ──
+        saveDailyPrecip(daily);
+
+        // ── Next 24h bars ──
         const bars=document.getElementById('weatherBars');
         const hours=document.getElementById('weatherHours');
         const slice=h.precipitation.slice(startIdx,startIdx+24);
@@ -868,24 +930,31 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
         bars.innerHTML=barsHtml;
         hours.innerHTML=hoursHtml;
 
-        // 3-day forecast
+        // ── 3-day forecast ──
         const daysEl=document.getElementById('weatherDays');
         const dayNames=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
         const wIcons=(c)=>c>=95?'⛈️':c>=80?'🌧️':c>=61?'🌧️':c>=51?'🌦️':c>=45?'🌫️':c>=3?'⛅':c>=1?'🌤️':'☀️';
         let daysHtml='';
-        for(let i=1;i<=3&&i<daily.precipitation_sum.length;i++){
+        // Find today's index in daily array (past_days shifts it)
+        let todayIdx=0;
+        const todayStr=now.toISOString().slice(0,10);
+        for(let i=0;i<daily.time.length;i++){if(daily.time[i]===todayStr){todayIdx=i;break}}
+        for(let i=todayIdx+1;i<=todayIdx+3&&i<daily.precipitation_sum.length;i++){
           const dt=new Date(daily.time[i]);
           const label=dayNames[dt.getDay()]+' '+dt.getDate();
           const mm=daily.precipitation_sum[i];
           const probMax=daily.precipitation_probability_max?daily.precipitation_probability_max[i]:null;
-          const cls=mm===0?'dry':mm<2?'light':mm<10?'moderate':mm<30?'heavy':'extreme';
+          const cls=mmClass(mm);
           const icon=wIcons(daily.weather_code[i]);
           const probStr=probMax!==null?'<div style="font-size:.55rem;color:var(--text-hint)">'+probMax+'% proba</div>':'';
           daysHtml+=`<div class="weather-day"><div class="weather-day-label">${label}</div><div class="weather-day-icon">${icon}</div><div class="weather-day-mm ${cls}">${mm.toFixed(1)} mm</div>${probStr}</div>`;
         }
         daysEl.innerHTML=daysHtml;
 
-        // Storm/flood alert
+        // ── Render precipitation history ──
+        renderPrecipHistory();
+
+        // ── Alerts ──
         const alertEl=document.getElementById('weatherAlert');
         const totalNext24=slice.reduce((a,b)=>a+b,0);
         if(hasStorm){
@@ -894,8 +963,10 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
           alertEl.innerHTML='<div class="weather-alert">🌊 <strong>Fortes pluies prévues ('+totalNext24.toFixed(0)+' mm/24h)</strong> — risque montée du Lot, vérifier <a href="https://www.vigicrues.gouv.fr" target="_blank" style="color:var(--accent)">Vigicrues</a>.</div>';
         }else if(totalNext24>10){
           alertEl.innerHTML='<div class="weather-alert">🌧️ Pluie modérée prévue ('+totalNext24.toFixed(0)+' mm/24h).</div>';
+        }else if(totalNext24===0&&needWater){
+          alertEl.innerHTML='<div style="margin-top:.4rem;font-size:.65rem;color:var(--text-hint)">💧 Sec depuis 48h et 0 pluie prévue — arrosage potager recommandé.</div>';
         }else if(totalNext24===0){
-          alertEl.innerHTML='<div style="margin-top:.4rem;font-size:.65rem;color:var(--text-hint)">☀️ Sec sur 24h — arrosage potager si besoin.</div>';
+          alertEl.innerHTML='<div style="margin-top:.4rem;font-size:.65rem;color:var(--text-hint)">☀️ Sec sur 24h.</div>';
         }else{
           alertEl.innerHTML='';
         }
@@ -903,6 +974,44 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
         console.error('Weather:',e);
       }
     }
+
+    function saveDailyPrecip(daily){
+      try{
+        const hist=JSON.parse(localStorage.getItem('macro-dash-precip')||'{}');
+        // Save each day from the API response
+        for(let i=0;i<daily.time.length;i++){
+          if(daily.precipitation_sum[i]!==null){
+            hist[daily.time[i]]=daily.precipitation_sum[i];
+          }
+        }
+        // Keep only last 30 days
+        const keys=Object.keys(hist).sort();
+        if(keys.length>30){
+          keys.slice(0,keys.length-30).forEach(k=>delete hist[k]);
+        }
+        localStorage.setItem('macro-dash-precip',JSON.stringify(hist));
+      }catch(e){}
+    }
+
+    function renderPrecipHistory(){
+      const el=document.getElementById('weatherHistory');
+      if(!el)return;
+      try{
+        const hist=JSON.parse(localStorage.getItem('macro-dash-precip')||'{}');
+        const dayNames=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+        const today=new Date().toISOString().slice(0,10);
+        const keys=Object.keys(hist).sort().reverse().filter(k=>k<today).slice(0,7).reverse();
+        if(keys.length===0){el.innerHTML='<div style="font-size:.6rem;color:var(--text-hint);font-style:italic">Se remplit jour après jour.</div>';return}
+        const mmClass=(mm)=>mm===0?'dry':mm<2?'light':mm<10?'moderate':mm<30?'heavy':'extreme';
+        el.innerHTML=keys.map(k=>{
+          const dt=new Date(k+'T12:00:00');
+          const label=dayNames[dt.getDay()]+' '+dt.getDate();
+          const mm=hist[k];
+          return `<div class="weather-day"><div class="weather-day-label">${label}</div><div class="weather-day-mm ${mmClass(mm)}">${mm.toFixed(1)}</div></div>`;
+        }).join('');
+      }catch(e){}
+    }
+
     loadWeather();
     setInterval(loadWeather,1800000);
 
