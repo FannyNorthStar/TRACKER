@@ -213,7 +213,7 @@
     </div>
   </header>
 
-  <div class="ticker-container" id="tickerTape"></div>
+  <div class="ticker-container" id="tickerTape" style="display:none"></div>
 
   <!-- Settings Modal -->
   <div class="modal-overlay" id="settingsModal">
@@ -310,14 +310,13 @@
       </div>
       <p class="section-desc">
         Matières premières agricoles sensibles au climat et aux conflits. Hausse simultanée = signal de crise alimentaire.
-        WEAT = blé · CORN = maïs · SOYB = soja · JO = café · CANE = sucre.
-        Riz et cacao suivis uniquement via l'analyse IA (pas d'ETF fiable en widget gratuit).
+        WEAT = blé · CORN = maïs · SOYB = soja · CANE = sucre.
+        Riz, café et cacao suivis uniquement via l'analyse IA (pas d'ETF fiable en widget gratuit).
       </p>
       <div class="widget-grid">
         <div class="widget-card widget-card--std" id="chart-wheat"><div class="widget-label"></div></div>
         <div class="widget-card widget-card--std" id="chart-corn"><div class="widget-label"></div></div>
         <div class="widget-card widget-card--std" id="chart-soy"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-coffee"><div class="widget-label"></div></div>
         <div class="widget-card widget-card--std" id="chart-sugar"><div class="widget-label"></div></div>
       </div>
       <div style="margin-top:.6rem;font-size:.65rem;color:var(--text-hint)">
@@ -456,7 +455,7 @@ Si tout est calme : "• RAS — indicateurs dans les normes, pas d'action parti
 [ANALYSE]
 Brief en catégories dynamiques (emoji + titre). 2-4 bullets par catégorie. Chaque bullet = fait daté + impact chiffré. Pas de tableau. Termine par "👀 À surveiller".
 Inclure SYSTÉMATIQUEMENT une catégorie météo/climat si pertinent (El Niño, alertes, crues du Lot).
-Max 350 mots. Pas d'intro. Pas de formules de politesse.
+Max 350 mots. Pas d'intro. Pas de formules de politesse. PAS DE CITATIONS DE SOURCES (pas de liens, pas de noms de sites, pas de parenthèses avec des URLs). Les données doivent être fiables mais le lecteur n'a pas besoin de savoir d'où elles viennent.
 [/ANALYSE]
 
 Langue : français.`;
@@ -532,7 +531,7 @@ IMPORTANT : respecte exactement le format [NIVEAU:X], [RESUME_NIVEAU], [ACTIONS]
           }
         }
 
-        text=text.replace(/\*\*/g,'').replace(/\*/g,'').trim();
+        text=text.replace(/\*\*/g,'').replace(/\*/g,'').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/\(?\[?https?:\/\/[^\s\])]+\]?\)?/g,'').replace(/\(\s*\)/g,'').trim();
         parseAndDisplay(text);
 
         const inTok=data.usage?.input_tokens||0;
@@ -685,7 +684,6 @@ IMPORTANT : respecte exactement le format [NIVEAU:X], [RESUME_NIVEAU], [ACTIONS]
     }
 
     function buildAllWidgets(){
-      tickerTape();
 
       // Stress — ETFs that always work in free widgets
       miniChart('chart-vix','AMEX:VIXY','6M');
@@ -703,7 +701,6 @@ IMPORTANT : respecte exactement le format [NIVEAU:X], [RESUME_NIVEAU], [ACTIONS]
       miniChart('chart-wheat','AMEX:WEAT','6M');
       miniChart('chart-corn','AMEX:CORN','6M');
       miniChart('chart-soy','AMEX:SOYB','6M');
-      miniChart('chart-coffee','AMEX:JO','6M');
       miniChart('chart-sugar','AMEX:CANE','6M');
 
       // Marchés
