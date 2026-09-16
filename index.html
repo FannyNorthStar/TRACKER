@@ -476,7 +476,7 @@ currencies:X
 3-5 lignes commençant par •. Concrètes, avec produit + quantité + timing. Adapter à la saison (bois au printemps, crues en automne, gaz bouteille moins cher en été). Si RAS : "• Indicateurs dans les normes, pas d'action."
 [/ACTIONS]
 [ANALYSE]
-Catégories dynamiques (emoji+titre, 2-4 bullets chacune). Terminer par 👀 À surveiller. Max 350 mots. Pas de sources/URLs.
+Catégories dynamiques (emoji+titre, 2-4 bullets chacune). Terminer par 👀 À surveiller. Max 500 mots. Donne du CONTEXTE et de la PROFONDEUR — pas juste "X a baissé de Y%" mais le pourquoi géopolitique/politique/économique derrière. Pas de sources/URLs.
 RÈGLE CLÉ : chaque chiffre = un fait + son POURQUOI (géopolitique, décision politique, données éco). Interdit de citer un mouvement sans cause.
 [/ANALYSE]
 
@@ -557,7 +557,7 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
           }
         }
 
-        text=text.replace(/\*\*/g,'').replace(/\*/g,'').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/\(?\[?https?:\/\/[^\s\])]+\]?\)?/g,'').replace(/\(\s*\)/g,'').trim();
+        text=text.replace(/\*\*/g,'').replace(/\*/g,'').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/\(?\[?https?:\/\/[^\s\])]+\]?\)?/g,'').replace(/\s*\([\w.-]+\.\w{2,4}\)/g,'').replace(/\(\s*\)/g,'').trim();
         parseAndDisplay(text);
 
         const inTok=data.usage?.input_tokens||0;
@@ -724,7 +724,7 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
               {role:'system',content:sysPrompt+'\n\nATTENTION : tu n\'as pas accès au web pour cette requête. Donne ton analyse avec les données les plus récentes dont tu disposes. Indique clairement la date limite de tes connaissances et précise que les cours affichés peuvent ne pas être à jour.'},
               {role:'user',content:userPrompt}
             ],
-            max_tokens:2000
+            max_tokens:3000
           })
         });
 
