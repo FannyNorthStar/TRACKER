@@ -212,13 +212,13 @@
       </div>
       <p class="section-desc">
         Premiers à bouger en cas de crise.
-        VIX > 30 = panique · Or et Dollar montent = fuite vers la sécurité · Taux 10 ans chutent = récession anticipée.
+        VIXY monte = volatilité (peur) en hausse · Or et Dollar (UUP) montent = fuite vers la sécurité · TLT monte = taux baissent = récession anticipée.
       </p>
       <div class="widget-grid widget-grid--large">
-        <div class="widget-card widget-card--tall" id="chart-vix"><div class="widget-label"><span class="widget-label-name">VIX — Indice de la peur</span><span class="widget-label-hint">> 30 = alerte</span></div></div>
+        <div class="widget-card widget-card--tall" id="chart-vix"><div class="widget-label"><span class="widget-label-name">Volatilité (VIXY)</span><span class="widget-label-hint">suit le VIX · monte = peur</span></div></div>
         <div class="widget-card widget-card--tall" id="chart-gold"><div class="widget-label"><span class="widget-label-name">Or — Valeur refuge</span><span class="widget-label-hint">monte en crise</span></div></div>
-        <div class="widget-card widget-card--tall" id="chart-dxy"><div class="widget-label"><span class="widget-label-name">Dollar (DXY)</span><span class="widget-label-hint">se renforce en crise</span></div></div>
-        <div class="widget-card widget-card--tall" id="chart-us10y"><div class="widget-label"><span class="widget-label-name">Taux US 10 ans</span><span class="widget-label-hint">chute = récession</span></div></div>
+        <div class="widget-card widget-card--tall" id="chart-dxy"><div class="widget-label"><span class="widget-label-name">Dollar (UUP)</span><span class="widget-label-hint">monte = fuite vers $</span></div></div>
+        <div class="widget-card widget-card--tall" id="chart-us10y"><div class="widget-label"><span class="widget-label-name">Obligations US 20 ans (TLT)</span><span class="widget-label-hint">monte = taux baissent = peur récession</span></div></div>
       </div>
     </section>
 
@@ -301,7 +301,8 @@
 
     <div class="legend">
       <strong>Comment lire ce tableau :</strong>
-      En temps normal, le VIX est entre 12 et 20, l'or et le dollar sont stables. Quand le VIX dépasse 25-30 ET que l'or et le dollar montent simultanément ET que les émergents plongent — signal « risk-off ».
+      En temps normal, VIXY est bas et stable, l'or et le dollar (UUP) sont neutres. Quand VIXY s'envole ET que l'or et UUP montent simultanément ET que les émergents plongent — signal « risk-off ».
+      TLT (obligations longues US) monte quand les taux baissent — c'est-à-dire quand les investisseurs fuient vers la sécurité et anticipent un ralentissement.
       Pétrole en forte hausse = choc d'offre/géopolitique · en chute libre = peur de récession.
 
       <strong>Sécurité alimentaire :</strong>
@@ -352,44 +353,29 @@
     function buildPrompts(){
       const tfLabel={'24h':'dernières 24h','7d':'7 derniers jours','both':'dernières 24h + tendance 7 jours'}[selectedTimeframe];
 
-      const sysPrompt=`Tu es un analyste macro-économique et géopolitique qui rédige un brief factuel pour un non-spécialiste. Ton rôle : lire les marchés et EXPLIQUER POURQUOI ils bougent en citant les faits d'actualité. Tu couvres aussi la dimension climatique et alimentaire (El Niño, sécheresses, récoltes, etc.).
+      const sysPrompt=`Tu rédiges un brief macro quotidien pour quelqu'un qui veut comprendre l'état du monde en 2 minutes. Format strict :
 
-Règles strictes :
-— Chaque mouvement de marché doit être relié à un fait daté et sourcé. Pas de « les marchés sont prudents » sans dire POURQUOI.
-— Commence par un tableau des cours actuels (une ligne par valeur).
-— Puis analyse en 4 blocs : MACRO & STRESS / ÉNERGIE / ALIMENTATION & CLIMAT / MARCHÉS & DEVISES.
-— Termine par les événements à surveiller.
-— Langue : français. Pas de markdown, pas de bullet points dans l'analyse (sauf le tableau). Pas de formules de politesse.
-— Sois concis : 350 mots max pour l'analyse (hors tableau).`;
+— Structure en CATÉGORIES avec emoji + titre en gras. Les catégories NE SONT PAS FIXES : tu choisis celles qui sont pertinentes aujourd'hui. Exemples possibles : 🔴 Géopolitique · 🌡️ Climat & El Niño · 🏦 Banques centrales · 🛢️ Énergie · 🌾 Alimentation · 💻 Tech · 💰 Marchés · 💱 Devises · ⚡ Tensions commerciales · 🗳️ Politique · 🏭 Industrie · 🦠 Santé — mais invente les tiennes si besoin.
+— Sous chaque catégorie : 2-4 bullet points courts. Chaque bullet = un FAIT daté + son IMPACT chiffré sur un marché.
+— Bon exemple : "• L'OPEP+ a annoncé lundi une hausse de production de 500k b/j → Brent -3% à 72$"
+— Mauvais exemple : "• Le pétrole est en baisse cette semaine"
+— PAS DE TABLEAU de cours. Les chiffres apparaissent dans les bullets, en contexte.
+— Termine par une rubrique "👀 À surveiller" avec 2-3 échéances à venir.
+— Langue : français. Max 300 mots. Pas de formules de politesse. Pas d'intro.`;
 
-      const userPrompt=`ÉTAPE 1 — Recherche les COURS ACTUELS de ces valeurs et donne-les dans un tableau simple avec cours + variation % sur la période :
+      const userPrompt=`Recherche via le web l'actualité des ${tfLabel} et rédige le brief.
 
-STRESS : VIX, Or ($/oz), Dollar Index (DXY), Taux US 10 ans (%)
-ÉNERGIE : Brent ($/baril), WTI ($/baril), Gaz naturel US ($/MMBtu), ETF Énergie propre (ICLN)
-ALIMENTATION : Blé, Maïs, Soja, Riz, Café, Cacao, Sucre ($/unité standard)
-MARCHÉS : S&P 500, CAC 40, Nasdaq 100, ETF Émergents (EEM)
-DEVISES : EUR/USD, Bitcoin ($)
+Valeurs à couvrir (cite leur cours et variation quand tu les mentionnes) :
+STRESS : VIX, Or, Dollar (DXY), Taux US 10 ans
+ÉNERGIE : Brent, WTI, Gaz naturel, transition énergétique
+ALIMENTATION : Blé, Maïs, Soja, Riz, Café, Cacao, Sucre
+MARCHÉS : S&P 500, CAC 40, Nasdaq 100, Émergents (EEM)
+DEVISES : EUR/USD, Bitcoin
+CLIMAT : statut ENSO (El Niño/La Niña), anomalies météo majeures, impacts sur récoltes
 
-ÉTAPE 2 — Recherche les FAITS MAJEURS des ${tfLabel} qui expliquent ces mouvements :
-— Décisions ou discours de banques centrales (Fed, BCE, etc.)
-— Événements géopolitiques (conflits, sanctions, accords, élections)
-— Annonces politiques majeures (tarifs douaniers, lois, régulations)
-— Données économiques (emploi, inflation, PIB, PMI)
-— Climat et El Niño : statut actuel de l'ENSO (El Niño/La Niña/neutre), anomalie de température du Pacifique, impacts en cours ou attendus (mousson, sécheresse, inondations, récoltes), alertes météo majeures
-— Sécurité alimentaire : récoltes, stocks mondiaux, restrictions d'exportation, rapports USDA/FAO
-— Catastrophes naturelles affectant les marchés
+Tu n'es PAS obligé de tout mentionner. Concentre-toi sur ce qui BOUGE et ce qui a une CAUSE identifiable. Si le riz n'a pas bougé et qu'il n'y a rien à dire, ne le mentionne pas. Si un événement géopolitique domine tout, fais-en la catégorie principale.
 
-ÉTAPE 3 — Rédige l'analyse en 4 BLOCS, chacun CONNECTANT les cours aux faits :
-
-BLOC 1 — MACRO & STRESS (VIX, or, dollar, taux) : risk-on ou risk-off et pourquoi.
-BLOC 2 — ÉNERGIE (pétrole, gaz, transition) : OPEP+, géopolitique, mix énergétique.
-BLOC 3 — ALIMENTATION & CLIMAT : état d'El Niño, impacts sur les récoltes et les cours agricoles, risques alimentaires. C'est la section la plus importante — ne la bâcle pas.
-BLOC 4 — MARCHÉS & DEVISES : tendances actions, EUR/USD, bitcoin.
-
-Exemple de bonne phrase : « Le café arabica a bondi de 8% à 2.45$/lb, les plantations colombiennes subissant une sécheresse record liée à El Niño, avec des prévisions USDA revues à la baisse de 12% sur la récolte 2026-27. »
-Exemple de mauvaise phrase : « Le café est en hausse. »
-
-ÉTAPE 4 — Termine par : événements à surveiller dans les prochains jours (réunions banques centrales, publications données éco, prévisions ENSO, rapports USDA/FAO, échéances politiques).`;
+Rappel : chaque chiffre doit être lié à un fait. Pas de description de mouvement sans explication.`;
 
       return {sysPrompt, userPrompt};
     }
@@ -538,8 +524,8 @@ Exemple de mauvaise phrase : « Le café est en hausse. »
       s.src='https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';s.async=true;
       s.textContent=JSON.stringify({
         symbols:[
-          {proName:'TVC:VIX',title:'VIX'},{proName:'TVC:GOLD',title:'Or'},
-          {proName:'TVC:DXY',title:'Dollar'},{proName:'TVC:US10Y',title:'US 10Y'},
+          {proName:'AMEX:VIXY',title:'Volatilité'},{proName:'TVC:GOLD',title:'Or'},
+          {proName:'AMEX:UUP',title:'Dollar'},{proName:'NASDAQ:TLT',title:'Oblig. US'},
           {proName:'TVC:UKOIL',title:'Brent'},{proName:'TVC:USOIL',title:'WTI'},
           {proName:'CBOT:ZW1!',title:'Blé'},{proName:'CBOT:ZC1!',title:'Maïs'},
           {proName:'CBOT:ZS1!',title:'Soja'},{proName:'ICEUS:KC1!',title:'Café'},
@@ -555,11 +541,11 @@ Exemple de mauvaise phrase : « Le café est en hausse. »
     function buildAllWidgets(){
       tickerTape();
 
-      // Stress
-      miniChart('chart-vix','TVC:VIX','6M');
+      // Stress — ETFs that always work in free widgets
+      miniChart('chart-vix','AMEX:VIXY','6M');
       miniChart('chart-gold','TVC:GOLD','6M');
-      miniChart('chart-dxy','TVC:DXY','6M');
-      miniChart('chart-us10y','TVC:US10Y','6M');
+      miniChart('chart-dxy','AMEX:UUP','6M');
+      miniChart('chart-us10y','NASDAQ:TLT','6M');
 
       // Énergie
       miniChart('chart-brent','TVC:UKOIL','3M');
