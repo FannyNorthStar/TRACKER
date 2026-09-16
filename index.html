@@ -94,11 +94,57 @@
     .ai-content.empty{color:var(--text-hint);font-style:italic}
     .ai-content.grid-mode{white-space:normal;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.55rem}
     .ai-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:.7rem .85rem;font-size:.74rem;line-height:1.6;color:var(--text)}
-    .ai-card-title{font-weight:700;font-size:.76rem;margin-bottom:.35rem;display:flex;align-items:center;gap:.3rem}
+    .ai-card.card-l1{border-left:3px solid #22c55e}
+    .ai-card.card-l2{border-left:3px solid #eab308}
+    .ai-card.card-l3{border-left:3px solid #f97316;background:rgba(249,115,22,.04)}
+    .ai-card.card-l4{border-left:3px solid #ef4444;background:rgba(239,68,68,.05)}
+    .ai-card-title{font-weight:700;font-size:.76rem;margin-bottom:.35rem;display:flex;align-items:center;gap:.35rem}
+    .ai-card-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .ai-card-dot.d1{background:#22c55e}
+    .ai-card-dot.d2{background:#eab308}
+    .ai-card-dot.d3{background:#f97316}
+    .ai-card-dot.d4{background:#ef4444}
+    .ai-card-level{font-size:.55rem;font-weight:600;padding:.1rem .3rem;border-radius:3px;margin-left:auto;flex-shrink:0}
+    .ai-card-level.l1{background:rgba(34,197,94,.12);color:#16a34a}
+    .ai-card-level.l2{background:rgba(234,179,8,.12);color:#ca8a04}
+    .ai-card-level.l3{background:rgba(249,115,22,.12);color:#ea580c}
+    .ai-card-level.l4{background:rgba(239,68,68,.12);color:#dc2626}
     .ai-card ul{margin:0;padding-left:1.1rem;list-style:disc}
     .ai-card li{margin-bottom:.2rem}
     .ai-card--watch{border-color:var(--accent);background:var(--tag-bg)}
     .ai-card--watch .ai-card-title{color:var(--accent)}
+
+    /* ── Weather ── */
+    .weather-section{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem}
+    .weather-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+    .weather-title{font-size:.78rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:.4rem}
+    .weather-subtitle{font-size:.62rem;color:var(--text-hint)}
+    .weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    .weather-panel{min-width:0}
+    .weather-panel-title{font-size:.65rem;font-weight:600;color:var(--text-muted);margin-bottom:.4rem}
+    .weather-bars{display:flex;align-items:flex-end;gap:1px;height:60px}
+    .weather-bar{flex:1;min-width:0;border-radius:2px 2px 0 0;position:relative;cursor:default;transition:opacity .2s}
+    .weather-bar:hover{opacity:.8}
+    .weather-bar[title]{position:relative}
+    .weather-bar.rain-0{background:var(--border);min-height:2px}
+    .weather-bar.rain-1{background:#60a5fa}
+    .weather-bar.rain-2{background:#3b82f6}
+    .weather-bar.rain-3{background:#f97316}
+    .weather-bar.rain-4{background:#ef4444}
+    .weather-hours{display:flex;gap:1px;font-size:.5rem;color:var(--text-hint);margin-top:.2rem}
+    .weather-hours span{flex:1;text-align:center}
+    .weather-days{display:flex;gap:.5rem}
+    .weather-day{flex:1;background:var(--bg-card-alt);border-radius:6px;padding:.45rem .5rem;text-align:center;font-size:.65rem}
+    .weather-day-label{font-weight:600;color:var(--text);margin-bottom:.15rem}
+    .weather-day-mm{font-size:.85rem;font-weight:700}
+    .weather-day-mm.dry{color:var(--text-hint)}
+    .weather-day-mm.light{color:#60a5fa}
+    .weather-day-mm.moderate{color:#3b82f6}
+    .weather-day-mm.heavy{color:#f97316}
+    .weather-day-mm.extreme{color:#ef4444}
+    .weather-day-icon{font-size:1rem}
+    .weather-alert{margin-top:.5rem;font-size:.68rem;padding:.35rem .6rem;border-radius:5px;border-left:3px solid #f97316;background:rgba(249,115,22,.06);color:var(--text)}
+    @media(max-width:640px){.weather-grid{grid-template-columns:1fr}}
     .ai-loading{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:var(--text-muted)}
     .ai-spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -263,6 +309,26 @@
     <div class="actions-section" id="actionsSection">
       <div class="actions-title">🎯 Actions recommandées pour le particulier</div>
       <div id="actionsList"></div>
+    </div>
+
+    <!-- ═══ MÉTÉO CAPDENAC ═══ -->
+    <div class="weather-section" id="weatherSection">
+      <div class="weather-header">
+        <div class="weather-title">🌧️ Météo Capdenac-Gare</div>
+        <div class="weather-subtitle">Modèle AROME Météo-France via Open-Meteo · résolution 1,3 km · auto 30 min</div>
+      </div>
+      <div class="weather-grid">
+        <div class="weather-panel">
+          <div class="weather-panel-title">Précipitations prochaines 24h (mm/h)</div>
+          <div class="weather-bars" id="weatherBars"></div>
+          <div class="weather-hours" id="weatherHours"></div>
+        </div>
+        <div class="weather-panel">
+          <div class="weather-panel-title">Prévisions 3 jours</div>
+          <div class="weather-days" id="weatherDays"></div>
+        </div>
+      </div>
+      <div id="weatherAlert"></div>
     </div>
 
     <!-- ═══ AI SUMMARY ═══ -->
@@ -476,7 +542,7 @@ currencies:X
 3-5 lignes commençant par •. Concrètes, avec produit + quantité + timing. Adapter à la saison (bois au printemps, crues en automne, gaz bouteille moins cher en été). Si RAS : "• Indicateurs dans les normes, pas d'action."
 [/ACTIONS]
 [ANALYSE]
-Catégories dynamiques (emoji+titre, 2-4 bullets chacune). Terminer par 👀 À surveiller. Max 500 mots. Donne du CONTEXTE et de la PROFONDEUR — pas juste "X a baissé de Y%" mais le pourquoi géopolitique/politique/économique derrière. Pas de sources/URLs.
+Catégories dynamiques (emoji+titre suivi de [1] à [4] pour le niveau de risque de cette catégorie, ex: "⚡ Énergie [3]"). 2-4 bullets chacune. Terminer par 👀 À surveiller. Max 500 mots. Donne du CONTEXTE et de la PROFONDEUR — pas juste "X a baissé de Y%" mais le pourquoi géopolitique/politique/économique derrière. Pas de sources/URLs.
 RÈGLE CLÉ : chaque chiffre = un fait + son POURQUOI (géopolitique, décision politique, données éco). Interdit de citer un mouvement sans cause.
 [/ANALYSE]
 
@@ -665,11 +731,20 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
 
       if(blocks.length>1){
         content.className='ai-content grid-mode';
+        const levelLabels={1:'CALME',2:'VIGILANCE',3:'ALERTE',4:'CRISE'};
         content.innerHTML=blocks.map(b=>{
-          const isWatch=b.title.toLowerCase().includes('surveiller');
-          const cls=isWatch?'ai-card ai-card--watch':'ai-card';
+          // Parse [N] level from title
+          const lvlMatch=b.title.match(/\[(\d)\]\s*$/);
+          const lvl=lvlMatch?parseInt(lvlMatch[1]):0;
+          const cleanTitle=b.title.replace(/\s*\[\d\]\s*$/,'');
+          const isWatch=cleanTitle.toLowerCase().includes('surveiller');
+          let cls='ai-card';
+          if(isWatch)cls+=' ai-card--watch';
+          else if(lvl>0)cls+=' card-l'+lvl;
+          const dot=lvl>0?'<span class="ai-card-dot d'+lvl+'"></span>':'';
+          const badge=lvl>0?'<span class="ai-card-level l'+lvl+'">'+levelLabels[lvl]+'</span>':'';
           const bulletsHtml=b.bullets.length?'<ul>'+b.bullets.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'';
-          return '<div class="'+cls+'"><div class="ai-card-title">'+b.emoji+' '+b.title+'</div>'+bulletsHtml+'</div>';
+          return '<div class="'+cls+'"><div class="ai-card-title">'+dot+b.emoji+' '+cleanTitle+badge+'</div>'+bulletsHtml+'</div>';
         }).join('');
       }else{
         content.className='ai-content';
@@ -750,6 +825,86 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
 
       btn.disabled=false;btn.textContent='Analyser';
     }
+
+    /* ═══════════════════════════════
+       WEATHER (Open-Meteo, free, no key)
+    ═══════════════════════════════ */
+    async function loadWeather(){
+      try{
+        const lat=44.58,lon=2.07;
+        const r=await fetch(`https://api.open-meteo.com/v1/meteofrance?latitude=${lat}&longitude=${lon}&hourly=precipitation,weather_code,precipitation_probability&daily=precipitation_sum,weather_code,precipitation_probability_max&timezone=Europe/Paris&forecast_days=4`);
+        if(!r.ok)return;
+        const d=await r.json();
+        const h=d.hourly, daily=d.daily;
+        const now=new Date();
+
+        // Find current hour index
+        let startIdx=0;
+        for(let i=0;i<h.time.length;i++){
+          if(new Date(h.time[i])>=now){startIdx=Math.max(0,i-1);break}
+        }
+
+        // Next 24h bars
+        const bars=document.getElementById('weatherBars');
+        const hours=document.getElementById('weatherHours');
+        const slice=h.precipitation.slice(startIdx,startIdx+24);
+        const probs=h.precipitation_probability?h.precipitation_probability.slice(startIdx,startIdx+24):[];
+        const codes=h.weather_code.slice(startIdx,startIdx+24);
+        const times=h.time.slice(startIdx,startIdx+24);
+        const maxMm=Math.max(1,...slice);
+
+        let barsHtml='',hoursHtml='';
+        let hasStorm=false;
+        slice.forEach((mm,i)=>{
+          const pct=Math.max(3,(mm/maxMm)*100);
+          const cls=mm===0?'rain-0':mm<1?'rain-1':mm<5?'rain-2':mm<15?'rain-3':'rain-4';
+          const t=new Date(times[i]);
+          const hh=t.getHours().toString().padStart(2,'0')+'h';
+          const prob=probs[i]!==undefined?' ('+probs[i]+'%)':'';
+          barsHtml+=`<div class="weather-bar ${cls}" style="height:${mm===0?'2px':pct+'%'}" title="${hh}: ${mm.toFixed(1)} mm${prob}"></div>`;
+          if(i%3===0)hoursHtml+=`<span>${hh}</span>`;
+          if(codes[i]>=95)hasStorm=true;
+        });
+        bars.innerHTML=barsHtml;
+        hours.innerHTML=hoursHtml;
+
+        // 3-day forecast
+        const daysEl=document.getElementById('weatherDays');
+        const dayNames=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+        const wIcons=(c)=>c>=95?'⛈️':c>=80?'🌧️':c>=61?'🌧️':c>=51?'🌦️':c>=45?'🌫️':c>=3?'⛅':c>=1?'🌤️':'☀️';
+        let daysHtml='';
+        for(let i=1;i<=3&&i<daily.precipitation_sum.length;i++){
+          const dt=new Date(daily.time[i]);
+          const label=dayNames[dt.getDay()]+' '+dt.getDate();
+          const mm=daily.precipitation_sum[i];
+          const probMax=daily.precipitation_probability_max?daily.precipitation_probability_max[i]:null;
+          const cls=mm===0?'dry':mm<2?'light':mm<10?'moderate':mm<30?'heavy':'extreme';
+          const icon=wIcons(daily.weather_code[i]);
+          const probStr=probMax!==null?'<div style="font-size:.55rem;color:var(--text-hint)">'+probMax+'% proba</div>':'';
+          daysHtml+=`<div class="weather-day"><div class="weather-day-label">${label}</div><div class="weather-day-icon">${icon}</div><div class="weather-day-mm ${cls}">${mm.toFixed(1)} mm</div>${probStr}</div>`;
+        }
+        daysEl.innerHTML=daysHtml;
+
+        // Storm/flood alert
+        const alertEl=document.getElementById('weatherAlert');
+        const totalNext24=slice.reduce((a,b)=>a+b,0);
+        if(hasStorm){
+          alertEl.innerHTML='<div class="weather-alert">⛈️ <strong>Orage prévu dans les 24h</strong> — vérifier écoulements, ne rien laisser en zone inondable bord du Lot.</div>';
+        }else if(totalNext24>30){
+          alertEl.innerHTML='<div class="weather-alert">🌊 <strong>Fortes pluies prévues ('+totalNext24.toFixed(0)+' mm/24h)</strong> — risque montée du Lot, vérifier <a href="https://www.vigicrues.gouv.fr" target="_blank" style="color:var(--accent)">Vigicrues</a>.</div>';
+        }else if(totalNext24>10){
+          alertEl.innerHTML='<div class="weather-alert">🌧️ Pluie modérée prévue ('+totalNext24.toFixed(0)+' mm/24h).</div>';
+        }else if(totalNext24===0){
+          alertEl.innerHTML='<div style="margin-top:.4rem;font-size:.65rem;color:var(--text-hint)">☀️ Sec sur 24h — arrosage potager si besoin.</div>';
+        }else{
+          alertEl.innerHTML='';
+        }
+      }catch(e){
+        console.error('Weather:',e);
+      }
+    }
+    loadWeather();
+    setInterval(loadWeather,1800000);
 
     /* ═══════════════════════════════
        TRADINGVIEW
