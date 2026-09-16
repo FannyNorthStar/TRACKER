@@ -334,7 +334,7 @@
     <!-- ═══ AI SUMMARY ═══ -->
     <section class="ai-section" id="aiSection">
       <div class="ai-header">
-        <div class="ai-title">🤖 Analyse IA <span style="font-weight:400;font-size:.62rem;color:var(--text-hint)">(GPT-4o mini + web · 24h + tendance 7j)</span></div>
+        <div class="ai-title">🤖 Analyse IA <span style="font-weight:400;font-size:.62rem;color:var(--text-hint)">(GPT-4o + web · situation actuelle)</span></div>
         <button class="ai-btn" id="aiBtn" onclick="runAnalysis()">Analyser</button>
       </div>
       <div class="ai-content empty" id="aiContent">Clique sur « Analyser » pour obtenir un résumé de la situation macro. Configure ta clé API OpenAI via ⚙️.</div>
@@ -548,7 +548,7 @@ RÈGLE CLÉ : chaque chiffre = un fait + son POURQUOI (géopolitique, décision 
 
 Langue : français.`;
 
-      const userPrompt=`Recherche l'actualité des dernières 24h + tendance 7 jours. Brief complet [NIVEAU] [RESUME_NIVEAU] [ACTIONS] [ANALYSE].
+      const userPrompt=`Recherche la SITUATION ACTUELLE des marchés et du monde. Pas seulement ce qui s'est passé dans les dernières 24h — inclus tout événement EN COURS qui impacte les marchés et le quotidien, même s'il a débuté il y a des semaines ou des mois (ex: blocage Houthis en mer Rouge, guerre Ukraine, politique tarifaire Trump, hausse annoncée du gaz en France, El Niño en cours). Ce qui compte = l'impact AUJOURD'HUI et dans les PROCHAINES SEMAINES, pas la date de début.
 
 DONNÉES À CHERCHER :
 Stress : VIX, Or, DXY, Taux US 10 ans, Cuivre
@@ -592,7 +592,7 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
           body:JSON.stringify({
-            model:'gpt-4o-mini',
+            model:'gpt-4o',
             tools:[{type:'web_search_preview',search_context_size:'medium'}],
             instructions:sysPrompt,
             input:userPrompt
@@ -628,7 +628,7 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
 
         const inTok=data.usage?.input_tokens||0;
         const outTok=data.usage?.output_tokens||0;
-        const cost=((inTok*0.15/1e6)+(outTok*0.60/1e6)).toFixed(4);
+        const cost=((inTok*2.5/1e6)+(outTok*10/1e6)).toFixed(4);
         meta.textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+' · '+elapsed+'s · ~'+(inTok+outTok)+' tokens · ~$'+cost;
 
       }catch(err){
@@ -794,7 +794,7 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
           body:JSON.stringify({
-            model:'gpt-4o-mini',
+            model:'gpt-4o',
             messages:[
               {role:'system',content:sysPrompt+'\n\nATTENTION : tu n\'as pas accès au web pour cette requête. Donne ton analyse avec les données les plus récentes dont tu disposes. Indique clairement la date limite de tes connaissances et précise que les cours affichés peuvent ne pas être à jour.'},
               {role:'user',content:userPrompt}
@@ -814,7 +814,7 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
         text=text.replace(/^#{1,3}\s+/gm,'').replace(/\*\*/g,'').replace(/\*/g,'').trim();
         const inTok=data.usage?.prompt_tokens||0;
         const outTok=data.usage?.completion_tokens||0;
-        const cost=((inTok*0.15/1e6)+(outTok*0.60/1e6)).toFixed(4);
+        const cost=((inTok*2.5/1e6)+(outTok*10/1e6)).toFixed(4);
 
         parseAndDisplay(text);
         meta.textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+' · '+elapsed+'s · ~'+(inTok+outTok)+' tokens · ~$'+cost+' · ⚠️ sans web search';
