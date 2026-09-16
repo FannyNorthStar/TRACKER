@@ -92,7 +92,7 @@
     .ai-tf-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
     .ai-content{font-size:.78rem;line-height:1.65;color:var(--ai-text);white-space:pre-wrap}
     .ai-content.empty{color:var(--text-hint);font-style:italic}
-    .ai-content.grid-mode{white-space:normal;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.6rem}
+    .ai-content.grid-mode{white-space:normal;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.55rem}
     .ai-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:.7rem .85rem;font-size:.74rem;line-height:1.6;color:var(--text)}
     .ai-card-title{font-weight:700;font-size:.76rem;margin-bottom:.35rem;display:flex;align-items:center;gap:.3rem}
     .ai-card ul{margin:0;padding-left:1.1rem;list-style:disc}
@@ -129,8 +129,8 @@
     .section--stress .section-desc{border-bottom-color:var(--border-stress)}
     .section--stress .widget-card{border-color:var(--border-stress);background:var(--stress-bg)}
 
-    .widget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.6rem}
-    .widget-grid--large{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+    .widget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:.55rem}
+    .widget-grid--large{grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
     .widget-card{background:var(--bg-card);border:1px solid var(--border);border-radius:9px;overflow:hidden;box-shadow:var(--shadow);position:relative}
     .widget-card--tall{height:235px}
     .widget-card--std{height:205px}
@@ -487,17 +487,23 @@ Langue : français.`;
       const userPrompt=`Recherche via le web l'actualité des ${tfLabel} et rédige le brief complet avec [NIVEAU], [RESUME_NIVEAU], [ACTIONS] et [ANALYSE].
 
 Valeurs à couvrir (cite cours et variation quand mentionnés) :
-STRESS : VIX, Or, Dollar (DXY), Taux US 10 ans
-ÉNERGIE : Brent, WTI, Gaz naturel (+ prix propane/butane France si dispo), uranium, transition énergétique
+STRESS : VIX, Or, Dollar (DXY), Taux US 10 ans, Cuivre (COPX)
+ÉNERGIE : Brent, WTI, Gaz naturel, uranium, prix essence SP95 et gazole en France (chercher prix moyen actuel), prix propane/butane France si dispo
 ALIMENTATION : Blé, Maïs, Soja, Riz, Café, Cacao, Sucre — préciser lesquels impactent le consommateur français
-MARCHÉS : S&P 500, CAC 40, Nasdaq 100, Émergents (EEM), Chine (FXI), Cuivre (COPX)
+MARCHÉS : S&P 500, CAC 40, Nasdaq 100, Émergents (EEM), Chine (FXI)
 DEVISES : EUR/USD, Bitcoin
-CLIMAT : statut ENSO, alertes météo France (surtout Lot/Aveyron/Occitanie), niveau des cours d'eau, risques crues du Lot
-LOGISTIQUE : Baltic Dry Index (coût fret maritime — indicateur avancé d'inflation), tensions maritimes (Hormuz, Suez, mer Rouge), perturbations chaîne d'approvisionnement
-ÉNERGIE FRANCE : prix électricité spot France si dispo, tendance nucléaire/uranium
+CLIMAT : statut ENSO, alertes météo France (surtout Lot/Aveyron/Occitanie), risques crues du Lot
+LOGISTIQUE : Baltic Dry Index, tensions maritimes (Hormuz, Suez, mer Rouge)
+ÉNERGIE FRANCE : prix électricité spot, tendance nucléaire/uranium
 
-Concentre-toi sur ce qui BOUGE et a une CAUSE identifiable. Chaque chiffre = un fait.
-Actions = spécifiques au contexte Capdenac-Gare (bord du Lot, chauffage bois, gaz bouteille, zone rurale).
+CONTEXTE OBLIGATOIRE — chaque mouvement de marché doit être EXPLIQUÉ par son contexte :
+— GÉOPOLITIQUE : situation Houthis/mer Rouge et impact sur passage pétrolier, guerre Ukraine-Russie et impact sur gaz/blé/oléoducs, tensions Iran/Israël et détroit d'Hormuz, situation Taïwan et chaîne d'approvisionnement semi-conducteurs
+— POLITIQUE : décisions et annonces Trump (tarifs douaniers, sanctions, régulations), décisions UE (politique énergétique, PAC, sanctions), politique française impactant le quotidien
+— ÉCONOMIQUE : décisions Fed/BCE (taux), résultats trimestriels majeurs (GAFAM, pétrolières, banques), levées de fonds significatives, faillites notables, données emploi/inflation
+— Ne pas juste dire "le Brent baisse de 3%". Dire POURQUOI : "Le Brent recule de 3% à 72$ après que l'OPEP+ a annoncé +500k b/j, dans un contexte de demande chinoise en berne (PMI manufacturier sous 50 pour le 3e mois consécutif)."
+
+Concentre-toi sur ce qui BOUGE et a une CAUSE identifiable. Chaque chiffre = un fait + son contexte.
+Actions = spécifiques au contexte Capdenac-Gare (bord du Lot, chauffage bois, gaz bouteille, zone rurale, essence pour déplacements).
 
 IMPORTANT : respecte exactement le format [NIVEAU:X], [RESUME_NIVEAU], [ACTIONS]...[/ACTIONS], [ANALYSE]...[/ANALYSE].`;
 
