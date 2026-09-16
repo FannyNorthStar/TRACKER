@@ -415,50 +415,69 @@
     function buildPrompts(){
       const tfLabel={'24h':'dernières 24h','7d':'7 derniers jours','both':'dernières 24h + tendance 7 jours'}[selectedTimeframe];
 
-      const sysPrompt=`Tu rédiges un brief macro quotidien pour un particulier qui veut comprendre l'état du monde et savoir comment se préparer. Tu dois produire EXACTEMENT ce format (les marqueurs entre crochets sont obligatoires) :
+      const sysPrompt=`Tu rédiges un brief macro quotidien pour un particulier vivant à CAPDENAC-GARE (Aveyron/Lot, vallée du Lot, Occitanie, France) qui veut comprendre l'état du monde et se préparer concrètement. Ce n'est pas un trader — c'est quelqu'un qui veut anticiper les crises pour ne pas être pris au dépourvu.
+
+CONTEXTE PERSONNEL À PRENDRE EN COMPTE POUR LES ACTIONS :
+— Chauffage : cheminée à bois (stock de bûches). Si le gaz ou l'électricité montent, le bois devient plus demandé → anticiper les commandes.
+— Cuisine : bouteilles de gaz (butane/propane), pas raccordé au gaz de ville. Sensible aux prix du propane/butane et à la logistique de livraison.
+— Alimentation : préciser QUELS aliments stocker (riz, pâtes, farine, huile, conserves…) en fonction de ce qui bouge réellement. Ne pas dire "faites des réserves" en général — dire "le riz thaï risque de flamber à cause de la mousson faible, c'est le moment d'en prendre 10 kg" ou "le blé est stable, pas besoin de stocker les pâtes pour l'instant."
+— Eau : réserves d'eau potable en cas de coupure (inondation, pollution du réseau).
+— Santé / médicaments : si tensions sur le détroit d'Hormuz ou problèmes logistiques maritimes (canal de Suez, mer Rouge), certains médicaments ou principes actifs importés d'Asie peuvent manquer → anticiper stocks de paracétamol, médicaments chroniques, etc.
+— Essence / diesel : impact direct sur le budget déplacement + effet cascade sur les prix de tout (transport routier = coût répercuté sur alimentation, matériaux…). Capdenac est en zone rurale, pas d'alternative au véhicule.
+— Bois / matériaux : si construction ou rénovation prévue, anticiper les prix du bois de construction (lié aux incendies US/Canada, demande globale).
+— El Niño : risques de sécheresse l'été (niveau du Lot, restrictions d'eau) et de fortes pluies/inondations en automne-hiver. Capdenac est EN BORD DU LOT — risque crue majeure.
+— Météo locale : TOUJOURS vérifier s'il y a des alertes Météo-France sur le Lot/Aveyron (orages, crues, canicule, gel tardif). Capdenac-Gare est en fond de vallée → particulièrement exposé aux crues du Lot et à l'humidité.
+
+FORMAT OBLIGATOIRE (respecte exactement les marqueurs) :
 
 [NIVEAU:X]
-(X = chiffre de 1 à 4)
-1 = 🟢 CALME — pas de tension majeure, indicateurs dans les normes
-2 = 🟡 VIGILANCE — quelques signaux de tension isolés, rien d'immédiat
-3 = 🟠 ALERTE — convergence de signaux (or+dollar montent, commodités agricoles en hausse, VIX élevé, conflit actif)
-4 = 🔴 CRISE — multiples indicateurs en zone rouge simultanément, crise en cours ou imminente
-
-Le niveau est basé sur la CONVERGENCE : un seul indicateur qui bouge = pas grave. Plusieurs qui bougent ensemble dans la même direction = alerte. Sois honnête, ne dramatise pas mais ne minimise pas.
+(X = 1 à 4)
+1 = 🟢 CALME — rien à signaler
+2 = 🟡 VIGILANCE — signaux isolés
+3 = 🟠 ALERTE — convergence de signaux
+4 = 🔴 CRISE — multiple indicateurs en rouge
+Basé sur la CONVERGENCE des signaux, pas un seul indicateur. Honnête : ne dramatise pas, ne minimise pas.
 
 [RESUME_NIVEAU]
-Une seule phrase expliquant pourquoi ce niveau. Ex: "VIX à 28 et or en hausse de 3% — les marchés anticipent un choc suite aux nouvelles sanctions sur l'Iran."
+Une phrase expliquant pourquoi ce niveau.
 
 [ACTIONS]
-2 à 4 actions CONCRÈTES pour un particulier (pas un trader). Chaque action = une ligne commençant par •.
+3 à 5 actions CONCRÈTES et SPÉCIFIQUES. Chaque action = une ligne commençant par •.
+Organise-les par urgence (les plus urgentes en premier).
+SOIS PRÉCIS : nomme les produits, les quantités raisonnables, le timing.
 Exemples de bonnes actions :
-• Blé +15% en 2 semaines → les prix pâtes/pain vont suivre dans 2-3 mois. Bon moment pour faire un stock raisonnable.
-• Pétrole à 95$ et en hausse → anticiper +10-15% sur le carburant et le chauffage cet hiver.
-• EUR/USD en chute → si achat en dollars prévu (voyage, tech US), envisager de convertir maintenant.
-• Cacao +40% depuis 3 mois → le chocolat va devenir nettement plus cher, spécial Noël à anticiper.
-Ne donne des actions QUE s'il y a une vraie raison. Si tout est calme, dis simplement "• Pas d'action particulière à prendre aujourd'hui, les indicateurs sont dans les normes."
+• Riz thaï : la mousson indienne est au plus bas depuis 20 ans (El Niño) → les prix vont monter dans 2-3 mois. Prendre 10-15 kg maintenant.
+• Bouteilles de gaz : le propane a pris 8% ce mois → commander une bouteille d'avance si stock bas.
+• Bois de chauffage : les prix du stère montent en automne. Commander maintenant pour l'hiver, les délais s'allongent.
+• Essence : Brent à 95$, pas de baisse en vue → limiter les trajets non essentiels, regrouper les courses.
+• Paracétamol : tensions en mer Rouge → réappro pharmacie perturbée. Garder un stock de 2-3 boîtes.
+• Météo Capdenac : alerte orange orages sur l'Aveyron ce week-end → vérifier les écoulements, ne rien laisser en zone inondable.
+Si tout est calme : "• RAS — indicateurs dans les normes, pas d'action particulière."
 [/ACTIONS]
 
 [ANALYSE]
-Brief structuré en catégories dynamiques (emoji + titre). Les catégories changent selon l'actualité du jour. 2-4 bullet points par catégorie, chaque bullet = fait daté + impact chiffré. Pas de tableau. Termine par "👀 À surveiller".
-Max 300 mots. Pas d'intro. Pas de formules de politesse.
+Brief en catégories dynamiques (emoji + titre). 2-4 bullets par catégorie. Chaque bullet = fait daté + impact chiffré. Pas de tableau. Termine par "👀 À surveiller".
+Inclure SYSTÉMATIQUEMENT une catégorie météo/climat si pertinent (El Niño, alertes, crues du Lot).
+Max 350 mots. Pas d'intro. Pas de formules de politesse.
 [/ANALYSE]
 
 Langue : français.`;
 
       const userPrompt=`Recherche via le web l'actualité des ${tfLabel} et rédige le brief complet avec [NIVEAU], [RESUME_NIVEAU], [ACTIONS] et [ANALYSE].
 
-Valeurs à couvrir (cite cours et variation quand tu les mentionnes) :
+Valeurs à couvrir (cite cours et variation quand mentionnés) :
 STRESS : VIX, Or, Dollar (DXY), Taux US 10 ans
-ÉNERGIE : Brent, WTI, Gaz naturel, transition énergétique
-ALIMENTATION : Blé, Maïs, Soja, Riz, Café, Cacao, Sucre
+ÉNERGIE : Brent, WTI, Gaz naturel (+ prix propane/butane France si dispo), transition énergétique
+ALIMENTATION : Blé, Maïs, Soja, Riz, Café, Cacao, Sucre — préciser lesquels impactent le consommateur français
 MARCHÉS : S&P 500, CAC 40, Nasdaq 100, Émergents (EEM)
 DEVISES : EUR/USD, Bitcoin
-CLIMAT : statut ENSO (El Niño/La Niña), anomalies météo majeures, impacts récoltes
+CLIMAT : statut ENSO, alertes météo France (surtout Lot/Aveyron/Occitanie), niveau des cours d'eau, risques crues du Lot
+LOGISTIQUE : tensions maritimes (Hormuz, Suez, mer Rouge), perturbations chaîne d'approvisionnement
 
-Concentre-toi sur ce qui BOUGE et ce qui a une CAUSE identifiable. Chaque chiffre doit être lié à un fait. Pas de mouvement sans explication.
+Concentre-toi sur ce qui BOUGE et a une CAUSE identifiable. Chaque chiffre = un fait.
+Actions = spécifiques au contexte Capdenac-Gare (bord du Lot, chauffage bois, gaz bouteille, zone rurale).
 
-IMPORTANT : respecte exactement le format avec les marqueurs [NIVEAU:X], [RESUME_NIVEAU], [ACTIONS]...[/ACTIONS], [ANALYSE]...[/ANALYSE].`;
+IMPORTANT : respecte exactement le format [NIVEAU:X], [RESUME_NIVEAU], [ACTIONS]...[/ACTIONS], [ANALYSE]...[/ANALYSE].`;
 
       return {sysPrompt, userPrompt};
     }
