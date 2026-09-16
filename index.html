@@ -92,6 +92,13 @@
     .ai-tf-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
     .ai-content{font-size:.78rem;line-height:1.65;color:var(--ai-text);white-space:pre-wrap}
     .ai-content.empty{color:var(--text-hint);font-style:italic}
+    .ai-content.grid-mode{white-space:normal;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.6rem}
+    .ai-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:.7rem .85rem;font-size:.74rem;line-height:1.6;color:var(--text)}
+    .ai-card-title{font-weight:700;font-size:.76rem;margin-bottom:.35rem;display:flex;align-items:center;gap:.3rem}
+    .ai-card ul{margin:0;padding-left:1.1rem;list-style:disc}
+    .ai-card li{margin-bottom:.2rem}
+    .ai-card--watch{border-color:var(--accent);background:var(--tag-bg)}
+    .ai-card--watch .ai-card-title{color:var(--accent)}
     .ai-loading{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:var(--text-muted)}
     .ai-spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -253,13 +260,8 @@
     <!-- ═══ AI SUMMARY ═══ -->
     <section class="ai-section" id="aiSection">
       <div class="ai-header">
-        <div class="ai-title">🤖 Analyse IA <span style="font-weight:400;font-size:.62rem;color:var(--text-hint)">(GPT-4o mini + web)</span></div>
+        <div class="ai-title">🤖 Analyse IA <span style="font-weight:400;font-size:.62rem;color:var(--text-hint)">(GPT-4o mini + web · 24h + tendance 7j)</span></div>
         <button class="ai-btn" id="aiBtn" onclick="runAnalysis()">Analyser</button>
-      </div>
-      <div class="ai-timeframe">
-        <button class="ai-tf-btn active" data-tf="24h" onclick="setTimeframe('24h',this)">Dernières 24h</button>
-        <button class="ai-tf-btn" data-tf="7d" onclick="setTimeframe('7d',this)">7 jours</button>
-        <button class="ai-tf-btn" data-tf="both" onclick="setTimeframe('both',this)">24h + tendance 7j</button>
       </div>
       <div class="ai-content empty" id="aiContent">Clique sur « Analyser » pour obtenir un résumé de la situation macro. Configure ta clé API OpenAI via ⚙️.</div>
       <div class="ai-meta" id="aiMeta"></div>
@@ -407,10 +409,9 @@
        AI ANALYSIS (OpenAI)
     ═══════════════════════════════ */
     let selectedTimeframe='both';
-    function setTimeframe(tf,btn){selectedTimeframe=tf;document.querySelectorAll('.ai-tf-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
 
     function buildPrompts(){
-      const tfLabel={'24h':'dernières 24h','7d':'7 derniers jours','both':'dernières 24h + tendance 7 jours'}[selectedTimeframe];
+      const tfLabel='dernières 24h + tendance 7 jours';
 
       const sysPrompt=`Tu rédiges un brief macro quotidien pour un particulier vivant à CAPDENAC-GARE (Aveyron/Lot, vallée du Lot, Occitanie, France) qui veut comprendre l'état du monde et se préparer concrètement. Ce n'est pas un trader — c'est quelqu'un qui veut anticiper les crises pour ne pas être pris au dépourvu.
 
@@ -593,11 +594,40 @@ IMPORTANT : respecte exactement le format [NIVEAU:X], [RESUME_NIVEAU], [ACTIONS]
         actionsSection.classList.remove('visible');
       }
 
-      // Parse analysis
+      // Parse analysis into category cards
       const analyseMatch=raw.match(/\[ANALYSE\]\s*([\s\S]*?)(?:\[\/ANALYSE\]|$)/i);
       const analyseText=analyseMatch?analyseMatch[1].trim():raw.replace(/\[.*?\]/g,'').trim();
-      content.className='ai-content';
-      content.textContent=analyseText||raw;
+
+      // Split into categories by emoji headers
+      const blocks=[];
+      const lines=analyseText.split('\n');
+      let current=null;
+      const emojiHeaderRe=/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s+(.+)/u;
+
+      for(const line of lines){
+        const m=line.trim().match(emojiHeaderRe);
+        if(m){
+          if(current)blocks.push(current);
+          current={emoji:m[1],title:m[2].replace(/:$/,''),bullets:[]};
+        }else if(current){
+          const bullet=line.trim().replace(/^[-•*]\s*/,'').trim();
+          if(bullet)current.bullets.push(bullet);
+        }
+      }
+      if(current)blocks.push(current);
+
+      if(blocks.length>1){
+        content.className='ai-content grid-mode';
+        content.innerHTML=blocks.map(b=>{
+          const isWatch=b.title.toLowerCase().includes('surveiller');
+          const cls=isWatch?'ai-card ai-card--watch':'ai-card';
+          const bulletsHtml=b.bullets.length?'<ul>'+b.bullets.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'';
+          return '<div class="'+cls+'"><div class="ai-card-title">'+b.emoji+' '+b.title+'</div>'+bulletsHtml+'</div>';
+        }).join('');
+      }else{
+        content.className='ai-content';
+        content.textContent=analyseText||raw;
+      }
     }
 
     /* ── Fallback : Chat Completions (sans web search) ── */
