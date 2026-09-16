@@ -3,70 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tracker Marchés</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
+  <title>Tableau de Bord Macro</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌡️</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #ffffff;
-      --bg-card: #f5f6f8;
+      --bg-card: #f6f7f9;
       --text: #1a1a2e;
       --text-muted: #6b7280;
+      --text-hint: #9ca3af;
       --accent: #c8a44e;
+      --stress-accent: #dc4a4a;
+      --stress-bg: rgba(220,74,74,0.04);
       --border: #e2e4e9;
-      --header-bg: #1a1a2e;
+      --border-stress: rgba(220,74,74,0.25);
+      --header-bg: #111318;
       --header-text: #f0f0f0;
-      --tag-bg: rgba(200, 164, 78, 0.12);
+      --tag-bg: rgba(200,164,78,0.12);
       --tag-text: #a07c2a;
-      --shadow: 0 1px 3px rgba(0,0,0,0.06);
-      --tv-theme: light;
+      --shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
-        --bg: #0f1117;
-        --bg-card: #1a1c25;
+        --bg: #0c0d12;
+        --bg-card: #161820;
         --text: #e4e5e9;
         --text-muted: #8b8fa3;
+        --text-hint: #5a5e72;
         --accent: #d4af5a;
-        --border: #2a2d3a;
-        --header-bg: #0f1117;
+        --stress-accent: #e05555;
+        --stress-bg: rgba(224,85,85,0.06);
+        --border: #252836;
+        --border-stress: rgba(224,85,85,0.3);
+        --header-bg: #0c0d12;
         --header-text: #e4e5e9;
-        --tag-bg: rgba(212, 175, 90, 0.12);
+        --tag-bg: rgba(212,175,90,0.1);
         --tag-text: #d4af5a;
         --shadow: 0 1px 3px rgba(0,0,0,0.3);
-        --tv-theme: dark;
       }
     }
 
     :root[data-theme="dark"] {
-      --bg: #0f1117;
-      --bg-card: #1a1c25;
+      --bg: #0c0d12;
+      --bg-card: #161820;
       --text: #e4e5e9;
       --text-muted: #8b8fa3;
+      --text-hint: #5a5e72;
       --accent: #d4af5a;
-      --border: #2a2d3a;
-      --header-bg: #0f1117;
+      --stress-accent: #e05555;
+      --stress-bg: rgba(224,85,85,0.06);
+      --border: #252836;
+      --border-stress: rgba(224,85,85,0.3);
+      --header-bg: #0c0d12;
       --header-text: #e4e5e9;
-      --tag-bg: rgba(212, 175, 90, 0.12);
+      --tag-bg: rgba(212,175,90,0.1);
       --tag-text: #d4af5a;
       --shadow: 0 1px 3px rgba(0,0,0,0.3);
-      --tv-theme: dark;
     }
 
     :root[data-theme="light"] {
       --bg: #ffffff;
-      --bg-card: #f5f6f8;
+      --bg-card: #f6f7f9;
       --text: #1a1a2e;
       --text-muted: #6b7280;
+      --text-hint: #9ca3af;
       --accent: #c8a44e;
+      --stress-accent: #dc4a4a;
+      --stress-bg: rgba(220,74,74,0.04);
       --border: #e2e4e9;
-      --header-bg: #1a1a2e;
+      --border-stress: rgba(220,74,74,0.25);
+      --header-bg: #111318;
       --header-text: #f0f0f0;
-      --tag-bg: rgba(200, 164, 78, 0.12);
+      --tag-bg: rgba(200,164,78,0.12);
       --tag-text: #a07c2a;
-      --shadow: 0 1px 3px rgba(0,0,0,0.06);
-      --tv-theme: light;
+      --shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -82,7 +94,7 @@
     /* ── Header ── */
     .header {
       background: var(--header-bg);
-      padding: 1.25rem 1.5rem;
+      padding: 1rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -92,60 +104,48 @@
       z-index: 100;
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
+    .header-left { display: flex; align-items: center; gap: 0.6rem; }
 
     .header h1 {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: var(--header-text);
       letter-spacing: -0.01em;
     }
 
+    .header-subtitle {
+      font-size: 0.7rem;
+      color: #8b8fa3;
+      font-weight: 400;
+    }
+
     .header-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px; height: 7px;
       background: #22c55e;
       border-radius: 50%;
       animation: pulse 2s ease-in-out infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.35; } }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
+    .header-right { display: flex; align-items: center; gap: 0.75rem; }
 
-    .timestamp {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
+    .timestamp { font-size: 0.7rem; color: #8b8fa3; }
 
     .theme-toggle {
       background: none;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.15);
       color: var(--header-text);
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
+      width: 34px; height: 34px;
+      border-radius: 7px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
       transition: border-color 0.2s;
     }
     .theme-toggle:hover { border-color: var(--accent); }
 
-    /* ── Ticker Tape ── */
+    /* ── Ticker ── */
     .ticker-container {
       border-bottom: 1px solid var(--border);
       overflow: hidden;
@@ -154,118 +154,156 @@
 
     /* ── Main ── */
     .main {
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
       padding: 1.5rem 1rem;
     }
 
     /* ── Section ── */
-    .section {
-      margin-bottom: 2rem;
-    }
+    .section { margin-bottom: 2.25rem; }
 
     .section-header {
       display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--border);
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.2rem;
     }
 
-    .section-icon {
-      font-size: 1.2rem;
-    }
+    .section-icon { font-size: 1.1rem; }
 
     .section-title {
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
       color: var(--text);
     }
 
     .section-tag {
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-weight: 500;
       background: var(--tag-bg);
       color: var(--tag-text);
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
+      padding: 0.12rem 0.45rem;
+      border-radius: 3px;
+      margin-left: auto;
+    }
+
+    .section-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 0.7rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.5;
+    }
+
+    /* ── Stress section special ── */
+    .section--stress .section-title { color: var(--stress-accent); }
+    .section--stress .section-desc { border-bottom-color: var(--border-stress); }
+    .section--stress .widget-card {
+      border-color: var(--border-stress);
+      background: var(--stress-bg);
     }
 
     /* ── Widget Grid ── */
     .widget-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.65rem;
+    }
+
+    .widget-grid--large {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     }
 
     .widget-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 9px;
       overflow: hidden;
       box-shadow: var(--shadow);
-      height: 220px;
       position: relative;
     }
 
-    .widget-card .tradingview-widget-container {
-      width: 100%;
-      height: 100%;
+    .widget-card--tall { height: 240px; }
+    .widget-card--std { height: 210px; }
+
+    .widget-label {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      z-index: 2;
+      padding: 0.4rem 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
     }
+
+    .widget-label-name {
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+
+    .widget-label-hint {
+      font-size: 0.58rem;
+      color: var(--text-hint);
+      font-style: italic;
+    }
+
+    .widget-card .tradingview-widget-container {
+      width: 100%; height: 100%;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .legend strong { color: var(--text); font-weight: 600; }
 
     /* ── Footer ── */
     .footer {
       text-align: center;
-      padding: 2rem 1rem 1.5rem;
-      font-size: 0.7rem;
-      color: var(--text-muted);
+      padding: 1.5rem 1rem 1.25rem;
+      font-size: 0.65rem;
+      color: var(--text-hint);
       border-top: 1px solid var(--border);
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
     }
-
-    .footer a {
-      color: var(--accent);
-      text-decoration: none;
-    }
+    .footer a { color: var(--accent); text-decoration: none; }
 
     /* ── Responsive ── */
     @media (max-width: 640px) {
-      .header { padding: 1rem; }
-      .header h1 { font-size: 1rem; }
-      .main { padding: 1rem 0.75rem; }
-      .widget-grid { grid-template-columns: 1fr; }
-      .widget-card { height: 200px; }
+      .header { padding: 0.85rem; }
+      .header h1 { font-size: 0.95rem; }
+      .header-subtitle { display: none; }
+      .main { padding: 1rem 0.65rem; }
+      .widget-grid, .widget-grid--large { grid-template-columns: 1fr; }
+      .widget-card--tall { height: 210px; }
+      .widget-card--std { height: 195px; }
       .timestamp { display: none; }
-    }
-
-    /* ── Loading state ── */
-    .widget-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--bg-card);
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: fadeOut 2s 1.5s forwards;
-    }
-
-    @keyframes fadeOut {
-      to { opacity: 0; pointer-events: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
   <header class="header">
     <div class="header-left">
       <div class="header-dot"></div>
-      <h1>Tracker Marchés</h1>
+      <div>
+        <h1>Tableau de Bord Macro</h1>
+        <div class="header-subtitle">Température économique mondiale</div>
+      </div>
     </div>
     <div class="header-right">
       <span class="timestamp" id="timestamp"></span>
@@ -273,93 +311,150 @@
     </div>
   </header>
 
-  <!-- Ticker Tape -->
   <div class="ticker-container" id="tickerTape"></div>
 
-  <!-- Main content -->
   <main class="main">
 
-    <!-- Pétrole -->
+    <!-- ═══ 1. STRESS / FEAR ═══ -->
+    <section class="section section--stress">
+      <div class="section-header">
+        <span class="section-icon">🚨</span>
+        <span class="section-title">Indicateurs de stress</span>
+        <span class="section-tag">à surveiller en premier</span>
+      </div>
+      <p class="section-desc">
+        Ces quatre valeurs sont les premières à bouger en cas de crise.
+        VIX au-dessus de 30 = marché en panique · Or et Dollar montent = fuite vers la sécurité · Taux 10 ans chutent = anticipation de récession.
+      </p>
+      <div class="widget-grid widget-grid--large">
+        <div class="widget-card widget-card--tall" id="chart-vix">
+          <div class="widget-label">
+            <span class="widget-label-name">VIX — Indice de la peur</span>
+            <span class="widget-label-hint">> 30 = alerte</span>
+          </div>
+        </div>
+        <div class="widget-card widget-card--tall" id="chart-gold">
+          <div class="widget-label">
+            <span class="widget-label-name">Or — Valeur refuge</span>
+            <span class="widget-label-hint">monte en crise</span>
+          </div>
+        </div>
+        <div class="widget-card widget-card--tall" id="chart-dxy">
+          <div class="widget-label">
+            <span class="widget-label-name">Dollar (DXY)</span>
+            <span class="widget-label-hint">se renforce en crise</span>
+          </div>
+        </div>
+        <div class="widget-card widget-card--tall" id="chart-us10y">
+          <div class="widget-label">
+            <span class="widget-label-name">Taux US 10 ans</span>
+            <span class="widget-label-hint">chute = récession anticipée</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 2. ÉNERGIE & MATIÈRES PREMIÈRES ═══ -->
     <section class="section">
       <div class="section-header">
         <span class="section-icon">🛢️</span>
-        <span class="section-title">Pétrole</span>
-        <span class="section-tag">Brent · WTI</span>
+        <span class="section-title">Énergie &amp; Matières premières</span>
       </div>
+      <p class="section-desc">
+        Pétrole = pouls de l'économie mondiale · Gaz naturel = vulnérabilité énergétique Europe · Blé = tensions alimentaires et géopolitiques.
+      </p>
       <div class="widget-grid">
-        <div class="widget-card" id="chart-brent"></div>
-        <div class="widget-card" id="chart-wti"></div>
+        <div class="widget-card widget-card--std" id="chart-brent">
+          <div class="widget-label"><span class="widget-label-name">Brent</span><span class="widget-label-hint">référence mondiale</span></div>
+        </div>
+        <div class="widget-card widget-card--std" id="chart-wti">
+          <div class="widget-label"><span class="widget-label-name">WTI</span><span class="widget-label-hint">référence US</span></div>
+        </div>
+        <div class="widget-card widget-card--std" id="chart-natgas">
+          <div class="widget-label"><span class="widget-label-name">Gaz naturel</span><span class="widget-label-hint">crise énergie EU</span></div>
+        </div>
+        <div class="widget-card widget-card--std" id="chart-wheat">
+          <div class="widget-label"><span class="widget-label-name">Blé</span><span class="widget-label-hint">crise alimentaire</span></div>
+        </div>
       </div>
     </section>
 
-    <!-- CAC 40 -->
+    <!-- ═══ 3. MARCHÉS ACTIONS ═══ -->
     <section class="section">
       <div class="section-header">
-        <span class="section-icon">🇫🇷</span>
-        <span class="section-title">CAC 40</span>
-        <span class="section-tag">Euronext Paris</span>
+        <span class="section-icon">📊</span>
+        <span class="section-title">Marchés actions</span>
       </div>
+      <p class="section-desc">
+        S&amp;P 500 = santé globale US · CAC 40 = Europe · Nasdaq = tech et croissance · Émergents = si ça chute, les capitaux fuient le risque.
+      </p>
       <div class="widget-grid">
-        <div class="widget-card" id="chart-cac40"></div>
-        <div class="widget-card" id="chart-tte"></div>
+        <div class="widget-card widget-card--std" id="chart-sp500">
+          <div class="widget-label"><span class="widget-label-name">S&P 500</span><span class="widget-label-hint">économie US</span></div>
+        </div>
+        <div class="widget-card widget-card--std" id="chart-cac40">
+          <div class="widget-label"><span class="widget-label-name">CAC 40</span><span class="widget-label-hint">Europe</span></div>
+        </div>
+        <div class="widget-card widget-card--std" id="chart-nasdaq">
+          <div class="widget-label"><span class="widget-label-name">Nasdaq 100</span><span class="widget-label-hint">tech &amp; croissance</span></div>
+        </div>
+        <div class="widget-card widget-card--std" id="chart-eem">
+          <div class="widget-label"><span class="widget-label-name">Émergents (EEM)</span><span class="widget-label-hint">fuite de capitaux</span></div>
+        </div>
       </div>
     </section>
 
-    <!-- US Markets -->
+    <!-- ═══ 4. DEVISES ═══ -->
     <section class="section">
       <div class="section-header">
-        <span class="section-icon">🇺🇸</span>
-        <span class="section-title">Marchés US</span>
-        <span class="section-tag">S&P 500 · Dow Jones</span>
+        <span class="section-icon">💱</span>
+        <span class="section-title">Devises &amp; Crypto</span>
       </div>
+      <p class="section-desc">
+        EUR/USD = force relative Europe vs US · Bitcoin = appétit pour le risque, chute quand la peur monte.
+      </p>
       <div class="widget-grid">
-        <div class="widget-card" id="chart-sp500"></div>
-        <div class="widget-card" id="chart-dji"></div>
+        <div class="widget-card widget-card--std" id="chart-eurusd">
+          <div class="widget-label"><span class="widget-label-name">EUR/USD</span><span class="widget-label-hint">€ vs $</span></div>
+        </div>
+        <div class="widget-card widget-card--std" id="chart-btc">
+          <div class="widget-label"><span class="widget-label-name">Bitcoin</span><span class="widget-label-hint">appétit risque</span></div>
+        </div>
       </div>
     </section>
 
-    <!-- Tech -->
-    <section class="section">
-      <div class="section-header">
-        <span class="section-icon">💻</span>
-        <span class="section-title">Tech</span>
-        <span class="section-tag">Nasdaq · NVDA · AAPL · MSFT</span>
-      </div>
-      <div class="widget-grid">
-        <div class="widget-card" id="chart-nasdaq"></div>
-        <div class="widget-card" id="chart-nvda"></div>
-        <div class="widget-card" id="chart-aapl"></div>
-        <div class="widget-card" id="chart-msft"></div>
-      </div>
-    </section>
+    <!-- ═══ LÉGENDE ═══ -->
+    <div class="legend">
+      <strong>Comment lire ce tableau :</strong>
+      En temps normal, le VIX est entre 12 et 20, l'or est stable, le dollar est neutre.
+      Quand le VIX monte au-dessus de 25-30, que l'or et le dollar grimpent en même temps et que les marchés émergents plongent — c'est le signal que le monde bascule en mode "risk-off" (fuite vers la sécurité).
+      Pétrole en forte hausse = choc d'offre/géopolitique · Pétrole en chute = peur d'une récession.
+      Blé en hausse soudaine = tensions agricoles ou conflit (Russie/Ukraine, sécheresse).
+    </div>
 
   </main>
 
   <footer class="footer">
-    Données fournies par <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a> · Cours différés · Mise à jour auto
+    Données <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a> · Cours différés · Rafraîchissement auto
   </footer>
 
   <script>
-    // ── Theme management ──
+    // ── Theme ──
     function getTheme() {
-      const saved = localStorage.getItem('tv-tracker-theme');
-      if (saved) return saved;
+      const s = localStorage.getItem('macro-dash-theme');
+      if (s) return s;
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
-
-    function applyTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('tv-tracker-theme', theme);
-      document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('macro-dash-theme', t);
+      document.getElementById('themeToggle').textContent = t === 'dark' ? '☀️' : '🌙';
     }
-
     let currentTheme = getTheme();
     applyTheme(currentTheme);
-
     document.getElementById('themeToggle').addEventListener('click', () => {
       currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
       applyTheme(currentTheme);
-      // Rebuild widgets with new theme
       buildAllWidgets();
     });
 
@@ -367,118 +462,118 @@
     function updateTimestamp() {
       const now = new Date();
       document.getElementById('timestamp').textContent = now.toLocaleString('fr-FR', {
-        weekday: 'short', day: 'numeric', month: 'short',
-        hour: '2-digit', minute: '2-digit'
+        weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'
       });
     }
     updateTimestamp();
     setInterval(updateTimestamp, 60000);
 
-    // ── TradingView Widget Builder ──
-    function getTvTheme() {
+    // ── TradingView ──
+    function tvTheme() {
       return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
     }
 
-    function createMiniChart(containerId, symbol, config = {}) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-      container.innerHTML = '';
+    function miniChart(id, symbol, range) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      // Keep the label overlay
+      const label = el.querySelector('.widget-label');
+      el.innerHTML = '';
+      if (label) el.appendChild(label);
 
-      const wrapper = document.createElement('div');
-      wrapper.className = 'tradingview-widget-container';
-      wrapper.style.cssText = 'width:100%;height:100%';
-
+      const w = document.createElement('div');
+      w.className = 'tradingview-widget-container';
+      w.style.cssText = 'width:100%;height:100%';
       const inner = document.createElement('div');
       inner.className = 'tradingview-widget-container__widget';
       inner.style.cssText = 'width:100%;height:100%';
-      wrapper.appendChild(inner);
+      w.appendChild(inner);
 
-      const script = document.createElement('script');
-      script.type = 'text/javascript';
-      script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
-      script.async = true;
-      script.textContent = JSON.stringify({
+      const s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
+      s.async = true;
+      s.textContent = JSON.stringify({
         symbol: symbol,
         width: '100%',
         height: '100%',
         locale: 'fr',
-        dateRange: config.dateRange || '1M',
-        colorTheme: getTvTheme(),
+        dateRange: range || '3M',
+        colorTheme: tvTheme(),
         isTransparent: true,
         autosize: true,
         largeChartUrl: '',
         noTimeScale: false,
         chartOnly: false
       });
-
-      wrapper.appendChild(script);
-      container.appendChild(wrapper);
+      w.appendChild(s);
+      el.appendChild(w);
     }
 
-    function createTickerTape() {
-      const container = document.getElementById('tickerTape');
-      if (!container) return;
-      container.innerHTML = '';
-
-      const wrapper = document.createElement('div');
-      wrapper.className = 'tradingview-widget-container';
-
+    function tickerTape() {
+      const el = document.getElementById('tickerTape');
+      if (!el) return;
+      el.innerHTML = '';
+      const w = document.createElement('div');
+      w.className = 'tradingview-widget-container';
       const inner = document.createElement('div');
       inner.className = 'tradingview-widget-container__widget';
-      wrapper.appendChild(inner);
-
-      const script = document.createElement('script');
-      script.type = 'text/javascript';
-      script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
-      script.async = true;
-      script.textContent = JSON.stringify({
+      w.appendChild(inner);
+      const s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
+      s.async = true;
+      s.textContent = JSON.stringify({
         symbols: [
-          { proName: 'TVC:UKOIL', title: 'Brent' },
-          { proName: 'TVC:USOIL', title: 'WTI' },
-          { proName: 'EURONEXT:PX1', title: 'CAC 40' },
-          { proName: 'FOREXCOM:SPXUSD', title: 'S&P 500' },
-          { proName: 'TVC:DJI', title: 'Dow Jones' },
-          { proName: 'NASDAQ:NDX', title: 'Nasdaq 100' },
-          { proName: 'NASDAQ:NVDA', title: 'NVIDIA' },
-          { proName: 'NASDAQ:AAPL', title: 'Apple' },
-          { proName: 'NASDAQ:MSFT', title: 'Microsoft' },
-          { proName: 'EURONEXT:TTE', title: 'TotalEnergies' }
+          { proName:'CBOE:VIX', title:'VIX' },
+          { proName:'TVC:GOLD', title:'Or' },
+          { proName:'TVC:DXY', title:'Dollar' },
+          { proName:'TVC:US10Y', title:'US 10Y' },
+          { proName:'TVC:UKOIL', title:'Brent' },
+          { proName:'TVC:USOIL', title:'WTI' },
+          { proName:'EURONEXT:PX1', title:'CAC 40' },
+          { proName:'FOREXCOM:SPXUSD', title:'S&P 500' },
+          { proName:'NASDAQ:NDX', title:'Nasdaq' },
+          { proName:'AMEX:EEM', title:'Émergents' },
+          { proName:'FX:EURUSD', title:'EUR/USD' },
+          { proName:'BITSTAMP:BTCUSD', title:'Bitcoin' }
         ],
         showSymbolLogo: true,
         isTransparent: true,
         displayMode: 'adaptive',
-        colorTheme: getTvTheme(),
+        colorTheme: tvTheme(),
         locale: 'fr'
       });
-
-      wrapper.appendChild(script);
-      container.appendChild(wrapper);
+      w.appendChild(s);
+      el.appendChild(w);
     }
 
-    // ── Build all widgets ──
     function buildAllWidgets() {
-      createTickerTape();
+      tickerTape();
 
-      // Pétrole
-      createMiniChart('chart-brent', 'TVC:UKOIL');
-      createMiniChart('chart-wti', 'TVC:USOIL');
+      // Stress
+      miniChart('chart-vix',   'CBOE:VIX',   '6M');
+      miniChart('chart-gold',  'TVC:GOLD',    '6M');
+      miniChart('chart-dxy',   'TVC:DXY',     '6M');
+      miniChart('chart-us10y', 'TVC:US10Y',   '6M');
 
-      // CAC 40
-      createMiniChart('chart-cac40', 'EURONEXT:PX1');
-      createMiniChart('chart-tte', 'EURONEXT:TTE');
+      // Énergie & Matières premières
+      miniChart('chart-brent',  'TVC:UKOIL',       '3M');
+      miniChart('chart-wti',    'TVC:USOIL',       '3M');
+      miniChart('chart-natgas', 'TVC:NATURALGAS',   '3M');
+      miniChart('chart-wheat',  'TVC:WHEAT',        '3M');
 
-      // US
-      createMiniChart('chart-sp500', 'FOREXCOM:SPXUSD');
-      createMiniChart('chart-dji', 'TVC:DJI');
+      // Marchés
+      miniChart('chart-sp500',  'FOREXCOM:SPXUSD', '3M');
+      miniChart('chart-cac40',  'EURONEXT:PX1',    '3M');
+      miniChart('chart-nasdaq', 'NASDAQ:NDX',       '3M');
+      miniChart('chart-eem',    'AMEX:EEM',         '3M');
 
-      // Tech
-      createMiniChart('chart-nasdaq', 'NASDAQ:NDX');
-      createMiniChart('chart-nvda', 'NASDAQ:NVDA');
-      createMiniChart('chart-aapl', 'NASDAQ:AAPL');
-      createMiniChart('chart-msft', 'NASDAQ:MSFT');
+      // Devises & Crypto
+      miniChart('chart-eurusd', 'FX:EURUSD',        '3M');
+      miniChart('chart-btc',    'BITSTAMP:BTCUSD',  '3M');
     }
 
-    // ── Init ──
     buildAllWidgets();
   </script>
 
