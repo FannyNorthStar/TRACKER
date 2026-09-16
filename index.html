@@ -444,10 +444,19 @@
     let selectedTimeframe='both';
 
     function buildPrompts(){
+      // Get previous level for stability
+      let prevLevel=0;
+      let prevSummary='';
+      try{
+        const hist=JSON.parse(localStorage.getItem('macro-dash-history')||'[]');
+        if(hist.length>0){prevLevel=hist[0].level||0;prevSummary=hist[0].summary||''}
+      }catch(e){}
+
+      const prevContext=prevLevel>0?`\nDernière analyse : NIVEAU ${prevLevel} ("${prevSummary}"). Ne change le niveau QUE si un fait nouveau le justifie clairement. Une variation de marché de <2% ou un changement de formulation ne justifie PAS un changement de niveau. Stabilité = crédibilité.`:'';
 
       const sysPrompt=`Brief macro quotidien pour un particulier à Capdenac-Gare (vallée du Lot, Aveyron). But : anticiper les crises, pas trader. Format strict ci-dessous.
 
-PROFIL : chauffage bois (cheminée), cuisine gaz bouteille (butane/propane), zone rurale (dépendant voiture), bord du Lot (risque crue). Commande bois idéale = avril-juin.
+PROFIL : chauffage bois (cheminée), cuisine gaz bouteille (butane/propane), zone rurale (dépendant voiture), bord du Lot (risque crue). Commande bois idéale = avril-juin.${prevContext}
 
 FORMAT — respecte les marqueurs exactement :
 
