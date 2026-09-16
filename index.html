@@ -77,6 +77,7 @@
     .header-btn:hover{border-color:var(--accent)}
 
     .ticker-container{border-bottom:1px solid var(--border);overflow:hidden;height:46px}
+    .tradingview-widget-copyright{display:none!important}
     .main{max-width:1280px;margin:0 auto;padding:1.5rem 1rem}
 
     /* AI */
@@ -147,6 +148,52 @@
       .timestamp{display:none}
       .ai-section{padding:.9rem}
     }
+
+    /* ── Threat Bar ── */
+    .threat-bar{
+      padding:.9rem 1.2rem;display:flex;align-items:center;gap:1rem;
+      border-radius:10px;margin-bottom:1rem;transition:all .4s;
+      border:1px solid var(--border);background:var(--bg-card);
+    }
+    .threat-bar.level-0{border-color:var(--border);background:var(--bg-card)}
+    .threat-bar.level-1{border-color:#22c55e;background:rgba(34,197,94,.06)}
+    .threat-bar.level-2{border-color:#eab308;background:rgba(234,179,8,.06)}
+    .threat-bar.level-3{border-color:#f97316;background:rgba(249,115,22,.07)}
+    .threat-bar.level-4{border-color:#ef4444;background:rgba(239,68,68,.08)}
+    :root[data-theme="dark"] .threat-bar.level-1{background:rgba(34,197,94,.1)}
+    :root[data-theme="dark"] .threat-bar.level-2{background:rgba(234,179,8,.1)}
+    :root[data-theme="dark"] .threat-bar.level-3{background:rgba(249,115,22,.1)}
+    :root[data-theme="dark"] .threat-bar.level-4{background:rgba(239,68,68,.12)}
+
+    .threat-level{display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+    .threat-icon{font-size:1.6rem;line-height:1}
+    .threat-grade{font-size:.82rem;font-weight:700;letter-spacing:.02em}
+    .level-1 .threat-grade{color:#16a34a}
+    .level-2 .threat-grade{color:#ca8a04}
+    .level-3 .threat-grade{color:#ea580c}
+    .level-4 .threat-grade{color:#dc2626}
+    .threat-summary{font-size:.74rem;color:var(--text-muted);line-height:1.5}
+    .threat-bar.level-0 .threat-summary{font-style:italic;color:var(--text-hint)}
+
+    /* ── Actions ── */
+    .actions-section{
+      background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
+      padding:1rem 1.2rem;margin-bottom:1rem;display:none;
+    }
+    .actions-section.visible{display:block}
+    .actions-title{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
+    .action-item{
+      font-size:.74rem;color:var(--text);line-height:1.6;
+      padding:.45rem .7rem;margin-bottom:.35rem;
+      background:var(--bg-card-alt);border-radius:6px;
+      border-left:3px solid var(--accent);
+    }
+    .action-item:last-child{margin-bottom:0}
+
+    @media(max-width:640px){
+      .threat-bar{flex-direction:column;align-items:flex-start;gap:.4rem}
+      .actions-section{padding:.85rem}
+    }
   </style>
 </head>
 <body>
@@ -187,6 +234,21 @@
   </div>
 
   <main class="main">
+
+    <!-- ═══ THREAT LEVEL ═══ -->
+    <div class="threat-bar level-0" id="threatBar">
+      <div class="threat-level">
+        <span class="threat-icon" id="threatIcon">⚪</span>
+        <span class="threat-grade" id="threatGrade">—</span>
+      </div>
+      <div class="threat-summary" id="threatSummary">Lance une analyse pour évaluer le niveau de risque global.</div>
+    </div>
+
+    <!-- ═══ ACTIONS ═══ -->
+    <div class="actions-section" id="actionsSection">
+      <div class="actions-title">🎯 Actions recommandées pour le particulier</div>
+      <div id="actionsList"></div>
+    </div>
 
     <!-- ═══ AI SUMMARY ═══ -->
     <section class="ai-section" id="aiSection">
@@ -353,29 +415,50 @@
     function buildPrompts(){
       const tfLabel={'24h':'dernières 24h','7d':'7 derniers jours','both':'dernières 24h + tendance 7 jours'}[selectedTimeframe];
 
-      const sysPrompt=`Tu rédiges un brief macro quotidien pour quelqu'un qui veut comprendre l'état du monde en 2 minutes. Format strict :
+      const sysPrompt=`Tu rédiges un brief macro quotidien pour un particulier qui veut comprendre l'état du monde et savoir comment se préparer. Tu dois produire EXACTEMENT ce format (les marqueurs entre crochets sont obligatoires) :
 
-— Structure en CATÉGORIES avec emoji + titre en gras. Les catégories NE SONT PAS FIXES : tu choisis celles qui sont pertinentes aujourd'hui. Exemples possibles : 🔴 Géopolitique · 🌡️ Climat & El Niño · 🏦 Banques centrales · 🛢️ Énergie · 🌾 Alimentation · 💻 Tech · 💰 Marchés · 💱 Devises · ⚡ Tensions commerciales · 🗳️ Politique · 🏭 Industrie · 🦠 Santé — mais invente les tiennes si besoin.
-— Sous chaque catégorie : 2-4 bullet points courts. Chaque bullet = un FAIT daté + son IMPACT chiffré sur un marché.
-— Bon exemple : "• L'OPEP+ a annoncé lundi une hausse de production de 500k b/j → Brent -3% à 72$"
-— Mauvais exemple : "• Le pétrole est en baisse cette semaine"
-— PAS DE TABLEAU de cours. Les chiffres apparaissent dans les bullets, en contexte.
-— Termine par une rubrique "👀 À surveiller" avec 2-3 échéances à venir.
-— Langue : français. Max 300 mots. Pas de formules de politesse. Pas d'intro.`;
+[NIVEAU:X]
+(X = chiffre de 1 à 4)
+1 = 🟢 CALME — pas de tension majeure, indicateurs dans les normes
+2 = 🟡 VIGILANCE — quelques signaux de tension isolés, rien d'immédiat
+3 = 🟠 ALERTE — convergence de signaux (or+dollar montent, commodités agricoles en hausse, VIX élevé, conflit actif)
+4 = 🔴 CRISE — multiples indicateurs en zone rouge simultanément, crise en cours ou imminente
 
-      const userPrompt=`Recherche via le web l'actualité des ${tfLabel} et rédige le brief.
+Le niveau est basé sur la CONVERGENCE : un seul indicateur qui bouge = pas grave. Plusieurs qui bougent ensemble dans la même direction = alerte. Sois honnête, ne dramatise pas mais ne minimise pas.
 
-Valeurs à couvrir (cite leur cours et variation quand tu les mentionnes) :
+[RESUME_NIVEAU]
+Une seule phrase expliquant pourquoi ce niveau. Ex: "VIX à 28 et or en hausse de 3% — les marchés anticipent un choc suite aux nouvelles sanctions sur l'Iran."
+
+[ACTIONS]
+2 à 4 actions CONCRÈTES pour un particulier (pas un trader). Chaque action = une ligne commençant par •.
+Exemples de bonnes actions :
+• Blé +15% en 2 semaines → les prix pâtes/pain vont suivre dans 2-3 mois. Bon moment pour faire un stock raisonnable.
+• Pétrole à 95$ et en hausse → anticiper +10-15% sur le carburant et le chauffage cet hiver.
+• EUR/USD en chute → si achat en dollars prévu (voyage, tech US), envisager de convertir maintenant.
+• Cacao +40% depuis 3 mois → le chocolat va devenir nettement plus cher, spécial Noël à anticiper.
+Ne donne des actions QUE s'il y a une vraie raison. Si tout est calme, dis simplement "• Pas d'action particulière à prendre aujourd'hui, les indicateurs sont dans les normes."
+[/ACTIONS]
+
+[ANALYSE]
+Brief structuré en catégories dynamiques (emoji + titre). Les catégories changent selon l'actualité du jour. 2-4 bullet points par catégorie, chaque bullet = fait daté + impact chiffré. Pas de tableau. Termine par "👀 À surveiller".
+Max 300 mots. Pas d'intro. Pas de formules de politesse.
+[/ANALYSE]
+
+Langue : français.`;
+
+      const userPrompt=`Recherche via le web l'actualité des ${tfLabel} et rédige le brief complet avec [NIVEAU], [RESUME_NIVEAU], [ACTIONS] et [ANALYSE].
+
+Valeurs à couvrir (cite cours et variation quand tu les mentionnes) :
 STRESS : VIX, Or, Dollar (DXY), Taux US 10 ans
 ÉNERGIE : Brent, WTI, Gaz naturel, transition énergétique
 ALIMENTATION : Blé, Maïs, Soja, Riz, Café, Cacao, Sucre
 MARCHÉS : S&P 500, CAC 40, Nasdaq 100, Émergents (EEM)
 DEVISES : EUR/USD, Bitcoin
-CLIMAT : statut ENSO (El Niño/La Niña), anomalies météo majeures, impacts sur récoltes
+CLIMAT : statut ENSO (El Niño/La Niña), anomalies météo majeures, impacts récoltes
 
-Tu n'es PAS obligé de tout mentionner. Concentre-toi sur ce qui BOUGE et ce qui a une CAUSE identifiable. Si le riz n'a pas bougé et qu'il n'y a rien à dire, ne le mentionne pas. Si un événement géopolitique domine tout, fais-en la catégorie principale.
+Concentre-toi sur ce qui BOUGE et ce qui a une CAUSE identifiable. Chaque chiffre doit être lié à un fait. Pas de mouvement sans explication.
 
-Rappel : chaque chiffre doit être lié à un fait. Pas de description de mouvement sans explication.`;
+IMPORTANT : respecte exactement le format avec les marqueurs [NIVEAU:X], [RESUME_NIVEAU], [ACTIONS]...[/ACTIONS], [ANALYSE]...[/ANALYSE].`;
 
       return {sysPrompt, userPrompt};
     }
@@ -397,7 +480,6 @@ Rappel : chaque chiffre doit être lié à un fait. Pas de description de mouvem
       const startTime=Date.now();
 
       try{
-        /* ── Responses API avec web search ── */
         const response=await fetch('https://api.openai.com/v1/responses',{
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
@@ -433,14 +515,12 @@ Rappel : chaque chiffre doit être lié à un fait. Pas de description de mouvem
           }
         }
 
-        /* Clean up markdown that GPT might add despite instructions */
-        text=text.replace(/^#{1,3}\s+/gm,'').replace(/\*\*/g,'').replace(/\*/g,'').trim();
+        text=text.replace(/\*\*/g,'').replace(/\*/g,'').trim();
+        parseAndDisplay(text);
 
         const inTok=data.usage?.input_tokens||0;
         const outTok=data.usage?.output_tokens||0;
         const cost=((inTok*0.15/1e6)+(outTok*0.60/1e6)).toFixed(4);
-
-        content.textContent=text||'Aucune réponse reçue.';
         meta.textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+' · '+elapsed+'s · ~'+(inTok+outTok)+' tokens · ~$'+cost;
 
       }catch(err){
@@ -452,6 +532,56 @@ Rappel : chaque chiffre doit être lié à un fait. Pas de description de mouvem
       }
 
       btn.disabled=false;btn.textContent='Analyser';
+    }
+
+    /* ── Parse structured AI response ── */
+    function parseAndDisplay(raw){
+      const content=document.getElementById('aiContent');
+      const threatBar=document.getElementById('threatBar');
+      const threatIcon=document.getElementById('threatIcon');
+      const threatGrade=document.getElementById('threatGrade');
+      const threatSummary=document.getElementById('threatSummary');
+      const actionsSection=document.getElementById('actionsSection');
+      const actionsList=document.getElementById('actionsList');
+
+      // Parse level
+      const levelMatch=raw.match(/\[NIVEAU[:\s]*(\d)\]/i);
+      const level=levelMatch?parseInt(levelMatch[1]):0;
+      const levelConfig={
+        0:{icon:'⚪',grade:'—',label:''},
+        1:{icon:'🟢',grade:'CALME',label:'Pas de tension majeure'},
+        2:{icon:'🟡',grade:'VIGILANCE',label:'Quelques signaux de tension'},
+        3:{icon:'🟠',grade:'ALERTE',label:'Convergence de signaux de stress'},
+        4:{icon:'🔴',grade:'CRISE',label:'Multiples indicateurs en zone rouge'}
+      };
+      const lc=levelConfig[level]||levelConfig[0];
+      threatBar.className='threat-bar level-'+level;
+      threatIcon.textContent=lc.icon;
+      threatGrade.textContent=lc.grade;
+
+      // Parse level summary
+      const summaryMatch=raw.match(/\[RESUME_NIVEAU\]\s*([\s\S]*?)(?=\[ACTIONS\]|\[ANALYSE\]|$)/i);
+      threatSummary.textContent=summaryMatch?summaryMatch[1].trim():lc.label;
+
+      // Parse actions
+      const actionsMatch=raw.match(/\[ACTIONS\]\s*([\s\S]*?)\[\/ACTIONS\]/i);
+      if(actionsMatch){
+        const actionLines=actionsMatch[1].trim().split('\n').map(l=>l.replace(/^[•\-\*]\s*/,'').trim()).filter(l=>l.length>0);
+        if(actionLines.length>0){
+          actionsList.innerHTML=actionLines.map(a=>'<div class="action-item">'+a+'</div>').join('');
+          actionsSection.classList.add('visible');
+        }else{
+          actionsSection.classList.remove('visible');
+        }
+      }else{
+        actionsSection.classList.remove('visible');
+      }
+
+      // Parse analysis
+      const analyseMatch=raw.match(/\[ANALYSE\]\s*([\s\S]*?)(?:\[\/ANALYSE\]|$)/i);
+      const analyseText=analyseMatch?analyseMatch[1].trim():raw.replace(/\[.*?\]/g,'').trim();
+      content.className='ai-content';
+      content.textContent=analyseText||raw;
     }
 
     /* ── Fallback : Chat Completions (sans web search) ── */
@@ -489,8 +619,8 @@ Rappel : chaque chiffre doit être lié à un fait. Pas de description de mouvem
         const outTok=data.usage?.completion_tokens||0;
         const cost=((inTok*0.15/1e6)+(outTok*0.60/1e6)).toFixed(4);
 
-        content.textContent=text;
-        meta.textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+' · '+elapsed+'s · ~'+(inTok+outTok)+' tokens · ~$'+cost+' · ⚠️ sans web search (données potentiellement datées)';
+        parseAndDisplay(text);
+        meta.textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+' · '+elapsed+'s · ~'+(inTok+outTok)+' tokens · ~$'+cost+' · ⚠️ sans web search';
 
       }catch(err){
         content.textContent='❌ '+err.message+'\n\nVérifie ta clé API dans ⚙️ et que tu as du crédit sur platform.openai.com.';
@@ -525,7 +655,6 @@ Rappel : chaque chiffre doit être lié à un fait. Pas de description de mouvem
       s.textContent=JSON.stringify({
         symbols:[
           {proName:'AMEX:VIXY',title:'Volatilité'},{proName:'TVC:GOLD',title:'Or'},
-          {proName:'AMEX:UUP',title:'Dollar'},{proName:'NASDAQ:TLT',title:'Oblig. US'},
           {proName:'TVC:UKOIL',title:'Brent'},{proName:'TVC:USOIL',title:'WTI'},
           {proName:'CBOT:ZW1!',title:'Blé'},{proName:'CBOT:ZC1!',title:'Maïs'},
           {proName:'CBOT:ZS1!',title:'Soja'},{proName:'ICEUS:KC1!',title:'Café'},
