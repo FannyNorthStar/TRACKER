@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tracker Marchés</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f5f6f8;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --accent: #c8a44e;
+      --border: #e2e4e9;
+      --header-bg: #1a1a2e;
+      --header-text: #f0f0f0;
+      --tag-bg: rgba(200, 164, 78, 0.12);
+      --tag-text: #a07c2a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06);
+      --tv-theme: light;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f1117;
+        --bg-card: #1a1c25;
+        --text: #e4e5e9;
+        --text-muted: #8b8fa3;
+        --accent: #d4af5a;
+        --border: #2a2d3a;
+        --header-bg: #0f1117;
+        --header-text: #e4e5e9;
+        --tag-bg: rgba(212, 175, 90, 0.12);
+        --tag-text: #d4af5a;
+        --shadow: 0 1px 3px rgba(0,0,0,0.3);
+        --tv-theme: dark;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #0f1117;
+      --bg-card: #1a1c25;
+      --text: #e4e5e9;
+      --text-muted: #8b8fa3;
+      --accent: #d4af5a;
+      --border: #2a2d3a;
+      --header-bg: #0f1117;
+      --header-text: #e4e5e9;
+      --tag-bg: rgba(212, 175, 90, 0.12);
+      --tag-text: #d4af5a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+      --tv-theme: dark;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #ffffff;
+      --bg-card: #f5f6f8;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --accent: #c8a44e;
+      --border: #e2e4e9;
+      --header-bg: #1a1a2e;
+      --header-text: #f0f0f0;
+      --tag-bg: rgba(200, 164, 78, 0.12);
+      --tag-text: #a07c2a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06);
+      --tv-theme: light;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--header-bg);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--accent);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--header-text);
+      letter-spacing: -0.01em;
+    }
+
+    .header-dot {
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .timestamp {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .theme-toggle {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--header-text);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: border-color 0.2s;
+    }
+    .theme-toggle:hover { border-color: var(--accent); }
+
+    /* ── Ticker Tape ── */
+    .ticker-container {
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      height: 46px;
+    }
+
+    /* ── Main ── */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+    }
+
+    /* ── Section ── */
+    .section {
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-icon {
+      font-size: 1.2rem;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    .section-tag {
+      font-size: 0.65rem;
+      font-weight: 500;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    /* ── Widget Grid ── */
+    .widget-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .widget-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      height: 220px;
+      position: relative;
+    }
+
+    .widget-card .tradingview-widget-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 2rem 1rem 1.5rem;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .header { padding: 1rem; }
+      .header h1 { font-size: 1rem; }
+      .main { padding: 1rem 0.75rem; }
+      .widget-grid { grid-template-columns: 1fr; }
+      .widget-card { height: 200px; }
+      .timestamp { display: none; }
+    }
+
+    /* ── Loading state ── */
+    .widget-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--bg-card);
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeOut 2s 1.5s forwards;
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; pointer-events: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-dot"></div>
+      <h1>Tracker Marchés</h1>
+    </div>
+    <div class="header-right">
+      <span class="timestamp" id="timestamp"></span>
+      <button class="theme-toggle" id="themeToggle" aria-label="Changer le thème">🌙</button>
+    </div>
+  </header>
+
+  <!-- Ticker Tape -->
+  <div class="ticker-container" id="tickerTape"></div>
+
+  <!-- Main content -->
+  <main class="main">
+
+    <!-- Pétrole -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">🛢️</span>
+        <span class="section-title">Pétrole</span>
+        <span class="section-tag">Brent · WTI</span>
+      </div>
+      <div class="widget-grid">
+        <div class="widget-card" id="chart-brent"></div>
+        <div class="widget-card" id="chart-wti"></div>
+      </div>
+    </section>
+
+    <!-- CAC 40 -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">🇫🇷</span>
+        <span class="section-title">CAC 40</span>
+        <span class="section-tag">Euronext Paris</span>
+      </div>
+      <div class="widget-grid">
+        <div class="widget-card" id="chart-cac40"></div>
+        <div class="widget-card" id="chart-tte"></div>
+      </div>
+    </section>
+
+    <!-- US Markets -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">🇺🇸</span>
+        <span class="section-title">Marchés US</span>
+        <span class="section-tag">S&P 500 · Dow Jones</span>
+      </div>
+      <div class="widget-grid">
+        <div class="widget-card" id="chart-sp500"></div>
+        <div class="widget-card" id="chart-dji"></div>
+      </div>
+    </section>
+
+    <!-- Tech -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">💻</span>
+        <span class="section-title">Tech</span>
+        <span class="section-tag">Nasdaq · NVDA · AAPL · MSFT</span>
+      </div>
+      <div class="widget-grid">
+        <div class="widget-card" id="chart-nasdaq"></div>
+        <div class="widget-card" id="chart-nvda"></div>
+        <div class="widget-card" id="chart-aapl"></div>
+        <div class="widget-card" id="chart-msft"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    Données fournies par <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a> · Cours différés · Mise à jour auto
+  </footer>
+
+  <script>
+    // ── Theme management ──
+    function getTheme() {
+      const saved = localStorage.getItem('tv-tracker-theme');
+      if (saved) return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('tv-tracker-theme', theme);
+      document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+
+    let currentTheme = getTheme();
+    applyTheme(currentTheme);
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(currentTheme);
+      // Rebuild widgets with new theme
+      buildAllWidgets();
+    });
+
+    // ── Timestamp ──
+    function updateTimestamp() {
+      const now = new Date();
+      document.getElementById('timestamp').textContent = now.toLocaleString('fr-FR', {
+        weekday: 'short', day: 'numeric', month: 'short',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+    updateTimestamp();
+    setInterval(updateTimestamp, 60000);
+
+    // ── TradingView Widget Builder ──
+    function getTvTheme() {
+      return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    }
+
+    function createMiniChart(containerId, symbol, config = {}) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'tradingview-widget-container';
+      wrapper.style.cssText = 'width:100%;height:100%';
+
+      const inner = document.createElement('div');
+      inner.className = 'tradingview-widget-container__widget';
+      inner.style.cssText = 'width:100%;height:100%';
+      wrapper.appendChild(inner);
+
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
+      script.async = true;
+      script.textContent = JSON.stringify({
+        symbol: symbol,
+        width: '100%',
+        height: '100%',
+        locale: 'fr',
+        dateRange: config.dateRange || '1M',
+        colorTheme: getTvTheme(),
+        isTransparent: true,
+        autosize: true,
+        largeChartUrl: '',
+        noTimeScale: false,
+        chartOnly: false
+      });
+
+      wrapper.appendChild(script);
+      container.appendChild(wrapper);
+    }
+
+    function createTickerTape() {
+      const container = document.getElementById('tickerTape');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'tradingview-widget-container';
+
+      const inner = document.createElement('div');
+      inner.className = 'tradingview-widget-container__widget';
+      wrapper.appendChild(inner);
+
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
+      script.async = true;
+      script.textContent = JSON.stringify({
+        symbols: [
+          { proName: 'TVC:UKOIL', title: 'Brent' },
+          { proName: 'TVC:USOIL', title: 'WTI' },
+          { proName: 'EURONEXT:PX1', title: 'CAC 40' },
+          { proName: 'FOREXCOM:SPXUSD', title: 'S&P 500' },
+          { proName: 'TVC:DJI', title: 'Dow Jones' },
+          { proName: 'NASDAQ:NDX', title: 'Nasdaq 100' },
+          { proName: 'NASDAQ:NVDA', title: 'NVIDIA' },
+          { proName: 'NASDAQ:AAPL', title: 'Apple' },
+          { proName: 'NASDAQ:MSFT', title: 'Microsoft' },
+          { proName: 'EURONEXT:TTE', title: 'TotalEnergies' }
+        ],
+        showSymbolLogo: true,
+        isTransparent: true,
+        displayMode: 'adaptive',
+        colorTheme: getTvTheme(),
+        locale: 'fr'
+      });
+
+      wrapper.appendChild(script);
+      container.appendChild(wrapper);
+    }
+
+    // ── Build all widgets ──
+    function buildAllWidgets() {
+      createTickerTape();
+
+      // Pétrole
+      createMiniChart('chart-brent', 'TVC:UKOIL');
+      createMiniChart('chart-wti', 'TVC:USOIL');
+
+      // CAC 40
+      createMiniChart('chart-cac40', 'EURONEXT:PX1');
+      createMiniChart('chart-tte', 'EURONEXT:TTE');
+
+      // US
+      createMiniChart('chart-sp500', 'FOREXCOM:SPXUSD');
+      createMiniChart('chart-dji', 'TVC:DJI');
+
+      // Tech
+      createMiniChart('chart-nasdaq', 'NASDAQ:NDX');
+      createMiniChart('chart-nvda', 'NASDAQ:NVDA');
+      createMiniChart('chart-aapl', 'NASDAQ:AAPL');
+      createMiniChart('chart-msft', 'NASDAQ:MSFT');
+    }
+
+    // ── Init ──
+    buildAllWidgets();
+  </script>
+
+</body>
+</html>
