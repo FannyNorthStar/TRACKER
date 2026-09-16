@@ -122,6 +122,14 @@
     .section-header{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.2rem}
     .section-icon{font-size:1.05rem}
     .section-title{font-size:.8rem;font-weight:700;letter-spacing:.03em;color:var(--text)}
+    .section-status{width:10px;height:10px;border-radius:50%;flex-shrink:0;opacity:.9}
+    .section-status.s0{background:#9ca3af}
+    .section-status.s1{background:#22c55e}
+    .section-status.s2{background:#eab308}
+    .section-status.s3{background:#f97316}
+    .section-status.s4{background:#ef4444}
+    .section.status-3{border-left:3px solid #f97316}
+    .section.status-4{border-left:3px solid #ef4444;background:rgba(239,68,68,.03)}
     .section-tag{font-size:.6rem;font-weight:500;background:var(--tag-bg);color:var(--tag-text);padding:.1rem .4rem;border-radius:3px;margin-left:auto}
     .section-desc{font-size:.7rem;color:var(--text-muted);margin-bottom:.7rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);line-height:1.55}
 
@@ -268,8 +276,9 @@
     </section>
 
     <!-- ═══ 1. STRESS & INDICATEURS AVANCÉS ═══ -->
-    <section class="section section--stress">
+    <section class="section section--stress" id="sec-stress">
       <div class="section-header">
+        <span class="section-status s0" id="dot-stress"></span>
         <span class="section-icon">🚨</span>
         <span class="section-title">Indicateurs de stress</span>
         <span class="section-tag">regarder en premier</span>
@@ -292,8 +301,9 @@
     </section>
 
     <!-- ═══ 2. ÉNERGIE ═══ -->
-    <section class="section">
+    <section class="section" id="sec-energy">
       <div class="section-header">
+        <span class="section-status s0" id="dot-energy"></span>
         <span class="section-icon">🛢️</span>
         <span class="section-title">Énergie</span>
       </div>
@@ -313,8 +323,9 @@
     </section>
 
     <!-- ═══ 3. SÉCURITÉ ALIMENTAIRE ═══ -->
-    <section class="section section--food">
+    <section class="section section--food" id="sec-food">
       <div class="section-header">
+        <span class="section-status s0" id="dot-food"></span>
         <span class="section-icon">🌾</span>
         <span class="section-title">Sécurité alimentaire</span>
         <span class="section-tag">sensible El Niño &amp; climat</span>
@@ -339,9 +350,9 @@
       </div>
     </section>
 
-    <!-- ═══ 4. MARCHÉS ═══ -->
-    <section class="section">
+    <section class="section" id="sec-markets">
       <div class="section-header">
+        <span class="section-status s0" id="dot-markets"></span>
         <span class="section-icon">📊</span>
         <span class="section-title">Marchés actions</span>
       </div>
@@ -362,9 +373,9 @@
       </div>
     </section>
 
-    <!-- ═══ 5. DEVISES ═══ -->
-    <section class="section">
+    <section class="section" id="sec-currencies">
       <div class="section-header">
+        <span class="section-status s0" id="dot-currencies"></span>
         <span class="section-icon">💱</span>
         <span class="section-title">Devises &amp; Crypto</span>
       </div>
@@ -444,6 +455,14 @@ FORMAT — respecte les marqueurs exactement :
 1=🟢CALME 2=🟡VIGILANCE 3=🟠ALERTE 4=🔴CRISE. Basé sur la CONVERGENCE (plusieurs signaux ensemble, pas un seul).
 [RESUME_NIVEAU]
 Une phrase : pourquoi ce niveau.
+[STATUS]
+stress:X
+energy:X
+food:X
+markets:X
+currencies:X
+[/STATUS]
+(X = 1 à 4 pour chaque section. Évalue chaque domaine individuellement.)
 [ACTIONS]
 3-5 lignes commençant par •. Concrètes, avec produit + quantité + timing. Adapter à la saison (bois au printemps, crues en automne, gaz bouteille moins cher en été). Si RAS : "• Indicateurs dans les normes, pas d'action."
 [/ACTIONS]
@@ -591,9 +610,31 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
         actionsSection.classList.remove('visible');
       }
 
+      // Parse per-section status
+      const statusMatch=raw.match(/\[STATUS\]\s*([\s\S]*?)\[\/STATUS\]/i);
+      const statusMap={stress:0,energy:0,food:0,markets:0,currencies:0};
+      if(statusMatch){
+        statusMatch[1].split('\n').forEach(line=>{
+          const m=line.trim().match(/^(\w+)\s*:\s*(\d)/);
+          if(m&&statusMap.hasOwnProperty(m[1]))statusMap[m[1]]=parseInt(m[2]);
+        });
+      }
+      Object.entries(statusMap).forEach(([key,val])=>{
+        const dot=document.getElementById('dot-'+key);
+        if(dot){dot.className='section-status s'+val}
+        const sec=document.getElementById('sec-'+key);
+        if(sec){sec.classList.remove('status-3','status-4');if(val>=3)sec.classList.add('status-'+val)}
+      });
+
       // Parse analysis into category cards
+      // Extract [ANALYSE] block if present, otherwise strip all markers and use full text
       const analyseMatch=raw.match(/\[ANALYSE\]\s*([\s\S]*?)(?:\[\/ANALYSE\]|$)/i);
-      const analyseText=analyseMatch?analyseMatch[1].trim():raw.replace(/\[.*?\]/g,'').trim();
+      let analyseText=analyseMatch?analyseMatch[1]:raw;
+      // Strip any remaining markers
+      analyseText=analyseText.replace(/\[NIVEAU[:\s]*\d?\]/gi,'').replace(/\[RESUME_NIVEAU\]/gi,'').replace(/\[\/?(ACTIONS|ANALYSE)\]/gi,'').trim();
+      // Also strip text before first emoji header (leftover summaries, level text)
+      const firstEmojiIdx=analyseText.search(/(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s+\S/u);
+      if(firstEmojiIdx>0)analyseText=analyseText.substring(firstEmojiIdx);
 
       // Split into categories by emoji headers
       const blocks=[];
@@ -603,12 +644,12 @@ Ne mentionner QUE ce qui bouge ou a une cause identifiable.`;
 
       for(const line of lines){
         const m=line.trim().match(emojiHeaderRe);
-        if(m){
+        if(m && !line.trim().startsWith('•') && !line.trim().startsWith('-')){
           if(current)blocks.push(current);
-          current={emoji:m[1],title:m[2].replace(/:$/,''),bullets:[]};
+          current={emoji:m[1],title:m[2].replace(/:$/,'').trim(),bullets:[]};
         }else if(current){
           const bullet=line.trim().replace(/^[-•*]\s*/,'').trim();
-          if(bullet)current.bullets.push(bullet);
+          if(bullet.length>3)current.bullets.push(bullet);
         }
       }
       if(current)blocks.push(current);
