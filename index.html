@@ -649,7 +649,7 @@
 
     <!-- Ajout dynamique -->
     <div class="potager-add-bar">
-      <input type="text" id="potagerAddInput" class="potager-add-input" placeholder="Ex: Acheté graines mâche + épinard d'hiver, ou : Reçu commande pépinière Jardin Forêt">
+      <input type="text" id="potagerAddInput" class="potager-add-input" placeholder="Ex: Acheté graines mâche + épinard d'hiver, ou : Reçu commande pépinière Jardin Forêt" onkeydown="if(event.key==='Enter')addPotagerItem()">
       <button class="ai-btn" onclick="addPotagerItem()" style="flex-shrink:0">+ Ajouter</button>
     </div>
     <div id="potagerAjoutsList" class="potager-ajouts-list"></div>
@@ -1592,6 +1592,12 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
 
         text=text.replace(/\*\*/g,'').replace(/\*/g,'').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/\(?\[?https?:\/\/[^\s\])]+\]?\)?/g,'').replace(/\s*\([\w.-]+\.\w{2,4}\)/g,'').replace(/\(\s*\)/g,'').trim();
 
+        if(!text){
+          el.innerHTML='<div class="climate-placeholder">❌ Aucune réponse. Vérifie ta clé API.</div>';
+          btn.disabled=false;
+          return;
+        }
+
         const cached={ts:Date.now(),text:text};
         localStorage.setItem(CLIMATE_CACHE_KEY,JSON.stringify(cached));
         // Save to Google Sheets for cross-device access
@@ -1665,19 +1671,19 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
       }
     }
 
-    // Auto-load climate on startup
+    // Auto-load climate on startup (lightweight — only reads cache, no API call if fresh)
     loadClimate(false);
 
     /* ═══════════════════════════════
        TAB SWITCHING
     ═══════════════════════════════ */
-    function switchTab(tab){
+    async function switchTab(tab){
       document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
       document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
       const el=document.getElementById('tab-'+tab);
       if(el)el.classList.add('active');
       if(tab==='potager'){
-        loadPotagerWeather();
+        await loadPotagerWeather();
         loadPotager(false);
         renderInventory();
         const monthNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -1789,6 +1795,8 @@ PRINCIPES ADAPTATION CLIMAT :
     const POTAGER_TTL=7*24*60*60*1000;
     let potagerTasks=[];
 
+    function hashStr(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return Math.abs(h).toString(36)}
+
     async function loadPotager(force){
       const apiKey=getApiKey();
       if(!apiKey)return;
@@ -1827,6 +1835,11 @@ PRINCIPES ADAPTATION CLIMAT :
       const btn=document.getElementById('potagerRefreshBtn');
       el.innerHTML='<div class="ai-loading"><div class="ai-spinner"></div>Analyse du jardin en cours (météo + saison + inventaire)…</div>';
       btn.disabled=true;
+
+      // Ensure weather is loaded for the prompt
+      if(!window._potagerForecast||window._potagerForecast.length===0){
+        await loadPotagerWeather();
+      }
 
       // Build weather context
       let weatherCtx='Pas de prévisions disponibles.';
@@ -1905,6 +1918,11 @@ Langue : français. COMMENCE par [TACHES].`;
         }
 
         text=text.replace(/\*\*/g,'').replace(/\*/g,'').trim();
+        if(!text){
+          el.innerHTML='<div class="potager-empty">❌ Aucune réponse de l\'API. Vérifie ta clé dans ⚙️.</div>';
+          btn.disabled=false;
+          return;
+        }
         const cached={ts:Date.now(),text:text};
         localStorage.setItem(POTAGER_CACHE_KEY,JSON.stringify(cached));
         await gasPost({action:'setPotager',ts:cached.ts,text:cached.text});
@@ -1939,7 +1957,8 @@ Langue : français. COMMENCE par [TACHES].`;
       lines.forEach((line,idx)=>{
         const parts=line.trim().split('|').map(s=>s.trim());
         if(parts.length>=4){
-          const id='task-'+idx;
+          // Content-based ID so checkboxes survive reordering
+          const id='t-'+hashStr(parts[2]||''+idx);
           potagerTasks.push({
             id:id,
             cat:parts[0]||'🌱',
@@ -2033,6 +2052,8 @@ Langue : français. COMMENCE par [TACHES].`;
       renderAjouts();
     }
 
+    function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
     function renderAjouts(){
       const el=document.getElementById('potagerAjoutsList');
       if(!el)return;
@@ -2043,7 +2064,7 @@ Langue : français. COMMENCE par [TACHES].`;
           const ds=d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
           return '<div class="potager-ajout">'+
             '<span class="potager-ajout-date">'+ds+'</span>'+
-            '<span class="potager-ajout-text">'+a.text+'</span>'+
+            '<span class="potager-ajout-text">'+escHtml(a.text)+'</span>'+
             '<button class="potager-ajout-del" onclick="removePotagerAjout('+i+')" title="Supprimer">✕</button>'+
           '</div>';
         }).join('');
