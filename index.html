@@ -251,9 +251,30 @@
     }
     .action-item:last-child{margin-bottom:0}
 
+    /* ── History section ── */
+    .history-section{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
+    .history-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;cursor:pointer;user-select:none;transition:background .2s}
+    .history-header:hover{background:var(--bg-card-alt)}
+    .history-title{font-size:.78rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:.5rem}
+    .history-count{font-size:.6rem;font-weight:500;background:var(--tag-bg);color:var(--tag-text);padding:.1rem .4rem;border-radius:3px}
+    .history-chevron{font-size:.7rem;color:var(--text-muted);transition:transform .25s}
+    .history-chevron.open{transform:rotate(90deg)}
+    .history-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+    .history-body.open{max-height:2000px}
+    .history-body-inner{padding:0 1.1rem 1rem}
+    .history-entry{display:flex;align-items:flex-start;gap:.6rem;padding:.55rem 0;border-bottom:1px solid var(--border);font-size:.72rem;line-height:1.55}
+    .history-entry:last-child{border-bottom:none}
+    .history-entry-icon{font-size:.9rem;flex-shrink:0;margin-top:.05rem}
+    .history-entry-date{font-weight:600;color:var(--text);white-space:nowrap;min-width:110px}
+    .history-entry-summary{color:var(--text-muted);flex:1}
+    .history-load-more{text-align:center;padding:.5rem 0 .2rem}
+    .history-loading{font-size:.7rem;color:var(--text-hint);font-style:italic;padding:.8rem 1.1rem}
+
     @media(max-width:640px){
       .threat-bar{flex-direction:column;align-items:flex-start;gap:.4rem}
       .actions-section{padding:.85rem}
+      .history-entry{flex-wrap:wrap;gap:.3rem}
+      .history-entry-date{min-width:auto}
     }
   </style>
 </head>
@@ -283,7 +304,7 @@
       <label for="apiKeyInput">Clé API OpenAI</label>
       <input type="password" id="apiKeyInput" placeholder="sk-...">
       <div class="modal-hint">
-        Ta clé est stockée uniquement dans ton navigateur (localStorage). Elle n'apparaît jamais dans le code ni sur GitHub.
+        Ta clé est stockée dans Google Sheets (privé, pas dans le code ni sur GitHub).
         Crée une clé sur <strong>platform.openai.com</strong> → API Keys, et fixe un plafond mensuel dans Settings → Limits (ex: 5 $).
         Coût par analyse : ~0,005 $.
       </div>
@@ -461,9 +482,17 @@
     </section>
 
     <!-- ═══ HISTORIQUE ═══ -->
-    <div class="legend" id="historySection">
-      <strong>📅 Historique des analyses</strong>
-      <div id="historyList" style="margin-top:.5rem;font-size:.7rem;line-height:1.8"></div>
+    <div class="history-section" id="historySection">
+      <div class="history-header" id="historyToggle">
+        <div class="history-title">📅 Historique <span class="history-count" id="historyCount"></span></div>
+        <span class="history-chevron" id="historyChevron">▸</span>
+      </div>
+      <div class="history-body" id="historyBody">
+        <div id="historyList"></div>
+        <div class="history-load-more" id="historyLoadMore" style="display:none">
+          <button class="ai-btn" id="historyMoreBtn" style="font-size:.65rem;padding:.3rem .7rem">Voir plus</button>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ CALENDRIER SAISONNIER ═══ -->
@@ -499,13 +528,69 @@
     updateTimestamp();setInterval(updateTimestamp,60000);
 
     /* ═══════════════════════════════
+       GOOGLE SHEETS PROXY
+    ═══════════════════════════════ */
+    const GAS_URL='https://script.google.com/macros/s/AKfycby_cDXgvFkSCCirA93XbAYEo3fhE28PLvQ-MGcodjEf4lXBmMBKlP7oP_bXGRoRwjM3jw/exec';
+    let cachedApiKey='';
+
+    async function gasGet(action){
+      try{
+        const r=await fetch(GAS_URL+'?action='+action);
+        if(!r.ok)return null;
+        return await r.json();
+      }catch(e){console.error('GAS GET:',e);return null}
+    }
+
+    async function gasPost(payload){
+      try{
+        const r=await fetch(GAS_URL,{
+          method:'POST',
+          headers:{'Content-Type':'text/plain'},
+          body:JSON.stringify(payload)
+        });
+        if(!r.ok)return null;
+        return await r.json();
+      }catch(e){console.error('GAS POST:',e);return null}
+    }
+
+    // Load API key from Google Sheets on startup
+    async function loadApiKey(){
+      const data=await gasGet('getKey');
+      if(data&&data.key){
+        cachedApiKey=data.key;
+        // Keep localStorage as fallback
+        localStorage.setItem('macro-dash-openai-key',data.key);
+      }else{
+        // Fallback to localStorage if GAS fails
+        cachedApiKey=localStorage.getItem('macro-dash-openai-key')||'';
+      }
+    }
+
+    function getApiKey(){
+      return cachedApiKey||localStorage.getItem('macro-dash-openai-key')||'';
+    }
+
+    /* ═══════════════════════════════
        SETTINGS
     ═══════════════════════════════ */
     const settingsModal=document.getElementById('settingsModal');
     const apiKeyInput=document.getElementById('apiKeyInput');
-    document.getElementById('settingsBtn').addEventListener('click',()=>{apiKeyInput.value=localStorage.getItem('macro-dash-openai-key')||'';settingsModal.classList.add('open')});
+    document.getElementById('settingsBtn').addEventListener('click',()=>{apiKeyInput.value=getApiKey();settingsModal.classList.add('open')});
     document.getElementById('settingsCancel').addEventListener('click',()=>settingsModal.classList.remove('open'));
-    document.getElementById('settingsSave').addEventListener('click',()=>{const k=apiKeyInput.value.trim();if(k){localStorage.setItem('macro-dash-openai-key',k)}else{localStorage.removeItem('macro-dash-openai-key')}settingsModal.classList.remove('open')});
+    document.getElementById('settingsSave').addEventListener('click',async()=>{
+      const k=apiKeyInput.value.trim();
+      if(k){
+        cachedApiKey=k;
+        localStorage.setItem('macro-dash-openai-key',k);
+        // Save to Google Sheets
+        gasPost({action:'setKey',key:k});
+      }else{
+        cachedApiKey='';
+        localStorage.removeItem('macro-dash-openai-key');
+        gasPost({action:'setKey',key:''});
+      }
+      settingsModal.classList.remove('open');
+    });
     settingsModal.addEventListener('click',e=>{if(e.target===settingsModal)settingsModal.classList.remove('open')});
 
     /* ═══════════════════════════════
@@ -517,10 +602,7 @@
       // Get previous level for stability
       let prevLevel=0;
       let prevSummary='';
-      try{
-        const hist=JSON.parse(localStorage.getItem('macro-dash-history')||'[]');
-        if(hist.length>0){prevLevel=hist[0].level||0;prevSummary=hist[0].summary||''}
-      }catch(e){}
+      if(historyData.length>0){prevLevel=historyData[0].level||0;prevSummary=historyData[0].summary||''}
 
       const prevContext=prevLevel>0?`\nDernière analyse : NIVEAU ${prevLevel} ("${prevSummary}"). Ne change le niveau QUE si un fait nouveau le justifie clairement. Une variation de marché de <2% ou un changement de formulation ne justifie PAS un changement de niveau. Stabilité = crédibilité.`:'';
 
@@ -612,7 +694,7 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
     }
 
     async function runAnalysis(){
-      const apiKey=localStorage.getItem('macro-dash-openai-key');
+      const apiKey=getApiKey();
       if(!apiKey){document.getElementById('settingsBtn').click();return}
 
       const btn=document.getElementById('aiBtn');
@@ -802,31 +884,86 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
       saveToHistory(level,threatSummary.textContent);
     }
 
-    function saveToHistory(level,summary){
+    // ── History: Google Sheets + localStorage fallback ──
+    let historyData=[];
+    let historyDisplayCount=10;
+
+    async function saveToHistory(level,summary){
+      const entry={date:new Date().toISOString(),level:level,summary:summary};
+      // Save to localStorage as immediate fallback
       try{
         const hist=JSON.parse(localStorage.getItem('macro-dash-history')||'[]');
-        hist.unshift({date:new Date().toISOString(),level:level,summary:summary});
-        if(hist.length>30)hist.length=30;
+        hist.unshift(entry);
+        if(hist.length>50)hist.length=50;
         localStorage.setItem('macro-dash-history',JSON.stringify(hist));
-        renderHistory();
       }catch(e){}
+      // Save to Google Sheets
+      gasPost({action:'addHistory',date:entry.date,level:entry.level,summary:entry.summary});
+      // Refresh display
+      await loadHistory();
+    }
+
+    async function loadHistory(){
+      // Try Google Sheets first
+      const data=await gasGet('getHistory');
+      if(data&&Array.isArray(data.history)&&data.history.length>0){
+        historyData=data.history;
+        // Sync to localStorage
+        try{localStorage.setItem('macro-dash-history',JSON.stringify(historyData.slice(0,50)))}catch(e){}
+      }else{
+        // Fallback to localStorage
+        try{historyData=JSON.parse(localStorage.getItem('macro-dash-history')||'[]')}catch(e){historyData=[]}
+      }
+      historyDisplayCount=10;
+      renderHistory();
     }
 
     function renderHistory(){
       const el=document.getElementById('historyList');
+      const countEl=document.getElementById('historyCount');
+      const moreEl=document.getElementById('historyLoadMore');
       if(!el)return;
-      try{
-        const hist=JSON.parse(localStorage.getItem('macro-dash-history')||'[]');
-        if(hist.length===0){el.innerHTML='<span style="color:var(--text-hint);font-style:italic">Aucune analyse enregistrée.</span>';return}
-        const icons={0:'⚪',1:'🟢',2:'🟡',3:'🟠',4:'🔴'};
-        el.innerHTML=hist.slice(0,10).map(h=>{
-          const d=new Date(h.date);
-          const ds=d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-          return '<div style="padding:.2rem 0;border-bottom:1px solid var(--border)">'+(icons[h.level]||'⚪')+' <strong>'+ds+'</strong> — '+h.summary+'</div>';
-        }).join('');
-      }catch(e){}
+
+      if(historyData.length===0){
+        el.innerHTML='<div class="history-loading">Aucune analyse enregistrée.</div>';
+        if(countEl)countEl.textContent='';
+        if(moreEl)moreEl.style.display='none';
+        return;
+      }
+
+      if(countEl)countEl.textContent=historyData.length+' entrée'+(historyData.length>1?'s':'');
+      const icons={0:'⚪',1:'🟢',2:'🟡',3:'🟠',4:'🔴'};
+      const slice=historyData.slice(0,historyDisplayCount);
+
+      el.innerHTML=slice.map(h=>{
+        const d=new Date(h.date);
+        const ds=d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        return '<div class="history-entry">'+
+          '<span class="history-entry-icon">'+(icons[h.level]||'⚪')+'</span>'+
+          '<span class="history-entry-date">'+ds+'</span>'+
+          '<span class="history-entry-summary">'+h.summary+'</span>'+
+        '</div>';
+      }).join('');
+
+      if(moreEl){
+        moreEl.style.display=historyData.length>historyDisplayCount?'block':'none';
+      }
     }
-    renderHistory();
+
+    // History toggle
+    document.getElementById('historyToggle').addEventListener('click',()=>{
+      document.getElementById('historyBody').classList.toggle('open');
+      document.getElementById('historyChevron').classList.toggle('open');
+    });
+
+    // Load more button
+    document.getElementById('historyMoreBtn').addEventListener('click',()=>{
+      historyDisplayCount=Math.min(historyDisplayCount+20,50);
+      renderHistory();
+    });
+
+    // Initial load from Google Sheets
+    loadHistory();
 
     /* ── Fallback : Chat Completions (sans web search) ── */
     async function fallbackChatCompletion(apiKey,sysPrompt,userPrompt,startTime){
@@ -1087,6 +1224,8 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
     }
 
     buildAllWidgets();
+    // Load API key from Google Sheets on startup
+    loadApiKey();
   </script>
 </body>
 </html>
