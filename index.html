@@ -262,11 +262,14 @@
     .history-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
     .history-body.open{max-height:2000px}
     .history-body-inner{padding:0 1.1rem 1rem}
-    .history-entry{display:flex;align-items:flex-start;gap:.6rem;padding:.55rem 0;border-bottom:1px solid var(--border);font-size:.72rem;line-height:1.55}
+    .history-entry{display:flex;align-items:flex-start;gap:.6rem;padding:.55rem 1.1rem;border-bottom:1px solid var(--border);font-size:.72rem;line-height:1.55}
     .history-entry:last-child{border-bottom:none}
     .history-entry-icon{font-size:.9rem;flex-shrink:0;margin-top:.05rem}
-    .history-entry-date{font-weight:600;color:var(--text);white-space:nowrap;min-width:110px}
-    .history-entry-summary{color:var(--text-muted);flex:1}
+    .history-entry-content{flex:1;min-width:0}
+    .history-entry-top{display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap}
+    .history-entry-date{font-weight:600;color:var(--text);white-space:nowrap}
+    .history-entry-summary{color:var(--text-muted)}
+    .history-entry-snap{font-size:.6rem;color:var(--text-hint);margin-top:.2rem;line-height:1.6;word-break:break-word}
     .history-load-more{text-align:center;padding:.5rem 0 .2rem}
     .history-loading{font-size:.7rem;color:var(--text-hint);font-style:italic;padding:.8rem 1.1rem}
 
@@ -625,6 +628,20 @@ markets:X
 currencies:X
 [/STATUS]
 (X = 1 à 4 pour chaque section. Évalue chaque domaine individuellement.)
+[SNAPSHOT]
+vix:XX.X
+or:XXXX
+brent:XX.XX
+sp95:X.XXX
+gazole:X.XXX
+eurusd:X.XXXX
+cac40:XXXXX
+sp500:XXXX
+btc:XXXXX
+ble:XXX.X
+mais:XXX.X
+[/SNAPSHOT]
+(Valeurs numériques UNIQUEMENT, en devise d'origine. VIX=indice, Or=$/oz, Brent=$/bbl, SP95/Gazole=€/L, CAC40/SP500=points, BTC=$, Blé/Maïs=cents/bushel CBOT. Si tu n'as pas trouvé un chiffre exact, mets 0.)
 [ACTIONS]
 4-6 actions ULTRA-CONCRÈTES et DATÉES. Chaque action = un VERBE + un OBJET PRÉCIS + un SEUIL ou PRIX + un TIMING.
 
@@ -705,8 +722,21 @@ food:X
 markets:X
 currencies:X
 [/STATUS]
+[SNAPSHOT]
+vix:XX.X
+or:XXXX
+brent:XX.XX
+sp95:X.XXX
+gazole:X.XXX
+eurusd:X.XXXX
+cac40:XXXXX
+sp500:XXXX
+btc:XXXXX
+ble:XXX.X
+mais:XXX.X
+[/SNAPSHOT]
 [ACTIONS]
-• action ULTRA-CONCRÈTE avec prix/seuil/date (voir instructions système)
+• action ULTRA-CONCRÈTE avec prix/seuil/date
 • action 2
 • action 3
 [/ACTIONS]
@@ -827,8 +857,8 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
       threatIcon.textContent=lc.icon;
       threatGrade.textContent=lc.grade;
 
-      // Parse level summary
-      const summaryMatch=raw.match(/\[RESUME_NIVEAU\]\s*([\s\S]*?)(?=\[ACTIONS\]|\[ANALYSE\]|$)/i);
+      // Parse level summary (stop before [STATUS], [ACTIONS] or [ANALYSE])
+      const summaryMatch=raw.match(/\[RESUME_NIVEAU\]\s*([\s\S]*?)(?=\[STATUS\]|\[ACTIONS\]|\[ANALYSE\]|$)/i);
       threatSummary.textContent=summaryMatch?summaryMatch[1].trim():lc.label;
 
       // Parse actions
@@ -918,16 +948,25 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
         content.textContent=analyseText||raw;
       }
 
-      // Save to history
-      saveToHistory(level,threatSummary.textContent);
+      // Save to history with snapshot data
+      const snapshotMatch=raw.match(/\[SNAPSHOT\]\s*([\s\S]*?)\[\/SNAPSHOT\]/i);
+      const snapshot={};
+      if(snapshotMatch){
+        snapshotMatch[1].split('\n').forEach(line=>{
+          const m=line.trim().match(/^(\w+)\s*:\s*([\d.]+)/);
+          if(m)snapshot[m[1]]=parseFloat(m[2]);
+        });
+      }
+      saveToHistory(level,threatSummary.textContent,snapshot);
     }
 
     // ── History: Google Sheets + localStorage fallback ──
     let historyData=[];
     let historyDisplayCount=10;
 
-    async function saveToHistory(level,summary){
-      const entry={date:new Date().toISOString(),level:level,summary:summary};
+    async function saveToHistory(level,summary,snapshot){
+      snapshot=snapshot||{};
+      const entry={date:new Date().toISOString(),level:level,summary:summary,snapshot:snapshot};
       // Save to localStorage as immediate fallback
       try{
         const hist=JSON.parse(localStorage.getItem('macro-dash-history')||'[]');
@@ -936,7 +975,23 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
         localStorage.setItem('macro-dash-history',JSON.stringify(hist));
       }catch(e){}
       // Save to Google Sheets (attendre que l'écriture soit faite avant de relire)
-      await gasPost({action:'addHistory',date:entry.date,level:entry.level,summary:entry.summary});
+      await gasPost({
+        action:'addHistory',
+        date:entry.date,
+        level:entry.level,
+        summary:entry.summary,
+        vix:snapshot.vix||0,
+        or:snapshot.or||0,
+        brent:snapshot.brent||0,
+        sp95:snapshot.sp95||0,
+        gazole:snapshot.gazole||0,
+        eurusd:snapshot.eurusd||0,
+        cac40:snapshot.cac40||0,
+        sp500:snapshot.sp500||0,
+        btc:snapshot.btc||0,
+        ble:snapshot.ble||0,
+        mais:snapshot.mais||0
+      });
       // Refresh display
       await loadHistory();
     }
@@ -946,10 +1001,8 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
       const data=await gasGet('getHistory');
       if(data&&Array.isArray(data.history)&&data.history.length>0){
         historyData=data.history;
-        // Sync to localStorage
         try{localStorage.setItem('macro-dash-history',JSON.stringify(historyData.slice(0,50)))}catch(e){}
       }else{
-        // Fallback to localStorage
         try{historyData=JSON.parse(localStorage.getItem('macro-dash-history')||'[]')}catch(e){historyData=[]}
       }
       historyDisplayCount=10;
@@ -976,10 +1029,29 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
       el.innerHTML=slice.map(h=>{
         const d=new Date(h.date);
         const ds=d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        // Build snapshot mini-table if data exists
+        const snap=h.snapshot||{};
+        const hasSnap=snap.brent||snap.or||snap.sp95;
+        let snapHtml='';
+        if(hasSnap){
+          const vals=[];
+          if(snap.brent)vals.push('Brent $'+snap.brent);
+          if(snap.or)vals.push('Or $'+snap.or);
+          if(snap.sp95)vals.push('SP95 '+snap.sp95+'€');
+          if(snap.gazole)vals.push('Gazole '+snap.gazole+'€');
+          if(snap.eurusd)vals.push('EUR/USD '+snap.eurusd);
+          if(snap.cac40)vals.push('CAC '+snap.cac40);
+          if(snap.sp500)vals.push('S&P '+snap.sp500);
+          if(snap.btc)vals.push('BTC $'+snap.btc);
+          if(snap.vix)vals.push('VIX '+snap.vix);
+          snapHtml='<div class="history-entry-snap">'+vals.join(' · ')+'</div>';
+        }
         return '<div class="history-entry">'+
           '<span class="history-entry-icon">'+(icons[h.level]||'⚪')+'</span>'+
-          '<span class="history-entry-date">'+ds+'</span>'+
-          '<span class="history-entry-summary">'+h.summary+'</span>'+
+          '<div class="history-entry-content">'+
+            '<div class="history-entry-top"><span class="history-entry-date">'+ds+'</span><span class="history-entry-summary">'+h.summary+'</span></div>'+
+            snapHtml+
+          '</div>'+
         '</div>';
       }).join('');
 
