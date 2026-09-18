@@ -535,22 +535,23 @@
 
     async function gasGet(action){
       try{
-        const r=await fetch(GAS_URL+'?action='+action);
-        if(!r.ok)return null;
+        const r=await fetch(GAS_URL+'?action='+action,{redirect:'follow'});
+        if(!r.ok){console.warn('GAS GET '+action+': HTTP '+r.status);return null}
         return await r.json();
-      }catch(e){console.error('GAS GET:',e);return null}
+      }catch(e){console.error('GAS GET '+action+':',e);return null}
     }
 
     async function gasPost(payload){
       try{
         const r=await fetch(GAS_URL,{
           method:'POST',
+          redirect:'follow',
           headers:{'Content-Type':'text/plain'},
           body:JSON.stringify(payload)
         });
-        if(!r.ok)return null;
+        if(!r.ok){console.warn('GAS POST '+payload.action+': HTTP '+r.status);return null}
         return await r.json();
-      }catch(e){console.error('GAS POST:',e);return null}
+      }catch(e){console.error('GAS POST '+payload.action+':',e);return null}
     }
 
     // Load API key from Google Sheets on startup
@@ -625,23 +626,32 @@ currencies:X
 [/STATUS]
 (X = 1 à 4 pour chaque section. Évalue chaque domaine individuellement.)
 [ACTIONS]
-3-5 actions ULTRA-CONCRÈTES et DATÉES. Chaque action = un VERBE + un OBJET PRÉCIS + un SEUIL ou PRIX + un TIMING.
+4-6 actions ULTRA-CONCRÈTES et DATÉES. Chaque action = un VERBE + un OBJET PRÉCIS + un SEUIL ou PRIX + un TIMING.
 
-ACTIONS INTERDITES (trop vagues, zéro valeur ajoutée) :
+RÈGLE ABSOLUE DE COHÉRENCE : UN SEUL VERDICT PAR SUJET. Tu ne peux PAS dire "faire le plein maintenant" ET "différer les achats de carburant". Tranche. Si le Brent baisse → "attendre, les prix pompe suivront dans 1-2 semaines". Si le Brent monte → "faire le plein maintenant avant la hausse". JAMAIS les deux dans la même analyse. Relis tes actions avant de répondre : si deux se contredisent, supprime la plus faible.
+
+COUVRIR 3 DOMAINES OBLIGATOIRES :
+🔴 ÉNERGIE : carburant (SP95/gazole : acheter ou attendre + pourquoi), gaz bouteille (prix + stock), bois/chauffage (saisonnier)
+🔴 ALIMENTATION : pas juste les commodities — chercher les PRIX EN RAYON et la SAISON :
+   — Fruits & légumes : qu'est-ce qui est de saison en ce moment ? Quels prix sont bas/élevés par rapport à la normale ? (ex: "Tomates en pleine saison à ~2€/kg, stocker/faire des conserves" ou "Agrumes hors saison, prix haut, attendre novembre")
+   — Produits stockables : farine, pâtes, huile, riz, sucre, conserves — si une matière première monte, DIRE quoi acheter maintenant avant la hausse en rayon (délai 6-8 semaines)
+   — Viande/lait : si le maïs (alimentation animale) ou le soja montent → impact prix viande/lait dans 2-3 mois
+🔴 RISQUES LOCAUX : niveau du Lot (Vigicrues), alertes météo Aveyron, restrictions eau si sécheresse
+
+ACTIONS INTERDITES (trop vagues) :
 ❌ "Surveiller les prix du gaz" → Tout le monde sait ça.
 ❌ "Rester informé des développements géopolitiques" → Conseil de journal télévisé.
-❌ "Évaluer les stocks de produits alimentaires" → N'importe qui pourrait écrire ça sans données.
 ❌ "Anticiper d'éventuelles hausses" → Aucune info actionnable.
+❌ Deux actions contradictoires sur le même sujet.
 
 ACTIONS EXIGÉES (spécifiques, chiffrées, timing clair) :
-✅ "Gaz bouteille : le propane est à 2,15€/kg, prochain ajustement réglementaire le 1er juillet — racheter une bouteille d'avance CETTE SEMAINE si stock < 2."
-✅ "Bois de chauffage : les prix livraison montent de 8% dès juin (demande estivale) — commander avant fin mai si pas encore fait (budget ~350€ la stère chêne livrée, prévoir 5-6 stères)."
-✅ "SP95 à 1.87€/L en Aveyron (+4 cts en 2 semaines) — faire le plein maintenant, tendance haussière liée au Brent qui repasse au-dessus de 80$."
-✅ "Farine/pâtes : le blé CBOT est à +12% sur 3 mois — acheter 5-10 kg de farine et pâtes stockables cette semaine, les prix en rayon suivront dans 6-8 semaines."
-✅ "Niveau du Lot à Capdenac : 1.2m (normal). Pas d'alerte crue. RAS côté inondation."
-✅ "Pas d'action urgente cette semaine — tous les indicateurs sont dans les normes saisonnières."
+✅ "SP95 à 1.87€/L, Brent en baisse à 74$ (-5% sur 2 sem.) — ATTENDRE pour faire le plein, les prix pompe baisseront de 3-5 cts d'ici 10 jours."
+✅ "Gaz bouteille : propane à 2,15€/kg, prochain ajustement le 1er juillet — racheter une bouteille d'avance CETTE SEMAINE si stock < 2."
+✅ "Fruits de saison : pêches/abricots au pic (juin-juillet), prix bas ~3€/kg — en profiter pour faire des confitures/conserves."
+✅ "Huile de tournesol : tournesol CBOT +15% sur 2 mois (sécheresse Ukraine) — racheter 2-3 bouteilles maintenant, hausse en rayon probable d'ici fin août."
+✅ "Niveau du Lot à Capdenac : 1.2m (normal). RAS côté crue."
 
-RÈGLE : si tu ne peux pas donner un PRIX, une DATE ou un SEUIL dans l'action, c'est que tu n'as pas assez cherché. Cherche plus. Si vraiment rien de notable : "• RAS cette semaine — indicateurs stables, pas d'action."
+RÈGLE : si tu ne peux pas donner un PRIX, une DATE ou un SEUIL, cherche plus. Si RAS : "• Indicateurs stables, pas d'action urgente cette semaine."
 [/ACTIONS]
 [ANALYSE]
 Catégories dynamiques (emoji+titre suivi de [1] à [4] pour le niveau de risque de cette catégorie, ex: "⚡ Énergie [3]"). 2-4 bullets chacune. Terminer par 👀 À surveiller. Max 600 mots.
@@ -666,7 +676,8 @@ Langue : français.`;
 DONNÉES À CHERCHER :
 Stress : VIX, Or, DXY, Taux US 10 ans, Cuivre
 Énergie : Brent, WTI, Gaz naturel, prix essence SP95 + gazole France AUJOURD'HUI (chercher "prix SP95 France" ou "prix carburant Aveyron"), prix propane/butane bouteille France (chercher "prix gaz bouteille propane France"), prochaine date d'ajustement réglementaire gaz
-Alimentation : Blé, Maïs, Soja, Riz, Café, Cacao, Sucre + indice FAO des prix alimentaires (dernier chiffre publié). Pour chaque matière en hausse >5% sur 1 mois : estimer le DÉLAI et l'IMPACT en rayon France (ex: blé +10% → farine +5-8% en rayon dans 6-8 semaines)
+Alimentation COMMODITIES : Blé, Maïs, Soja, Riz, Café, Cacao, Sucre, Huile de tournesol, Huile d'olive + indice FAO des prix alimentaires (dernier chiffre publié). Pour chaque matière en hausse >5% sur 1 mois : estimer le DÉLAI et l'IMPACT en rayon France (ex: blé +10% → farine +5-8% en rayon dans 6-8 semaines)
+Alimentation CONSOMMATEUR : chercher "prix fruits légumes France" ou "cours fruits légumes Rungis" — quels fruits et légumes sont de SAISON maintenant ? Lesquels sont chers/pas chers par rapport à la normale ? Y a-t-il des alertes récolte (gel, sécheresse, grêle) qui impactent les prix ? Impact maïs/soja sur prix viande et produits laitiers (alimentation animale → délai 2-3 mois)
 Marchés : S&P 500, CAC 40, Nasdaq 100, EEM, FXI (Chine)
 Devises : EUR/USD, Bitcoin
 Logistique : Baltic Dry Index, tensions Hormuz/Suez/mer Rouge, surcoûts fret conteneur
@@ -924,8 +935,8 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
         if(hist.length>50)hist.length=50;
         localStorage.setItem('macro-dash-history',JSON.stringify(hist));
       }catch(e){}
-      // Save to Google Sheets
-      gasPost({action:'addHistory',date:entry.date,level:entry.level,summary:entry.summary});
+      // Save to Google Sheets (attendre que l'écriture soit faite avant de relire)
+      await gasPost({action:'addHistory',date:entry.date,level:entry.level,summary:entry.summary});
       // Refresh display
       await loadHistory();
     }
