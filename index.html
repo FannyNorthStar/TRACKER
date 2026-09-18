@@ -332,6 +332,18 @@
     .potager-ai-meta{font-size:.6rem;color:var(--text-hint);margin-top:.5rem}
     .potager-empty{font-size:.72rem;color:var(--text-hint);font-style:italic;padding:1rem 0}
 
+    .potager-add-bar{display:flex;gap:.4rem;margin-bottom:.6rem}
+    .potager-add-input{flex:1;padding:.45rem .7rem;border:1px solid var(--border);border-radius:7px;font-size:.72rem;font-family:inherit;background:var(--bg);color:var(--text)}
+    .potager-add-input::placeholder{color:var(--text-hint)}
+    .potager-add-input:focus{outline:none;border-color:var(--accent)}
+    .potager-ajouts-list{margin-bottom:.8rem}
+    .potager-ajout{display:flex;align-items:center;gap:.5rem;padding:.35rem .6rem;margin-bottom:.25rem;background:var(--bg-card-alt);border:1px solid var(--border);border-radius:6px;font-size:.65rem;border-left:3px solid #22c55e}
+    .potager-ajout-date{color:var(--text-hint);flex-shrink:0;font-size:.58rem}
+    .potager-ajout-text{color:var(--text);flex:1}
+    .potager-ajout-del{background:none;border:none;color:var(--text-hint);cursor:pointer;font-size:.7rem;padding:0 .3rem}
+    .potager-ajout-del:hover{color:#ef4444}
+    .potager-ajout-hint{font-size:.58rem;color:var(--text-hint);font-style:italic;margin-bottom:.6rem}
+
     @media(max-width:640px){
       .potager-weather-grid{gap:.3rem}
       .potager-inv-grid{grid-template-columns:1fr}
@@ -634,6 +646,13 @@
         <button class="ai-btn" id="potagerRefreshBtn" onclick="loadPotager(true)" style="font-size:.68rem;padding:.3rem .8rem">🔄 Actualiser</button>
       </div>
     </div>
+
+    <!-- Ajout dynamique -->
+    <div class="potager-add-bar">
+      <input type="text" id="potagerAddInput" class="potager-add-input" placeholder="Ex: Acheté graines mâche + épinard d'hiver, ou : Reçu commande pépinière Jardin Forêt">
+      <button class="ai-btn" onclick="addPotagerItem()" style="flex-shrink:0">+ Ajouter</button>
+    </div>
+    <div id="potagerAjoutsList" class="potager-ajouts-list"></div>
 
     <!-- Météo 10 jours jardin -->
     <div class="potager-weather" id="potagerWeather">
@@ -1774,6 +1793,17 @@ PRINCIPES ADAPTATION CLIMAT :
       const apiKey=getApiKey();
       if(!apiKey)return;
 
+      // Load done state from Google Sheets (cross-device)
+      try{
+        const doneData=await gasGet('getPotagerDone');
+        if(doneData&&doneData.doneMap){
+          localStorage.setItem('macro-dash-potager-done',JSON.stringify(doneData.doneMap));
+        }
+      }catch(e){}
+
+      // Load dynamic additions
+      await loadPotagerAjouts();
+
       if(!force){
         try{
           const cached=await gasGet('getPotager');
@@ -1847,12 +1877,20 @@ RÈGLES :
 
 Langue : français. COMMENCE par [TACHES].`;
 
+      // Build user message with dynamic additions
+      let userMsg='Génère les tâches pour le jardin ce mois-ci. Commence par [TACHES].';
+      if(potagerAjouts.length>0){
+        userMsg+='\n\nAJOUTS RÉCENTS (nouvelles plantes/graines achetées, à intégrer dans les tâches) :\n'+
+          potagerAjouts.map(a=>'- '+new Date(a.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' : '+a.text).join('\n')+
+          '\n\nPour chaque ajout, génère les tâches appropriées : quand semer/planter (selon la saison et la météo), où dans le jardin (associations permaculture), comment (profondeur, espacement, arrosage). Si c\'est un achat de graines pour une saison future, indiquer quand les semer.';
+      }
+
       try{
         let text='';
         const response=await fetch('https://api.openai.com/v1/responses',{
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-          body:JSON.stringify({model:'gpt-4o',tools:[{type:'web_search_preview',search_context_size:'low'}],instructions:potagerSys,input:'Génère les tâches pour le jardin ce mois-ci. Commence par [TACHES].'})
+          body:JSON.stringify({model:'gpt-4o',tools:[{type:'web_search_preview',search_context_size:'low'}],instructions:potagerSys,input:userMsg})
         });
         if(response.ok){
           const data=await response.json();
@@ -1861,7 +1899,7 @@ Langue : français. COMMENCE par [TACHES].`;
         if(!text){
           const r2=await fetch('https://api.openai.com/v1/chat/completions',{
             method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-            body:JSON.stringify({model:'gpt-4o',messages:[{role:'system',content:potagerSys},{role:'user',content:'Génère les tâches pour le jardin ce mois-ci. Commence par [TACHES].'}],max_tokens:3000})
+            body:JSON.stringify({model:'gpt-4o',messages:[{role:'system',content:potagerSys},{role:'user',content:userMsg}],max_tokens:3000})
           });
           if(r2.ok){const d2=await r2.json();text=d2.choices?.[0]?.message?.content||''}
         }
@@ -1967,14 +2005,66 @@ Langue : français. COMMENCE par [TACHES].`;
       const task=potagerTasks.find(t=>t.id===id);
       if(!task)return;
       task.done=!task.done;
-      // Save done state
       let doneMap={};
       try{doneMap=JSON.parse(localStorage.getItem('macro-dash-potager-done')||'{}')}catch(e){}
       if(task.done){doneMap[id]=true}else{delete doneMap[id]}
       localStorage.setItem('macro-dash-potager-done',JSON.stringify(doneMap));
-      // Also save to Google Sheets
       gasPost({action:'setPotagerDone',doneMap:doneMap});
       renderPotagerTasks();
+    }
+
+    /* ═══════════════════════════════
+       POTAGER — AJOUTS DYNAMIQUES
+    ═══════════════════════════════ */
+    let potagerAjouts=[];
+
+    async function loadPotagerAjouts(){
+      try{
+        const data=await gasGet('getPotagerAjouts');
+        if(data&&Array.isArray(data.ajouts)){
+          potagerAjouts=data.ajouts;
+          localStorage.setItem('macro-dash-potager-ajouts',JSON.stringify(potagerAjouts));
+        }else{
+          potagerAjouts=JSON.parse(localStorage.getItem('macro-dash-potager-ajouts')||'[]');
+        }
+      }catch(e){
+        try{potagerAjouts=JSON.parse(localStorage.getItem('macro-dash-potager-ajouts')||'[]')}catch(e2){potagerAjouts=[]}
+      }
+      renderAjouts();
+    }
+
+    function renderAjouts(){
+      const el=document.getElementById('potagerAjoutsList');
+      if(!el)return;
+      if(potagerAjouts.length===0){el.innerHTML='';return}
+      el.innerHTML='<div class="potager-ajout-hint">Ces ajouts seront intégrés à la prochaine analyse IA (cliquer Actualiser) :</div>'+
+        potagerAjouts.map((a,i)=>{
+          const d=new Date(a.date);
+          const ds=d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+          return '<div class="potager-ajout">'+
+            '<span class="potager-ajout-date">'+ds+'</span>'+
+            '<span class="potager-ajout-text">'+a.text+'</span>'+
+            '<button class="potager-ajout-del" onclick="removePotagerAjout('+i+')" title="Supprimer">✕</button>'+
+          '</div>';
+        }).join('');
+    }
+
+    async function addPotagerItem(){
+      const input=document.getElementById('potagerAddInput');
+      const text=input.value.trim();
+      if(!text)return;
+      potagerAjouts.push({date:new Date().toISOString(),text:text});
+      input.value='';
+      localStorage.setItem('macro-dash-potager-ajouts',JSON.stringify(potagerAjouts));
+      await gasPost({action:'setPotagerAjouts',ajouts:potagerAjouts});
+      renderAjouts();
+    }
+
+    async function removePotagerAjout(idx){
+      potagerAjouts.splice(idx,1);
+      localStorage.setItem('macro-dash-potager-ajouts',JSON.stringify(potagerAjouts));
+      await gasPost({action:'setPotagerAjouts',ajouts:potagerAjouts});
+      renderAjouts();
     }
 
     /* ═══════════════════════════════
