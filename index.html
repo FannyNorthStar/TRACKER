@@ -641,7 +641,14 @@ btc:XXXXX
 ble:XXX.X
 mais:XXX.X
 [/SNAPSHOT]
-(Valeurs numériques UNIQUEMENT, en devise d'origine. VIX=indice, Or=$/oz, Brent=$/bbl, SP95/Gazole=€/L, CAC40/SP500=points, BTC=$, Blé/Maïs=cents/bushel CBOT. Si tu n'as pas trouvé un chiffre exact, mets 0.)
+CHAQUE valeur est OBLIGATOIRE — tu les as forcément trouvées dans ta recherche web. Format : clé:nombre UNIQUEMENT (pas de $, pas de €, pas d'espace). Point comme séparateur décimal (pas de virgule). Pas de texte après le nombre.
+VIX=indice VIX (pas VIXY), Or=prix $/oz, Brent=$/bbl, SP95/Gazole=€/L prix moyen France, EUR/USD=taux, CAC40=points, SP500=points, BTC=prix $, Blé/Maïs=cents/bushel CBOT.
+Exemple correct :
+vix:18.5
+or:2340
+brent:74.20
+sp95:1.875
+Un champ à 0 = tu n'as pas cherché. INTERDIT.
 [ACTIONS]
 4-6 actions ULTRA-CONCRÈTES et DATÉES. Chaque action = un VERBE + un OBJET PRÉCIS + un SEUIL ou PRIX + un TIMING.
 
@@ -948,15 +955,55 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
         content.textContent=analyseText||raw;
       }
 
-      // Save to history with snapshot data
+      // Parse SNAPSHOT block
       const snapshotMatch=raw.match(/\[SNAPSHOT\]\s*([\s\S]*?)\[\/SNAPSHOT\]/i);
       const snapshot={};
       if(snapshotMatch){
         snapshotMatch[1].split('\n').forEach(line=>{
-          const m=line.trim().match(/^(\w+)\s*:\s*([\d.]+)/);
-          if(m)snapshot[m[1]]=parseFloat(m[2]);
+          // Handle: "brent:105.76" or "brent: 105,76" or "brent : 4 312.48" or "brent:$105.76"
+          const m=line.trim().match(/^(\w+)\s*[:=]\s*[$€]?\s*([\d\s.,]+)/);
+          if(m){
+            const key=m[1].toLowerCase();
+            // Normalize: remove spaces, handle comma as decimal
+            let val=m[2].replace(/\s/g,'');
+            // If has both dot and comma, treat last one as decimal separator
+            if(val.includes(',')&&val.includes('.')){
+              // 4.312,48 → 4312.48  or  4,312.48 → 4312.48
+              if(val.lastIndexOf(',')>val.lastIndexOf('.')){val=val.replace(/\./g,'').replace(',','.')}
+              else{val=val.replace(/,/g,'')}
+            }else if(val.includes(',')){
+              val=val.replace(',','.');
+            }
+            const num=parseFloat(val);
+            if(!isNaN(num)&&num>0)snapshot[key]=num;
+          }
         });
       }
+
+      // Fallback: extract key values from analysis text if SNAPSHOT missed them
+      const extractors={
+        vix:[/VIX[^:]*?[àa]\s*([\d.,]+)/i,/VIXY[^:]*?[àa]\s*([\d.,]+)/i],
+        or:[/Or[^:]*?[àa]\s*([\d\s.,]+)\s*\$/i,/Gold[^:]*?[àa]\s*([\d\s.,]+)/i],
+        brent:[/Brent[^:]*?[àa]\s*([\d.,]+)\s*\$/i],
+        sp95:[/SP95[^:]*?[àa]\s*([\d.,]+)\s*€/i],
+        gazole:[/[Gg]azole[^:]*?[àa]\s*([\d.,]+)\s*€/i],
+        eurusd:[/EUR\/USD[^:]*?[àa]\s*([\d.,]+)/i],
+        cac40:[/CAC\s*40[^:]*?[àa]\s*([\d\s.,]+)/i],
+        sp500:[/S&?P\s*500[^:]*?[àa]\s*([\d\s.,]+)/i],
+        btc:[/BTC[^:]*?[àa]\s*([\d\s.,]+)\s*\$/i,/Bitcoin[^:]*?[àa]\s*([\d\s.,]+)/i],
+        ble:[/[Bb]l[ée][^:]*?[àa]\s*([\d.,]+)/i],
+        mais:[/[Mm]a[ïi]s[^:]*?[àa]\s*([\d.,]+)/i]
+      };
+      const parseNum=(s)=>{let v=s.replace(/\s/g,'');if(v.includes(',')&&v.includes('.')){if(v.lastIndexOf(',')>v.lastIndexOf('.')){v=v.replace(/\./g,'').replace(',','.')}else{v=v.replace(/,/g,'')}}else if(v.includes(',')){v=v.replace(',','.')}return parseFloat(v)};
+      for(const[key,patterns]of Object.entries(extractors)){
+        if(!snapshot[key]||snapshot[key]===0){
+          for(const pat of patterns){
+            const m=raw.match(pat);
+            if(m){const n=parseNum(m[1]);if(!isNaN(n)&&n>0){snapshot[key]=n;break}}
+          }
+        }
+      }
+
       saveToHistory(level,threatSummary.textContent,snapshot);
     }
 
