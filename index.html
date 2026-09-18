@@ -1,1341 +1,1387 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tableau de Bord Macro</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌡️</text></svg>">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #ffffff; --bg-card: #f6f7f9; --bg-card-alt: #f0f1f4;
-      --text: #1a1a2e; --text-muted: #6b7280; --text-hint: #9ca3af;
-      --accent: #c8a44e; --stress-accent: #dc4a4a;
-      --stress-bg: rgba(220,74,74,0.04);
-      --border: #e2e4e9; --border-stress: rgba(220,74,74,0.25);
-      --header-bg: #111318; --header-text: #f0f0f0;
-      --tag-bg: rgba(200,164,78,0.12); --tag-text: #a07c2a;
-      --shadow: 0 1px 3px rgba(0,0,0,0.05);
-      --ai-bg: #fefdf8; --ai-border: #e8dfc0; --ai-text: #3d3520;
-      --btn-bg: #1a1a2e; --btn-text: #f0f0f0;
-      --settings-bg: #ffffff;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --bg: #0c0d12; --bg-card: #161820; --bg-card-alt: #1e2029;
-        --text: #e4e5e9; --text-muted: #8b8fa3; --text-hint: #5a5e72;
-        --accent: #d4af5a; --stress-accent: #e05555;
-        --stress-bg: rgba(224,85,85,0.06);
-        --border: #252836; --border-stress: rgba(224,85,85,0.3);
-        --header-bg: #0c0d12; --header-text: #e4e5e9;
-        --tag-bg: rgba(212,175,90,0.1); --tag-text: #d4af5a;
-        --shadow: 0 1px 3px rgba(0,0,0,0.3);
-        --ai-bg: #1a1810; --ai-border: #3d3520; --ai-text: #e4ddc8;
-        --btn-bg: #d4af5a; --btn-text: #111318;
-        --settings-bg: #161820;
-      }
-    }
-    :root[data-theme="dark"] {
-      --bg: #0c0d12; --bg-card: #161820; --bg-card-alt: #1e2029;
-      --text: #e4e5e9; --text-muted: #8b8fa3; --text-hint: #5a5e72;
-      --accent: #d4af5a; --stress-accent: #e05555;
-      --stress-bg: rgba(224,85,85,0.06);
-      --border: #252836; --border-stress: rgba(224,85,85,0.3);
-      --header-bg: #0c0d12; --header-text: #e4e5e9;
-      --tag-bg: rgba(212,175,90,0.1); --tag-text: #d4af5a;
-      --shadow: 0 1px 3px rgba(0,0,0,0.3);
-      --ai-bg: #1a1810; --ai-border: #3d3520; --ai-text: #e4ddc8;
-      --btn-bg: #d4af5a; --btn-text: #111318;
-      --settings-bg: #161820;
-    }
-    :root[data-theme="light"] {
-      --bg: #ffffff; --bg-card: #f6f7f9; --bg-card-alt: #f0f1f4;
-      --text: #1a1a2e; --text-muted: #6b7280; --text-hint: #9ca3af;
-      --accent: #c8a44e; --stress-accent: #dc4a4a;
-      --stress-bg: rgba(220,74,74,0.04);
-      --border: #e2e4e9; --border-stress: rgba(220,74,74,0.25);
-      --header-bg: #111318; --header-text: #f0f0f0;
-      --tag-bg: rgba(200,164,78,0.12); --tag-text: #a07c2a;
-      --shadow: 0 1px 3px rgba(0,0,0,0.05);
-      --ai-bg: #fefdf8; --ai-border: #e8dfc0; --ai-text: #3d3520;
-      --btn-bg: #1a1a2e; --btn-text: #f0f0f0;
-      --settings-bg: #ffffff;
-    }
+<title>NSN Notoriety</title>
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --surface-0: #f5f5f4;
+  --surface-1: #ffffff;
+  --surface-2: #fafaf9;
+  --border: #e7e5e4;
+  --border-subtle: #f0eeec;
+  --text-primary: #1c1917;
+  --text-secondary: #57534e;
+  --text-muted: #a8a29e;
+  --accent: #2a78d6;
+  --accent-soft: rgba(42,120,214,0.08);
+  --positive: #16a34a;
+  --negative: #dc2626;
+  --warning: #d97706;
+  --positive-bg: rgba(22,163,74,0.08);
+  --negative-bg: rgba(220,38,38,0.08);
+  --warning-bg: rgba(217,119,6,0.08);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
+  --chart-surface: #fcfcfb;
+  --chart-grid: #e7e5e4;
+  --chart-text: #57534e;
+  --chart-text-muted: #a8a29e;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
 
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface-0: #0c0a09;
+    --surface-1: #1c1917;
+    --surface-2: #292524;
+    --border: #44403c;
+    --border-subtle: #292524;
+    --text-primary: #fafaf9;
+    --text-secondary: #a8a29e;
+    --text-muted: #78716c;
+    --accent: #3987e5;
+    --accent-soft: rgba(57,135,229,0.12);
+    --positive: #22c55e;
+    --negative: #ef4444;
+    --warning: #f59e0b;
+    --positive-bg: rgba(34,197,94,0.1);
+    --negative-bg: rgba(239,68,68,0.1);
+    --warning-bg: rgba(245,158,11,0.1);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
+    --series-6: #008300;
+    --series-7: #9085e9;
+    --series-8: #e66767;
+    --chart-surface: #1a1a19;
+    --chart-grid: #44403c;
+    --chart-text: #a8a29e;
+    --chart-text-muted: #78716c;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  }
+}
+:root[data-theme="dark"] {
+  --surface-0: #0c0a09;
+  --surface-1: #1c1917;
+  --surface-2: #292524;
+  --border: #44403c;
+  --border-subtle: #292524;
+  --text-primary: #fafaf9;
+  --text-secondary: #a8a29e;
+  --text-muted: #78716c;
+  --accent: #3987e5;
+  --accent-soft: rgba(57,135,229,0.12);
+  --positive: #22c55e;
+  --negative: #ef4444;
+  --warning: #f59e0b;
+  --positive-bg: rgba(34,197,94,0.1);
+  --negative-bg: rgba(239,68,68,0.1);
+  --warning-bg: rgba(245,158,11,0.1);
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #008300;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+  --chart-surface: #1a1a19;
+  --chart-grid: #44403c;
+  --chart-text: #a8a29e;
+  --chart-text-muted: #78716c;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+}
 
-    .header{background:var(--header-bg);padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--accent);position:sticky;top:0;z-index:100}
-    .header-left{display:flex;align-items:center;gap:.6rem}
-    .header h1{font-size:1.05rem;font-weight:700;color:var(--header-text);letter-spacing:-.01em}
-    .header-subtitle{font-size:.68rem;color:#8b8fa3}
-    .header-dot{width:7px;height:7px;background:#22c55e;border-radius:50%;animation:pulse 2s ease-in-out infinite;flex-shrink:0}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-    .header-right{display:flex;align-items:center;gap:.5rem}
-    .timestamp{font-size:.68rem;color:#8b8fa3}
-    .header-btn{background:none;border:1px solid rgba(255,255,255,.15);color:var(--header-text);width:34px;height:34px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:border-color .2s}
-    .header-btn:hover{border-color:var(--accent)}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  line-height: 1.5;
+  padding-inline: 0;
+  padding-block: 0;
+}
 
-    .ticker-container{border-bottom:1px solid var(--border);overflow:hidden;height:46px}
-    .tradingview-widget-copyright{display:none!important}
-    .main{max-width:1280px;margin:0 auto;padding:1.5rem 1rem}
+/* ---- LOADING ---- */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+}
+.loading-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; color: var(--text-muted); }
+.loading-error { color: var(--negative); font-size: 14px; text-align: center; max-width: 500px; }
 
-    /* AI */
-    .ai-section{background:var(--ai-bg);border:1px solid var(--ai-border);border-radius:10px;padding:1.1rem 1.2rem;margin-bottom:2rem}
-    .ai-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
-    .ai-title{font-size:.78rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:.4rem}
-    .ai-btn{background:var(--btn-bg);color:var(--btn-text);border:none;border-radius:6px;padding:.4rem .9rem;font-size:.72rem;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .2s}
-    .ai-btn:hover{opacity:.85}
-    .ai-btn:disabled{opacity:.5;cursor:not-allowed}
-    .ai-timeframe{display:flex;gap:.35rem;margin-bottom:.7rem}
-    .ai-tf-btn{background:var(--bg-card-alt);color:var(--text-muted);border:1px solid var(--border);border-radius:5px;padding:.25rem .6rem;font-size:.65rem;font-weight:500;font-family:inherit;cursor:pointer;transition:all .2s}
-    .ai-tf-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-    .ai-content{font-size:.78rem;line-height:1.65;color:var(--ai-text);white-space:pre-wrap}
-    .ai-content.empty{color:var(--text-hint);font-style:italic}
-    .ai-content.grid-mode{white-space:normal;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.55rem}
-    .ai-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:.7rem .85rem;font-size:.74rem;line-height:1.6;color:var(--text)}
-    .ai-card.card-l1{border-left:3px solid #22c55e}
-    .ai-card.card-l2{border-left:3px solid #eab308}
-    .ai-card.card-l3{border-left:3px solid #f97316;background:rgba(249,115,22,.04)}
-    .ai-card.card-l4{border-left:3px solid #ef4444;background:rgba(239,68,68,.05)}
-    .ai-card-title{font-weight:700;font-size:.76rem;margin-bottom:.35rem;display:flex;align-items:center;gap:.35rem}
-    .ai-card-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-    .ai-card-dot.d1{background:#22c55e}
-    .ai-card-dot.d2{background:#eab308}
-    .ai-card-dot.d3{background:#f97316}
-    .ai-card-dot.d4{background:#ef4444}
-    .ai-card-level{font-size:.55rem;font-weight:600;padding:.1rem .3rem;border-radius:3px;margin-left:auto;flex-shrink:0}
-    .ai-card-level.l1{background:rgba(34,197,94,.12);color:#16a34a}
-    .ai-card-level.l2{background:rgba(234,179,8,.12);color:#ca8a04}
-    .ai-card-level.l3{background:rgba(249,115,22,.12);color:#ea580c}
-    .ai-card-level.l4{background:rgba(239,68,68,.12);color:#dc2626}
-    .ai-card ul{margin:0;padding-left:1.1rem;list-style:disc}
-    .ai-card li{margin-bottom:.2rem}
-    .ai-card--watch{border-color:var(--accent);background:var(--tag-bg)}
-    .ai-card--watch .ai-card-title{color:var(--accent)}
+/* ---- HEADER ---- */
+.header {
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 100;
+}
+.header-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.header h1 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.header h1 span { color: var(--accent); }
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+select, button {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+select:hover, button:hover { border-color: var(--accent); }
+select:focus, button:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 500;
+}
+.btn-primary:hover { opacity: 0.9; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
 
-    /* ── Weather ── */
-    .weather-section{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem}
-    .weather-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
-    .weather-title{font-size:.78rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:.4rem}
-    .weather-subtitle{font-size:.62rem;color:var(--text-hint)}
-    .weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-    .weather-panel{min-width:0}
-    .weather-panel-title{font-size:.65rem;font-weight:600;color:var(--text-muted);margin-bottom:.4rem}
-    .weather-bars{display:flex;align-items:flex-end;gap:1px;height:60px}
-    .weather-bar{flex:1;min-width:0;border-radius:2px 2px 0 0;position:relative;cursor:default;transition:opacity .2s}
-    .weather-bar:hover{opacity:.8}
-    .weather-bar[title]{position:relative}
-    .weather-bar.rain-0{background:var(--border);min-height:2px}
-    .weather-bar.rain-1{background:#60a5fa}
-    .weather-bar.rain-2{background:#3b82f6}
-    .weather-bar.rain-3{background:#f97316}
-    .weather-bar.rain-4{background:#ef4444}
-    .weather-hours{display:flex;gap:1px;font-size:.5rem;color:var(--text-hint);margin-top:.2rem}
-    .weather-hours span{flex:1;text-align:center}
-    .weather-days{display:flex;gap:.5rem}
-    .weather-day{flex:1;background:var(--bg-card-alt);border-radius:6px;padding:.45rem .5rem;text-align:center;font-size:.65rem}
-    .weather-day-label{font-weight:600;color:var(--text);margin-bottom:.15rem}
-    .weather-day-mm{font-size:.85rem;font-weight:700}
-    .weather-day-mm.dry{color:var(--text-hint)}
-    .weather-day-mm.light{color:#60a5fa}
-    .weather-day-mm.moderate{color:#3b82f6}
-    .weather-day-mm.heavy{color:#f97316}
-    .weather-day-mm.extreme{color:#ef4444}
-    .weather-day-icon{font-size:1rem}
-    .weather-alert{margin-top:.5rem;font-size:.68rem;padding:.35rem .6rem;border-radius:5px;border-left:3px solid #f97316;background:rgba(249,115,22,.06);color:var(--text)}
-    @media(max-width:640px){.weather-grid{grid-template-columns:1fr}}
-    .ai-loading{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:var(--text-muted)}
-    .ai-spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .ai-meta{margin-top:.5rem;font-size:.6rem;color:var(--text-hint)}
+/* ---- MAIN ---- */
+.main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
 
-    /* Modal */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:1rem}
-    .modal-overlay.open{display:flex}
-    .modal{background:var(--settings-bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem;max-width:420px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.2)}
-    .modal h2{font-size:.95rem;margin-bottom:1rem}
-    .modal label{display:block;font-size:.72rem;font-weight:600;margin-bottom:.3rem;color:var(--text-muted)}
-    .modal input[type="password"],.modal input[type="text"]{width:100%;padding:.55rem .7rem;border:1px solid var(--border);border-radius:7px;font-size:.78rem;font-family:inherit;background:var(--bg);color:var(--text);margin-bottom:.8rem}
-    .modal-hint{font-size:.65rem;color:var(--text-hint);line-height:1.5;margin-bottom:1rem}
-    .modal-actions{display:flex;gap:.5rem;justify-content:flex-end}
-    .modal-actions button{padding:.45rem 1rem;border-radius:6px;font-size:.75rem;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .2s}
-    .modal-save{background:var(--accent);color:#fff;border:none}
-    .modal-cancel{background:transparent;color:var(--text-muted);border:1px solid var(--border)}
+/* ---- TABS ---- */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.tab {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
 
-    /* Sections */
-    .section{margin-bottom:2.25rem}
-    .section-header{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.2rem}
-    .section-icon{font-size:1.05rem}
-    .section-title{font-size:.8rem;font-weight:700;letter-spacing:.03em;color:var(--text)}
-    .section-status{width:10px;height:10px;border-radius:50%;flex-shrink:0;opacity:.9}
-    .section-status.s0{background:#9ca3af}
-    .section-status.s1{background:#22c55e}
-    .section-status.s2{background:#eab308}
-    .section-status.s3{background:#f97316}
-    .section-status.s4{background:#ef4444}
-    .section.status-3{border-left:3px solid #f97316}
-    .section.status-4{border-left:3px solid #ef4444;background:rgba(239,68,68,.03)}
-    .section-tag{font-size:.6rem;font-weight:500;background:var(--tag-bg);color:var(--tag-text);padding:.1rem .4rem;border-radius:3px;margin-left:auto}
-    .section-desc{font-size:.7rem;color:var(--text-muted);margin-bottom:.7rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);line-height:1.55}
+/* ---- CARDS ---- */
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+.card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.card-subtitle { font-size: 12px; color: var(--text-muted); }
 
-    .section--stress .section-title{color:var(--stress-accent)}
-    .section--stress .section-desc{border-bottom-color:var(--border-stress)}
-    .section--stress .widget-card{border-color:var(--border-stress);background:var(--stress-bg)}
+/* ---- KPI TILES ---- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-tile {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.kpi-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.kpi-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+.kpi-change.up { color: var(--positive); background: var(--positive-bg); }
+.kpi-change.down { color: var(--negative); background: var(--negative-bg); }
+.kpi-change.flat { color: var(--text-muted); background: var(--surface-2); }
 
-    .widget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:.55rem}
-    .widget-grid--large{grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
-    .widget-card{background:var(--bg-card);border:1px solid var(--border);border-radius:9px;overflow:hidden;box-shadow:var(--shadow);position:relative}
-    .widget-card--tall{height:235px}
-    .widget-card--std{height:205px}
-    .widget-label{display:none}
-    .widget-label-name{font-size:.6rem;font-weight:600;color:var(--text-muted)}
-    .widget-label-hint{font-size:.55rem;color:var(--text-hint);font-style:italic}
-    .widget-card .tradingview-widget-container{width:100%;height:100%}
+/* ---- GRID LAYOUTS ---- */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 768px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .main { padding: 16px; }
+  .header { padding: 12px 16px; }
+  .header-inner { gap: 8px; }
+}
 
-    .legend{margin-top:2rem;padding:1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:9px;font-size:.7rem;color:var(--text-muted);line-height:1.7}
-    .legend strong{color:var(--text);font-weight:600}
-    .footer{text-align:center;padding:1.5rem 1rem 1.25rem;font-size:.62rem;color:var(--text-hint);border-top:1px solid var(--border);max-width:1280px;margin:0 auto}
-    .footer a{color:var(--accent);text-decoration:none}
+/* ---- SITE GRID ---- */
+.site-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.site-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.site-card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+.site-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.site-card-name { font-size: 15px; font-weight: 600; }
+.site-card-lang {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  background: var(--surface-2);
+  border-radius: 100px;
+}
+.site-card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.site-stat-label { font-size: 11px; color: var(--text-muted); }
+.site-stat-value { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.site-ai-summary {
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle);
+  font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+}
+.site-ai-summary.loading { color: var(--text-muted); font-style: italic; }
 
-    @media(max-width:640px){
-      .header{padding:.75rem .85rem}
-      .header h1{font-size:.92rem}
-      .header-subtitle{display:none}
-      .main{padding:1rem .65rem}
-      .widget-grid,.widget-grid--large{grid-template-columns:1fr}
-      .widget-card--tall{height:210px}
-      .widget-card--std{height:195px}
-      .timestamp{display:none}
-      .ai-section{padding:.9rem}
-    }
+/* ---- CHART ---- */
+.chart-wrap { position: relative; width: 100%; overflow-x: auto; }
+.chart-wrap svg { display: block; width: 100%; height: auto; }
 
-    /* ── Threat Bar ── */
-    .threat-bar{
-      padding:.9rem 1.2rem;display:flex;align-items:center;gap:1rem;
-      border-radius:10px;margin-bottom:1rem;transition:all .4s;
-      border:1px solid var(--border);background:var(--bg-card);
-    }
-    .threat-bar.level-0{border-color:var(--border);background:var(--bg-card)}
-    .threat-bar.level-1{border-color:#22c55e;background:rgba(34,197,94,.06)}
-    .threat-bar.level-2{border-color:#eab308;background:rgba(234,179,8,.06)}
-    .threat-bar.level-3{border-color:#f97316;background:rgba(249,115,22,.07)}
-    .threat-bar.level-4{border-color:#ef4444;background:rgba(239,68,68,.08)}
-    :root[data-theme="dark"] .threat-bar.level-1{background:rgba(34,197,94,.1)}
-    :root[data-theme="dark"] .threat-bar.level-2{background:rgba(234,179,8,.1)}
-    :root[data-theme="dark"] .threat-bar.level-3{background:rgba(249,115,22,.1)}
-    :root[data-theme="dark"] .threat-bar.level-4{background:rgba(239,68,68,.12)}
+/* ---- TABLE ---- */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+th {
+  text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text-muted); padding: 10px 12px;
+  border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none;
+}
+th:hover { color: var(--text-secondary); }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); }
+tr:hover td { background: var(--surface-2); }
 
-    .threat-level{display:flex;align-items:center;gap:.5rem;flex-shrink:0}
-    .threat-icon{font-size:1.6rem;line-height:1}
-    .threat-grade{font-size:.82rem;font-weight:700;letter-spacing:.02em}
-    .level-1 .threat-grade{color:#16a34a}
-    .level-2 .threat-grade{color:#ca8a04}
-    .level-3 .threat-grade{color:#ea580c}
-    .level-4 .threat-grade{color:#dc2626}
-    .threat-summary{font-size:.74rem;color:var(--text-muted);line-height:1.5}
-    .threat-bar.level-0 .threat-summary{font-style:italic;color:var(--text-hint)}
+/* ---- BADGES ---- */
+.badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 100px; white-space: nowrap; }
+.badge-branded { background: var(--accent-soft); color: var(--accent); }
+.badge-authority { background: var(--surface-2); color: var(--text-secondary); }
 
-    /* ── Actions ── */
-    .actions-section{
-      background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
-      padding:1rem 1.2rem;margin-bottom:1rem;display:none;
-    }
-    .actions-section.visible{display:block}
-    .actions-title{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
-    .action-item{
-      font-size:.74rem;color:var(--text);line-height:1.6;
-      padding:.45rem .7rem;margin-bottom:.35rem;
-      background:var(--bg-card-alt);border-radius:6px;
-      border-left:3px solid var(--accent);
-    }
-    .action-item:last-child{margin-bottom:0}
+/* ---- ALERTS ---- */
+.alerts { margin-bottom: 24px; }
+.alert {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px;
+  border-radius: var(--radius); margin-bottom: 8px; font-size: 13px; line-height: 1.5;
+}
+.alert-icon { flex-shrink: 0; font-size: 16px; margin-top: 1px; }
+.alert-warn { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning); }
+.alert-bad { background: var(--negative-bg); color: var(--negative); border: 1px solid var(--negative); }
+.alert-good { background: var(--positive-bg); color: var(--positive); border: 1px solid var(--positive); }
 
-    /* ── History section ── */
-    .history-section{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
-    .history-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;cursor:pointer;user-select:none;transition:background .2s}
-    .history-header:hover{background:var(--bg-card-alt)}
-    .history-title{font-size:.78rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:.5rem}
-    .history-count{font-size:.6rem;font-weight:500;background:var(--tag-bg);color:var(--tag-text);padding:.1rem .4rem;border-radius:3px}
-    .history-chevron{font-size:.7rem;color:var(--text-muted);transition:transform .25s}
-    .history-chevron.open{transform:rotate(90deg)}
-    .history-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
-    .history-body.open{max-height:2000px}
-    .history-body-inner{padding:0 1.1rem 1rem}
-    .history-entry{display:flex;align-items:flex-start;gap:.6rem;padding:.55rem 1.1rem;border-bottom:1px solid var(--border);font-size:.72rem;line-height:1.55}
-    .history-entry:last-child{border-bottom:none}
-    .history-entry-icon{font-size:.9rem;flex-shrink:0;margin-top:.05rem}
-    .history-entry-content{flex:1;min-width:0}
-    .history-entry-top{display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap}
-    .history-entry-date{font-weight:600;color:var(--text);white-space:nowrap}
-    .history-entry-summary{color:var(--text-muted)}
-    .history-entry-snap{font-size:.6rem;color:var(--text-hint);margin-top:.2rem;line-height:1.6;word-break:break-word}
-    .history-load-more{text-align:center;padding:.5rem 0 .2rem}
-    .history-loading{font-size:.7rem;color:var(--text-hint);font-style:italic;padding:.8rem 1.1rem}
+/* ---- AI PANEL ---- */
+.ai-panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; }
+.ai-panel-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.ai-panel-title { font-size: 14px; font-weight: 600; }
+.ai-panel-body { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+.ai-panel-body p { margin-bottom: 8px; }
+.ai-panel-body p:last-child { margin-bottom: 0; }
+.ai-loading { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
+.ai-loading .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
 
-    @media(max-width:640px){
-      .threat-bar{flex-direction:column;align-items:flex-start;gap:.4rem}
-      .actions-section{padding:.85rem}
-      .history-entry{flex-wrap:wrap;gap:.3rem}
-      .history-entry-date{min-width:auto}
-    }
-  </style>
-</head>
-<body>
+/* ---- TOOLTIP ---- */
+.tooltip {
+  position: fixed; background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 14px; font-size: 12px;
+  box-shadow: var(--shadow); pointer-events: none; z-index: 1000; max-width: 280px;
+  opacity: 0; transition: opacity 0.1s;
+}
+.tooltip.show { opacity: 1; }
+.tooltip-title { font-weight: 600; margin-bottom: 4px; }
+.tooltip-row { display: flex; justify-content: space-between; gap: 16px; font-variant-numeric: tabular-nums; }
+.tooltip-label { color: var(--text-muted); }
+.tooltip-value { font-weight: 500; }
 
-  <header class="header">
-    <div class="header-left">
-      <div class="header-dot"></div>
-      <div>
-        <h1>Tableau de Bord Macro</h1>
-        <div class="header-subtitle">Température économique mondiale</div>
-      </div>
-    </div>
-    <div class="header-right">
-      <span class="timestamp" id="timestamp"></span>
-      <button class="header-btn" id="settingsBtn" aria-label="Réglages" title="Clé API">⚙️</button>
-      <button class="header-btn" id="themeToggle" aria-label="Thème">🌙</button>
-    </div>
-  </header>
+/* ---- MISC ---- */
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+  color: var(--text-secondary); cursor: pointer; background: none; border: none; padding: 4px 0; margin-bottom: 16px;
+}
+.back-btn:hover { color: var(--accent); }
+.objectives {
+  background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.6; color: var(--text-primary);
+}
+.objectives strong { font-weight: 600; }
+[hidden] { display: none !important; }
+.text-right { text-align: right; }
+.text-positive { color: var(--positive); }
+.text-negative { color: var(--negative); }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.data-source-bar {
+  font-size: 11px; color: var(--text-muted); text-align: center;
+  padding: 8px; border-top: 1px solid var(--border-subtle);
+}
+</style>
 
-  <div class="ticker-container" id="tickerTape" style="display:none"></div>
-
-  <!-- Settings Modal -->
-  <div class="modal-overlay" id="settingsModal">
-    <div class="modal">
-      <h2>⚙️ Réglages</h2>
-      <label for="apiKeyInput">Clé API OpenAI</label>
-      <input type="password" id="apiKeyInput" placeholder="sk-...">
-      <div class="modal-hint">
-        Ta clé est stockée dans Google Sheets (privé, pas dans le code ni sur GitHub).
-        Crée une clé sur <strong>platform.openai.com</strong> → API Keys, et fixe un plafond mensuel dans Settings → Limits (ex: 5 $).
-        Coût par analyse : ~0,005 $.
-      </div>
-      <div class="modal-actions">
-        <button class="modal-cancel" id="settingsCancel">Annuler</button>
-        <button class="modal-save" id="settingsSave">Enregistrer</button>
-      </div>
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <h1><span>NSN</span> Notoriety</h1>
+    <div class="header-controls">
+      <select id="langSelect" title="Language">
+        <option value="all">All Languages</option>
+        <option value="en">English</option>
+        <option value="fr">French</option>
+        <option value="pt-br">Portuguese (BR)</option>
+        <option value="es">Spanish</option>
+        <option value="it">Italian</option>
+        <option value="cz">Czech</option>
+        <option value="ru">Russian</option>
+      </select>
+      <select id="monthSelect" title="Month"></select>
+      <button class="btn-primary btn-sm" id="aiBtn" title="Generate AI insights">AI Insights</button>
     </div>
   </div>
+</div>
 
-  <main class="main">
+<!-- MAIN -->
+<div class="main">
+  <!-- LOADING -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Fetching data from Google Sheets...</div>
+  </div>
 
-    <!-- ═══ THREAT LEVEL ═══ -->
-    <div class="threat-bar level-0" id="threatBar">
-      <div class="threat-level">
-        <span class="threat-icon" id="threatIcon">⚪</span>
-        <span class="threat-grade" id="threatGrade">—</span>
-      </div>
-      <div class="threat-summary" id="threatSummary">Lance une analyse pour évaluer le niveau de risque global.</div>
+  <!-- APP (hidden until data loads) -->
+  <div id="app" hidden>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-tab="overview">Network Overview</button>
+      <button class="tab" data-tab="detail">Site Detail</button>
+      <button class="tab" data-tab="queries">All Queries</button>
     </div>
 
-    <!-- ═══ ACTIONS ═══ -->
-    <div class="actions-section" id="actionsSection">
-      <div class="actions-title">🎯 Actions recommandées pour le particulier</div>
-      <div id="actionsList"></div>
-    </div>
-
-    <!-- ═══ MÉTÉO CAPDENAC ═══ -->
-    <div class="weather-section" id="weatherSection">
-      <div class="weather-header">
-        <div class="weather-title">🌧️ Météo Capdenac-Gare</div>
-        <div class="weather-subtitle">Modèle AROME Météo-France via Open-Meteo · résolution 1,3 km · auto 30 min</div>
-      </div>
-      <div class="weather-grid">
-        <div class="weather-panel">
-          <div class="weather-panel-title">Pluie tombée</div>
-          <div style="display:flex;gap:.5rem;margin-bottom:.5rem" id="weatherPast"></div>
-          <div class="weather-panel-title">Prévisions prochaines 24h (mm/h)</div>
-          <div class="weather-bars" id="weatherBars"></div>
-          <div class="weather-hours" id="weatherHours"></div>
+    <!-- OVERVIEW TAB -->
+    <div id="view-overview">
+      <div class="kpi-grid" id="kpiGrid"></div>
+      <div class="alerts" id="alerts"></div>
+      <div id="aiInsightsOverview"></div>
+      <div class="grid-2" id="overviewCharts">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Impressions Trend</span>
+            <span class="card-subtitle" id="impressionsTrendSubtitle"></span>
+          </div>
+          <div class="chart-wrap" id="chartImpressions"></div>
         </div>
-        <div class="weather-panel">
-          <div class="weather-panel-title">Prévisions 3 jours</div>
-          <div class="weather-days" id="weatherDays"></div>
-          <div class="weather-panel-title" style="margin-top:.6rem">Historique pluviométrie</div>
-          <div class="weather-days" id="weatherHistory"></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Average Position</span>
+            <span class="card-subtitle" id="positionTrendSubtitle"></span>
+          </div>
+          <div class="chart-wrap" id="chartPosition"></div>
         </div>
       </div>
-      <div id="weatherAlert"></div>
+      <div class="card mb-24">
+        <div class="card-header">
+          <span class="card-title">Sites</span>
+          <span class="card-subtitle">Click a site to see details</span>
+        </div>
+        <div class="site-grid" id="siteGrid"></div>
+      </div>
     </div>
 
-    <!-- ═══ AI SUMMARY ═══ -->
-    <section class="ai-section" id="aiSection">
-      <div class="ai-header">
-        <div class="ai-title">🤖 Analyse IA <span style="font-weight:400;font-size:.62rem;color:var(--text-hint)">(GPT-4o + web · situation actuelle)</span></div>
-        <button class="ai-btn" id="aiBtn" onclick="runAnalysis()">Analyser</button>
+    <!-- SITE DETAIL TAB -->
+    <div id="view-detail" hidden>
+      <button class="back-btn" id="backBtn">&#8592; Back to overview</button>
+      <h2 id="detailSiteName" style="font-size:20px;font-weight:700;margin-bottom:4px;"></h2>
+      <p id="detailSiteMeta" style="font-size:13px;color:var(--text-muted);margin-bottom:16px;"></p>
+      <div id="detailObjectives"></div>
+      <div id="aiInsightsDetail"></div>
+      <div class="kpi-grid" id="detailKpis"></div>
+      <div class="grid-2 mb-24">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Impressions by Query</span></div>
+          <div class="chart-wrap" id="chartDetailImpressions"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Position by Query</span></div>
+          <div class="chart-wrap" id="chartDetailPosition"></div>
+        </div>
       </div>
-      <div class="ai-content empty" id="aiContent">Clique sur « Analyser » pour obtenir un résumé de la situation macro. Configure ta clé API OpenAI via ⚙️.</div>
-      <div class="ai-meta" id="aiMeta"></div>
-    </section>
-
-    <!-- ═══ 1. STRESS & INDICATEURS AVANCÉS ═══ -->
-    <section class="section section--stress" id="sec-stress">
-      <div class="section-header">
-        <span class="section-status s0" id="dot-stress"></span>
-        <span class="section-icon">🚨</span>
-        <span class="section-title">Indicateurs de stress</span>
-        <span class="section-tag">regarder en premier</span>
-      </div>
-      <p class="section-desc">
-        Ces valeurs bougent EN PREMIER quand une crise approche. C'est ici qu'il faut regarder avant tout le reste.
-        VIXY = volatilité des marchés US, suit l'indice VIX. En dessous de 20 = calme, au-dessus de 30 = panique.
-        Or = valeur refuge historique, monte quand les investisseurs fuient le risque.
-        UUP = force du dollar US, se renforce quand les capitaux mondiaux cherchent la sécurité.
-        TLT = obligations longues US — monte quand les taux baissent, c'est-à-dire quand le marché anticipe un ralentissement ou une récession.
-        COPX = mines de cuivre, surnommé « Dr. Copper ». Le cuivre est utilisé partout (construction, industrie, électronique). Si COPX chute, l'économie mondiale ralentit.
-      </p>
-      <div class="widget-grid widget-grid--large">
-        <div class="widget-card widget-card--tall" id="chart-vix"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--tall" id="chart-gold"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--tall" id="chart-dxy"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--tall" id="chart-us10y"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--tall" id="chart-copx"><div class="widget-label"></div></div>
-      </div>
-    </section>
-
-    <!-- ═══ 2. ÉNERGIE ═══ -->
-    <section class="section" id="sec-energy">
-      <div class="section-header">
-        <span class="section-status s0" id="dot-energy"></span>
-        <span class="section-icon">🛢️</span>
-        <span class="section-title">Énergie</span>
-      </div>
-      <p class="section-desc">
-        Le pétrole est le pouls de l'économie mondiale — il entre dans le coût de tout (transport, plastique, chauffage, agriculture).
-        Brent = référence mondiale (ce qu'on cite en Europe). WTI = référence US.
-        Hausse pétrole → essence plus chère dans 2-3 semaines → puis cascade sur les prix alimentaires et les matériaux via le transport routier.
-        UNG = gaz naturel US. Quand il monte, l'énergie européenne suit avec un décalage. Impact direct sur les bouteilles de gaz (propane/butane).
-        ICLN = ETF énergie propre (solaire, éolien). Monte quand les politiques vertes avancent, chute quand les gouvernements reculent.
-      </p>
-      <div class="widget-grid">
-        <div class="widget-card widget-card--std" id="chart-brent"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-wti"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-natgas"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-icln"><div class="widget-label"></div></div>
-      </div>
-    </section>
-
-    <!-- ═══ 3. SÉCURITÉ ALIMENTAIRE ═══ -->
-    <section class="section section--food" id="sec-food">
-      <div class="section-header">
-        <span class="section-status s0" id="dot-food"></span>
-        <span class="section-icon">🌾</span>
-        <span class="section-title">Sécurité alimentaire</span>
-        <span class="section-tag">sensible El Niño &amp; climat</span>
-      </div>
-      <p class="section-desc">
-        Les matières premières agricoles sont les premières touchées par El Niño, les sécheresses et les conflits.
-        Signal d'alerte : quand PLUSIEURS montent en même temps → crise alimentaire globale (pas juste un problème local).
-        WEAT = blé (pain, pâtes, farine). CORN = maïs (alimentation animale, huile, biocarburant). SOYB = soja (huile, alimentation animale mondiale). CANE = sucre (sensible aux sécheresses Brésil/Inde).
-        Riz, café et cacao sont suivis par l'analyse IA uniquement (pas d'ETF fiable en widget gratuit).
-        Délai de transmission : une hausse sur les marchés met 2-4 mois à arriver dans les rayons en France.
-      </p>
-      <div class="widget-grid">
-        <div class="widget-card widget-card--std" id="chart-wheat"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-corn"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-soy"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-sugar"><div class="widget-label"></div></div>
-      </div>
-      <div style="margin-top:.6rem;font-size:.65rem;color:var(--text-hint)">
-        📡 Suivi El Niño : <a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml" target="_blank" rel="noopener" style="color:var(--accent)">NOAA ENSO</a>
-        · <a href="https://www.bom.gov.au/climate/enso/" target="_blank" rel="noopener" style="color:var(--accent)">BOM Australia</a>
-        · <a href="https://www.vigicrues.gouv.fr/niv3-bassin.php?CdEntViworgiCworworworru=6" target="_blank" rel="noopener" style="color:var(--accent)">Vigicrues Lot</a>
-      </div>
-    </section>
-
-    <section class="section" id="sec-markets">
-      <div class="section-header">
-        <span class="section-status s0" id="dot-markets"></span>
-        <span class="section-icon">📊</span>
-        <span class="section-title">Marchés actions</span>
-      </div>
-      <p class="section-desc">
-        Indiquent la confiance des investisseurs dans l'économie. Une chute synchronisée de tous les marchés = panique globale.
-        SPY = S&amp;P 500, les 500 plus grandes entreprises US. L'indicateur le plus suivi au monde pour la santé économique.
-        CAC 40 = les 40 plus grandes entreprises françaises. Impact direct sur l'emploi et l'économie en France.
-        QQQ = Nasdaq 100, dominé par la tech (Apple, Microsoft, Nvidia). Plus volatil, amplifie les mouvements.
-        EEM = marchés émergents (Chine, Inde, Brésil…). Premiers à chuter en crise — les capitaux fuient vers le dollar.
-        FXI = Chine seule (2e économie mondiale). Chute de FXI = ralentissement de la demande mondiale en matières premières.
-      </p>
-      <div class="widget-grid">
-        <div class="widget-card widget-card--std" id="chart-sp500"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-cac40"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-nasdaq"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-eem"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-fxi"><div class="widget-label"></div></div>
-      </div>
-    </section>
-
-    <section class="section" id="sec-currencies">
-      <div class="section-header">
-        <span class="section-status s0" id="dot-currencies"></span>
-        <span class="section-icon">💱</span>
-        <span class="section-title">Devises &amp; Crypto</span>
-      </div>
-      <p class="section-desc">
-        EUR/USD = combien de dollars pour 1 euro. Quand il baisse, tout ce qu'on achète en dollars (tech, pétrole, matières premières) coûte plus cher en euros.
-        Impact concret : vacances aux US, achats Amazon US, prix de l'essence (le pétrole est coté en dollars).
-        Bitcoin = indicateur d'appétit pour le risque. Monte quand l'optimisme domine, chute quand la peur s'installe. Aussi impacté par les régulations (SEC, UE).
-      </p>
-      <div class="widget-grid">
-        <div class="widget-card widget-card--std" id="chart-eurusd"><div class="widget-label"></div></div>
-        <div class="widget-card widget-card--std" id="chart-btc"><div class="widget-label"></div></div>
-      </div>
-    </section>
-
-    <!-- ═══ HISTORIQUE ═══ -->
-    <div class="history-section" id="historySection">
-      <div class="history-header" id="historyToggle">
-        <div class="history-title">📅 Historique <span class="history-count" id="historyCount"></span></div>
-        <span class="history-chevron" id="historyChevron">▸</span>
-      </div>
-      <div class="history-body" id="historyBody">
-        <div id="historyList"></div>
-        <div class="history-load-more" id="historyLoadMore" style="display:none">
-          <button class="ai-btn" id="historyMoreBtn" style="font-size:.65rem;padding:.3rem .7rem">Voir plus</button>
+      <div class="card mb-24">
+        <div class="card-header"><span class="card-title">Query Performance</span></div>
+        <div class="table-wrap">
+          <table id="detailTable">
+            <thead><tr>
+              <th data-sort="query">Query</th>
+              <th data-sort="type">Type</th>
+              <th data-sort="impressions" class="text-right">Impressions</th>
+              <th data-sort="clicks" class="text-right">Clicks</th>
+              <th data-sort="ctr" class="text-right">CTR</th>
+              <th data-sort="position" class="text-right">Position</th>
+              <th data-sort="impChange" class="text-right">Imp. Change</th>
+            </tr></thead>
+            <tbody id="detailTableBody"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- ═══ CALENDRIER SAISONNIER ═══ -->
-    <div class="legend" style="margin-top:.75rem">
-      <strong>🗓️ Calendrier saisonnier — Capdenac-Gare</strong><br>
-      <span style="color:var(--text)">Jan-Fév :</span> Pic consommation bois &amp; gaz bouteille. Risque crues du Lot (fonte + pluies). Vérifier stock médicaments (grippe + ruptures hiver).<br>
-      <span style="color:var(--text)">Mar-Avr :</span> <strong>Commander le bois de chauffage</strong> (prix bas, bon séchage avant hiver). Vérifier état cheminée/ramonage.<br>
-      <span style="color:var(--text)">Mai-Juin :</span> Dernier moment pour commander le bois. Surveiller les prévisions El Niño (NOAA publie les prévisions d'été). Début restrictions eau si sécheresse.<br>
-      <span style="color:var(--text)">Juil-Août :</span> Pic sécheresse, restrictions d'eau possibles (niveau du Lot). Les récoltes mondiales se jouent maintenant — blé/maïs US et soja Brésil. Prix gaz bouteille au plus bas.<br>
-      <span style="color:var(--text)">Sept-Oct :</span> Début saison des crues du Lot. Préparer zone inondable (rien au sol). Stocker conserves/eau si prévisions fortes pluies. Les hausses de matières premières agricoles de l'été arrivent en rayon.<br>
-      <span style="color:var(--text)">Nov-Déc :</span> Pic prix bois (si pas commandé au printemps). Hausse gaz bouteille (demande hiver). Vérifier stock médicaments avant fêtes (pharmacies fermées + logistique ralentie). Crues du Lot possibles.
+    <!-- ALL QUERIES TAB -->
+    <div id="view-queries" hidden>
+      <div class="card mb-24">
+        <div class="card-header">
+          <span class="card-title">All Tracked Queries</span>
+          <select id="querySiteFilter" style="font-size:12px;"><option value="all">All sites</option></select>
+        </div>
+        <div class="table-wrap">
+          <table id="queriesTable">
+            <thead><tr>
+              <th data-sort="site">Site</th>
+              <th data-sort="query">Query</th>
+              <th data-sort="type">Type</th>
+              <th data-sort="impressions" class="text-right">Impressions</th>
+              <th data-sort="clicks" class="text-right">Clicks</th>
+              <th data-sort="ctr" class="text-right">CTR</th>
+              <th data-sort="position" class="text-right">Position</th>
+              <th>Trend</th>
+            </tr></thead>
+            <tbody id="queriesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-  </main>
+    <div class="data-source-bar" id="dataSourceBar"></div>
+  </div>
+</div>
 
-  <footer class="footer">
-    Données <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a> · Analyse IA via <a href="https://platform.openai.com/" target="_blank" rel="noopener">OpenAI</a> · Cours différés
-  </footer>
+<!-- TOOLTIP -->
+<div class="tooltip" id="tooltip"></div>
 
-  <script>
-    /* ═══════════════════════════════
-       THEME
-    ═══════════════════════════════ */
-    function getTheme(){const s=localStorage.getItem('macro-dash-theme');if(s)return s;return window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'}
-    function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('macro-dash-theme',t);document.getElementById('themeToggle').textContent=t==='dark'?'☀️':'🌙'}
-    let currentTheme=getTheme();applyTheme(currentTheme);
-    document.getElementById('themeToggle').addEventListener('click',()=>{currentTheme=currentTheme==='dark'?'light':'dark';applyTheme(currentTheme);buildAllWidgets()});
+<!-- AI proxy: Google Apps Script URL (stores OpenAI key server-side) -->
+<script>
+var AI_PROXY_URL = 'https://script.google.com/macros/s/AKfycbyITmH6HKw1qAGr6CHgN6NWdkRuzbFm5wPIzpglTIa_qDRpmMUzhfqZ61ECXzU5M0iYbA/exec';
+</script>
+<script src="config.js" onerror=""></script>
 
-    /* ═══════════════════════════════
-       TIMESTAMP
-    ═══════════════════════════════ */
-    function updateTimestamp(){document.getElementById('timestamp').textContent=new Date().toLocaleString('fr-FR',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
-    updateTimestamp();setInterval(updateTimestamp,60000);
+<script>
+// ======================================================
+// CONFIG: Google Sheets source
+// ======================================================
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSHFkti4Ubga62vEjVfFHaxzzTdCuPLYXbIiMDVn0iOsiGwragSS4FajGRAY1P6Q_AcJUBT4SopnZCk/pub?gid=1679156358&single=true&output=csv';
 
-    /* ═══════════════════════════════
-       GOOGLE SHEETS PROXY
-    ═══════════════════════════════ */
-    const GAS_URL='https://script.google.com/macros/s/AKfycby_cDXgvFkSCCirA93XbAYEo3fhE28PLvQ-MGcodjEf4lXBmMBKlP7oP_bXGRoRwjM3jw/exec';
-    let cachedApiKey='';
+// Objectives tab CSV URL (update gid after creating the tab)
+const OBJECTIVES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSHFkti4Ubga62vEjVfFHaxzzTdCuPLYXbIiMDVn0iOsiGwragSS4FajGRAY1P6Q_AcJUBT4SopnZCk/pub?gid=1991638599&single=true&output=csv';
 
-    async function gasGet(action){
-      try{
-        const r=await fetch(GAS_URL+'?action='+action,{redirect:'follow'});
-        if(!r.ok){console.warn('GAS GET '+action+': HTTP '+r.status);return null}
-        return await r.json();
-      }catch(e){console.error('GAS GET '+action+':',e);return null}
+// Objectives loaded from sheet: array of { site, start, end, objective }
+let OBJECTIVES_DATA = [];
+
+// Get objectives for a site in a specific month
+function getObjectivesForSite(siteCode, month) {
+  return OBJECTIVES_DATA
+    .filter(o => o.site === siteCode && month >= o.start && month <= o.end)
+    .map(o => o.objective)
+    .join('\n');
+}
+
+// Site metadata (static config - no objectives here, they come from the sheet)
+const SITE_META = {
+  'AAL': { name: 'Al Aire Libre', lang: 'es' },
+  'AF(en)': { name: 'Afrik Foot', lang: 'en', sub: { 'AFNG': 'AF NG', 'AFZA': 'AF ZA' } },
+  'AF(fr)': { name: 'Afrik Foot', lang: 'fr' },
+  'CDA':  { name: "Calcio d'Angolo", lang: 'it' },
+  'FGG':  { name: 'Football Ground Guide', lang: 'en' },
+  'FP':   { name: 'Fotbal Portal', lang: 'cz' },
+  'FW':   { name: 'Football Whispers', lang: 'en' },
+  'LB':   { name: 'Lakers Brasil', lang: 'pt-br' },
+  'MFT':  { name: 'Mr Fix Its Tips', lang: 'en' },
+  'SB':   { name: 'Solo Basket', lang: 'es' },
+  'SM':   { name: 'SportsMole', lang: 'en' },
+  'SN':   { name: 'Soccernet.ng', lang: 'en' },
+  'TM':   { name: 'Topmercato.fr', lang: 'fr' },
+  'Trivela': { name: 'Trivela', lang: 'pt-br' },
+  'UDE':  { name: 'UmDoisEsportes', lang: 'pt-br' },
+  'Vringe': { name: 'Vringe', lang: 'ru' }
+};
+
+// Brand terms for branded vs authority detection
+const BRAND_TERMS = {
+  'AAL': ['al aire libre'],
+  'AF(en)': ['afrik foot','afrikfoot'],
+  'AF(fr)': ['afrik foot','afrikfoot'],
+  'CDA': ["calcio d'angolo",'calciodangolo'],
+  'FGG': ['football ground guide','footballgroundguide'],
+  'FP': ['fotbal portal','fotbalportal'],
+  'FW': ['football whispers','footballwhispers'],
+  'LB': ['lakers brasil','lakersbrasil'],
+  'MFT': ['mr fix it','mrfixitstips','mr fix its tips'],
+  'SB': ['solo basket','solobasket'],
+  'SM': ['sportsmole','sports mole'],
+  'SN': ['soccernet'],
+  'TM': ['top mercato','topmercato'],
+  'Trivela': ['trivela'],
+  'UDE': ['um dois esportes','umdoisesportes'],
+  'Vringe': ['vringe']
+};
+
+// ======================================================
+// CSV PARSER
+// ======================================================
+function parseCSV(text) {
+  const lines = text.split('\n');
+  const headers = parseCSVLine(lines[0]);
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = parseCSVLine(lines[i]);
+    const row = {};
+    headers.forEach((h, j) => row[h.trim()] = (vals[j] || '').trim());
+    rows.push(row);
+  }
+  return rows;
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') { current += '"'; i++; }
+        else { inQuotes = false; }
+      } else { current += c; }
+    } else {
+      if (c === '"') { inQuotes = true; }
+      else if (c === ',') { result.push(current); current = ''; }
+      else { current += c; }
     }
+  }
+  result.push(current);
+  return result;
+}
 
-    async function gasPost(payload){
-      try{
-        const r=await fetch(GAS_URL,{
-          method:'POST',
-          redirect:'follow',
-          headers:{'Content-Type':'text/plain'},
-          body:JSON.stringify(payload)
-        });
-        if(!r.ok){console.warn('GAS POST '+payload.action+': HTTP '+r.status);return null}
-        return await r.json();
-      }catch(e){console.error('GAS POST '+payload.action+':',e);return null}
-    }
+// ======================================================
+// DATA PROCESSING
+// ======================================================
+function processSheetData(rows) {
+  // Expected columns: First row, Site (tab), Site name, Repertory (if applicable), Query, Month, Impressions, Clicks, CTR, Position
+  const sites = {};
+  const allMonths = new Set();
+  let currentTab = '', currentName = '', currentRepertory = '';
 
-    // Load API key from Google Sheets on startup
-    async function loadApiKey(){
-      const data=await gasGet('getKey');
-      if(data&&data.key){
-        cachedApiKey=data.key;
-        // Keep localStorage as fallback
-        localStorage.setItem('macro-dash-openai-key',data.key);
-      }else{
-        // Fallback to localStorage if GAS fails
-        cachedApiKey=localStorage.getItem('macro-dash-openai-key')||'';
-      }
-    }
+  for (const row of rows) {
+    // Column names from the ALL tab
+    const firstRow = row['First row'] || '';
+    const siteTab = row['Site (tab)'] || '';
+    const siteName = row['Site name'] || '';
+    const repertory = row['Repertory (if applicable)'] || '';
+    const query = row['Query'] || '';
+    const monthRaw = row['Month'] || '';
+    const impressions = parseInt(row['Impressions']) || 0;
+    const clicks = parseInt(row['Clicks']) || 0;
+    const ctrRaw = row['CTR'] || '0';
+    const positionRaw = row['Position'] || '0';
 
-    function getApiKey(){
-      return cachedApiKey||localStorage.getItem('macro-dash-openai-key')||'';
-    }
+    // Carry forward site tab/name
+    if (siteTab) currentTab = siteTab;
+    if (siteName) currentName = siteName;
+    if (repertory) currentRepertory = repertory;
+    else if (firstRow === 'ICI') currentRepertory = '';
 
-    /* ═══════════════════════════════
-       SETTINGS
-    ═══════════════════════════════ */
-    const settingsModal=document.getElementById('settingsModal');
-    const apiKeyInput=document.getElementById('apiKeyInput');
-    document.getElementById('settingsBtn').addEventListener('click',()=>{apiKeyInput.value=getApiKey();settingsModal.classList.add('open')});
-    document.getElementById('settingsCancel').addEventListener('click',()=>settingsModal.classList.remove('open'));
-    document.getElementById('settingsSave').addEventListener('click',async()=>{
-      const k=apiKeyInput.value.trim();
-      if(k){
-        cachedApiKey=k;
-        localStorage.setItem('macro-dash-openai-key',k);
-        // Save to Google Sheets
-        gasPost({action:'setKey',key:k});
-      }else{
-        cachedApiKey='';
-        localStorage.removeItem('macro-dash-openai-key');
-        gasPost({action:'setKey',key:''});
-      }
-      settingsModal.classList.remove('open');
-    });
-    settingsModal.addEventListener('click',e=>{if(e.target===settingsModal)settingsModal.classList.remove('open')});
+    if (!query || !monthRaw) continue;
 
-    /* ═══════════════════════════════
-       AI ANALYSIS (OpenAI)
-    ═══════════════════════════════ */
-    let selectedTimeframe='both';
+    // Normalize month: could be "12/1/2025", "2025-12", "Dec 2025", "2025-12-01" etc.
+    const month = normalizeMonth(monthRaw);
+    if (!month) continue;
+    allMonths.add(month);
 
-    function buildPrompts(){
-      // Get previous level for stability
-      let prevLevel=0;
-      let prevSummary='';
-      if(historyData.length>0){prevLevel=historyData[0].level||0;prevSummary=historyData[0].summary||''}
+    // CTR: could be "8.27%" or "0.0827"
+    let ctr = parseFloat(ctrRaw.replace('%', ''));
+    if (ctr < 1 && ctrRaw.indexOf('%') === -1) ctr = ctr * 100; // was decimal
+    ctr = Math.round(ctr * 100) / 100;
 
-      const prevContext=prevLevel>0?`\nDernière analyse : NIVEAU ${prevLevel} ("${prevSummary}"). Ne change le niveau QUE si un fait nouveau le justifie clairement. Une variation de marché de <2% ou un changement de formulation ne justifie PAS un changement de niveau. Stabilité = crédibilité.`:'';
+    const position = Math.round(parseFloat(positionRaw) * 10) / 10;
 
-      const sysPrompt=`Brief macro quotidien pour un particulier à Capdenac-Gare (vallée du Lot, Aveyron). But : anticiper les crises, pas trader. Format strict ci-dessous.
-
-PROFIL : chauffage bois (cheminée), cuisine gaz bouteille (butane/propane), zone rurale (dépendant voiture), bord du Lot (risque crue). Commande bois idéale = avril-juin.${prevContext}
-
-FORMAT — respecte les marqueurs exactement :
-
-[NIVEAU:X]
-1=🟢CALME 2=🟡VIGILANCE 3=🟠ALERTE 4=🔴CRISE. Basé sur la CONVERGENCE (plusieurs signaux ensemble, pas un seul).
-[RESUME_NIVEAU]
-Une phrase : pourquoi ce niveau.
-[STATUS]
-stress:X
-energy:X
-food:X
-markets:X
-currencies:X
-[/STATUS]
-(X = 1 à 4 pour chaque section. Évalue chaque domaine individuellement.)
-[SNAPSHOT]
-vix:XX.X
-or:XXXX
-brent:XX.XX
-sp95:X.XXX
-gazole:X.XXX
-eurusd:X.XXXX
-cac40:XXXXX
-sp500:XXXX
-btc:XXXXX
-ble:XXX.X
-mais:XXX.X
-[/SNAPSHOT]
-(Valeurs numériques UNIQUEMENT, en devise d'origine. VIX=indice, Or=$/oz, Brent=$/bbl, SP95/Gazole=€/L, CAC40/SP500=points, BTC=$, Blé/Maïs=cents/bushel CBOT. Si tu n'as pas trouvé un chiffre exact, mets 0.)
-[ACTIONS]
-4-6 actions ULTRA-CONCRÈTES et DATÉES. Chaque action = un VERBE + un OBJET PRÉCIS + un SEUIL ou PRIX + un TIMING.
-
-RÈGLE ABSOLUE DE COHÉRENCE : UN SEUL VERDICT PAR SUJET. Tu ne peux PAS dire "faire le plein maintenant" ET "différer les achats de carburant". Tranche. Si le Brent baisse → "attendre, les prix pompe suivront dans 1-2 semaines". Si le Brent monte → "faire le plein maintenant avant la hausse". JAMAIS les deux dans la même analyse. Relis tes actions avant de répondre : si deux se contredisent, supprime la plus faible.
-
-COUVRIR 3 DOMAINES OBLIGATOIRES :
-🔴 ÉNERGIE : carburant (SP95/gazole : acheter ou attendre + pourquoi), gaz bouteille (prix + stock), bois/chauffage (saisonnier)
-🔴 ALIMENTATION : pas juste les commodities — chercher les PRIX EN RAYON et la SAISON :
-   — Fruits & légumes : qu'est-ce qui est de saison en ce moment ? Quels prix sont bas/élevés par rapport à la normale ? (ex: "Tomates en pleine saison à ~2€/kg, stocker/faire des conserves" ou "Agrumes hors saison, prix haut, attendre novembre")
-   — Produits stockables : farine, pâtes, huile, riz, sucre, conserves — si une matière première monte, DIRE quoi acheter maintenant avant la hausse en rayon (délai 6-8 semaines)
-   — Viande/lait : si le maïs (alimentation animale) ou le soja montent → impact prix viande/lait dans 2-3 mois
-🔴 RISQUES LOCAUX : niveau du Lot (Vigicrues), alertes météo Aveyron, restrictions eau si sécheresse
-
-ACTIONS INTERDITES (trop vagues) :
-❌ "Surveiller les prix du gaz" → Tout le monde sait ça.
-❌ "Rester informé des développements géopolitiques" → Conseil de journal télévisé.
-❌ "Anticiper d'éventuelles hausses" → Aucune info actionnable.
-❌ Deux actions contradictoires sur le même sujet.
-
-ACTIONS EXIGÉES (spécifiques, chiffrées, timing clair) :
-✅ "SP95 à 1.87€/L, Brent en baisse à 74$ (-5% sur 2 sem.) — ATTENDRE pour faire le plein, les prix pompe baisseront de 3-5 cts d'ici 10 jours."
-✅ "Gaz bouteille : propane à 2,15€/kg, prochain ajustement le 1er juillet — racheter une bouteille d'avance CETTE SEMAINE si stock < 2."
-✅ "Fruits de saison : pêches/abricots au pic (juin-juillet), prix bas ~3€/kg — en profiter pour faire des confitures/conserves."
-✅ "Huile de tournesol : tournesol CBOT +15% sur 2 mois (sécheresse Ukraine) — racheter 2-3 bouteilles maintenant, hausse en rayon probable d'ici fin août."
-✅ "Niveau du Lot à Capdenac : 1.2m (normal). RAS côté crue."
-
-RÈGLE : si tu ne peux pas donner un PRIX, une DATE ou un SEUIL, cherche plus. Si RAS : "• Indicateurs stables, pas d'action urgente cette semaine."
-[/ACTIONS]
-[ANALYSE]
-Catégories dynamiques (emoji+titre suivi de [1] à [4] pour le niveau de risque de cette catégorie, ex: "⚡ Énergie [3]"). 2-4 bullets chacune. Terminer par 👀 À surveiller. Max 600 mots.
-
-PROFONDEUR EXIGÉE — chaque bullet doit contenir :
-1. Le FAIT (asset + direction + chiffre exact)
-2. La CAUSE (géopolitique, décision politique, donnée éco)
-3. L'IMPACT CONCRET pour un particulier en France rurale (prix à la pompe, rayon supermarché, facture énergie, emploi local)
-
-BULLET INTERDIT : "Le pétrole est en hausse, ce qui pourrait impacter les prix" → Zéro info.
-BULLET EXIGÉ : "Brent à 83.4$ (+6% sur 1 mois) : OPEP+ prolonge les coupes de 500k b/j jusqu'en septembre + tensions Hormuz après saisie d'un tanker. Impact : SP95 devrait passer de 1.84 à ~1.92€/L d'ici 2-3 semaines en Aveyron."
-
-Pour 👀 À surveiller : UNIQUEMENT des DATES PRÉCISES d'événements à venir (réunion Fed le X, publication chiffres emploi le X, échéance politique le X, date de récolte, prochaine décision OPEP). Pas de "surveiller l'évolution de…"
-Pas de sources/URLs.
-RÈGLE CLÉ : chaque chiffre = un fait + son POURQUOI (géopolitique, décision politique, données éco). Interdit de citer un mouvement sans cause.
-[/ANALYSE]
-
-Langue : français.`;
-
-      const userPrompt=`Recherche la SITUATION ACTUELLE des marchés et du monde. Pas seulement ce qui s'est passé dans les dernières 24h — inclus tout événement EN COURS qui impacte les marchés et le quotidien, même s'il a débuté il y a des semaines ou des mois (ex: blocage Houthis en mer Rouge, guerre Ukraine, politique tarifaire Trump, hausse annoncée du gaz en France, El Niño en cours). Ce qui compte = l'impact AUJOURD'HUI et dans les PROCHAINES SEMAINES, pas la date de début.
-
-DONNÉES À CHERCHER :
-Stress : VIX, Or, DXY, Taux US 10 ans, Cuivre
-Énergie : Brent, WTI, Gaz naturel, prix essence SP95 + gazole France AUJOURD'HUI (chercher "prix SP95 France" ou "prix carburant Aveyron"), prix propane/butane bouteille France (chercher "prix gaz bouteille propane France"), prochaine date d'ajustement réglementaire gaz
-Alimentation COMMODITIES : Blé, Maïs, Soja, Riz, Café, Cacao, Sucre, Huile de tournesol, Huile d'olive + indice FAO des prix alimentaires (dernier chiffre publié). Pour chaque matière en hausse >5% sur 1 mois : estimer le DÉLAI et l'IMPACT en rayon France (ex: blé +10% → farine +5-8% en rayon dans 6-8 semaines)
-Alimentation CONSOMMATEUR : chercher "prix fruits légumes France" ou "cours fruits légumes Rungis" — quels fruits et légumes sont de SAISON maintenant ? Lesquels sont chers/pas chers par rapport à la normale ? Y a-t-il des alertes récolte (gel, sécheresse, grêle) qui impactent les prix ? Impact maïs/soja sur prix viande et produits laitiers (alimentation animale → délai 2-3 mois)
-Marchés : S&P 500, CAC 40, Nasdaq 100, EEM, FXI (Chine)
-Devises : EUR/USD, Bitcoin
-Logistique : Baltic Dry Index, tensions Hormuz/Suez/mer Rouge, surcoûts fret conteneur
-Climat : statut ENSO, alertes Météo-France Lot/Aveyron, VÉRIFIER vigicrues.gouv.fr pour le niveau actuel du Lot à Capdenac
-Énergie France : électricité spot, uranium/nucléaire, prochaine hausse tarifaire EDF annoncée
-
-CONTEXTE EXIGÉ pour chaque mouvement :
-— Géopolitique : Houthis/mer Rouge, Ukraine-Russie (gaz, blé, oléoducs), Iran/Hormuz, Taïwan/semi-conducteurs
-— Politique : annonces Trump (tarifs, sanctions), décisions UE, politique française
-— Économique : Fed/BCE, résultats trimestriels, emploi/inflation, faillites, levées de fonds
-Pas "le Brent baisse" → "le Brent recule à 72$ : OPEP+ annonce +500k b/j + demande chinoise faible (PMI sous 50)"
-
-Ne mentionner QUE ce qui bouge ou a une cause identifiable.
-
-FORMAT DE RÉPONSE OBLIGATOIRE — ta réponse DOIT commencer par [NIVEAU:X] et suivre exactement cette structure :
-
-[NIVEAU:X]
-(1=calme 2=vigilance 3=alerte 4=crise)
-[RESUME_NIVEAU]
-(une phrase)
-[STATUS]
-stress:X
-energy:X
-food:X
-markets:X
-currencies:X
-[/STATUS]
-[SNAPSHOT]
-vix:XX.X
-or:XXXX
-brent:XX.XX
-sp95:X.XXX
-gazole:X.XXX
-eurusd:X.XXXX
-cac40:XXXXX
-sp500:XXXX
-btc:XXXXX
-ble:XXX.X
-mais:XXX.X
-[/SNAPSHOT]
-[ACTIONS]
-• action ULTRA-CONCRÈTE avec prix/seuil/date
-• action 2
-• action 3
-[/ACTIONS]
-[ANALYSE]
-🚨 Stress du marché [X]
-• fait + chiffre EXACT + cause géopolitique/politique + impact concret France
-• bullet
-
-⚡ Énergie [X]
-• asset + prix exact + cause + impact prix pompe/gaz bouteille en €
-• bullet
-
-(autres catégories dynamiques avec emoji, chacune avec [1-4])
-
-👀 À surveiller
-• DATE PRÉCISE + événement (ex: "18 juin : décision Fed sur les taux")
-• DATE PRÉCISE + événement
-[/ANALYSE]
-
-COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
-
-      return {sysPrompt, userPrompt};
-    }
-
-    async function runAnalysis(){
-      const apiKey=getApiKey();
-      if(!apiKey){document.getElementById('settingsBtn').click();return}
-
-      const btn=document.getElementById('aiBtn');
-      const content=document.getElementById('aiContent');
-      const meta=document.getElementById('aiMeta');
-
-      btn.disabled=true;btn.textContent='⏳';
-      content.className='ai-content';
-      content.innerHTML='<div class="ai-loading"><div class="ai-spinner"></div>Recherche des cours et de l\'actualité en cours… (15-30s)</div>';
-      meta.textContent='';
-
-      const {sysPrompt,userPrompt}=buildPrompts();
-      const startTime=Date.now();
-
-      try{
-        const response=await fetch('https://api.openai.com/v1/responses',{
-          method:'POST',
-          headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-          body:JSON.stringify({
-            model:'gpt-4o',
-            tools:[{type:'web_search_preview',search_context_size:'medium'}],
-            instructions:sysPrompt,
-            input:userPrompt
-          })
-        });
-
-        if(!response.ok){
-          const errData=await response.json().catch(()=>({}));
-          const errMsg=errData.error?.message||'Erreur API ('+response.status+')';
-          if(response.status===404||response.status===400){
-            await fallbackChatCompletion(apiKey,sysPrompt,userPrompt,startTime);
-            return;
-          }
-          throw new Error(errMsg);
-        }
-
-        const data=await response.json();
-        const elapsed=((Date.now()-startTime)/1000).toFixed(1);
-
-        let text='';
-        if(data.output){
-          for(const item of data.output){
-            if(item.type==='message'&&item.content){
-              for(const c of item.content){
-                if(c.type==='output_text')text+=c.text;
-              }
-            }
-          }
-        }
-
-        text=text.replace(/\*\*/g,'').replace(/\*/g,'').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/\(?\[?https?:\/\/[^\s\])]+\]?\)?/g,'').replace(/\s*\([\w.-]+\.\w{2,4}\)/g,'').replace(/\(\s*\)/g,'').trim();
-        parseAndDisplay(text);
-
-        const inTok=data.usage?.input_tokens||0;
-        const outTok=data.usage?.output_tokens||0;
-        const cost=((inTok*2.5/1e6)+(outTok*10/1e6)).toFixed(4);
-        meta.textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+' · '+elapsed+'s · ~'+(inTok+outTok)+' tokens · ~$'+cost;
-
-      }catch(err){
-        if(err.name==='TypeError'){
-          await fallbackChatCompletion(apiKey,sysPrompt,userPrompt,startTime);
-          return;
-        }
-        content.textContent='❌ '+err.message;
-      }
-
-      btn.disabled=false;btn.textContent='Analyser';
-    }
-
-    /* ── Parse structured AI response ── */
-    function parseAndDisplay(raw){
-      const content=document.getElementById('aiContent');
-      const threatBar=document.getElementById('threatBar');
-      const threatIcon=document.getElementById('threatIcon');
-      const threatGrade=document.getElementById('threatGrade');
-      const threatSummary=document.getElementById('threatSummary');
-      const actionsSection=document.getElementById('actionsSection');
-      const actionsList=document.getElementById('actionsList');
-
-      // Parse level
-      const levelMatch=raw.match(/\[NIVEAU[:\s]*(\d)\]/i);
-      const level=levelMatch?parseInt(levelMatch[1]):0;
-      const levelConfig={
-        0:{icon:'⚪',grade:'—',label:''},
-        1:{icon:'🟢',grade:'CALME',label:'Pas de tension majeure'},
-        2:{icon:'🟡',grade:'VIGILANCE',label:'Quelques signaux de tension'},
-        3:{icon:'🟠',grade:'ALERTE',label:'Convergence de signaux de stress'},
-        4:{icon:'🔴',grade:'CRISE',label:'Multiples indicateurs en zone rouge'}
+    // Build site structure
+    if (!sites[currentTab]) {
+      const meta = SITE_META[currentTab] || { name: currentName || currentTab, lang: 'en' };
+      sites[currentTab] = {
+        code: currentTab,
+        name: meta.name || currentName,
+        lang: meta.lang,
+        queries: {}
       };
-      const lc=levelConfig[level]||levelConfig[0];
-      threatBar.className='threat-bar level-'+level;
-      threatIcon.textContent=lc.icon;
-      threatGrade.textContent=lc.grade;
-
-      // Parse level summary (stop before [STATUS], [ACTIONS] or [ANALYSE])
-      const summaryMatch=raw.match(/\[RESUME_NIVEAU\]\s*([\s\S]*?)(?=\[STATUS\]|\[ACTIONS\]|\[ANALYSE\]|$)/i);
-      threatSummary.textContent=summaryMatch?summaryMatch[1].trim():lc.label;
-
-      // Parse actions
-      const actionsMatch=raw.match(/\[ACTIONS\]\s*([\s\S]*?)\[\/ACTIONS\]/i);
-      if(actionsMatch){
-        const actionLines=actionsMatch[1].trim().split('\n').map(l=>l.replace(/^[•\-\*]\s*/,'').trim()).filter(l=>l.length>0);
-        if(actionLines.length>0){
-          actionsList.innerHTML=actionLines.map(a=>'<div class="action-item">'+a+'</div>').join('');
-          actionsSection.classList.add('visible');
-        }else{
-          actionsSection.classList.remove('visible');
-        }
-      }else{
-        actionsSection.classList.remove('visible');
-      }
-
-      // Parse per-section status
-      const statusMatch=raw.match(/\[STATUS\]\s*([\s\S]*?)\[\/STATUS\]/i);
-      const statusMap={stress:0,energy:0,food:0,markets:0,currencies:0};
-      if(statusMatch){
-        statusMatch[1].split('\n').forEach(line=>{
-          const m=line.trim().match(/^(\w+)\s*:\s*(\d)/);
-          if(m&&statusMap.hasOwnProperty(m[1]))statusMap[m[1]]=parseInt(m[2]);
-        });
-      }
-      Object.entries(statusMap).forEach(([key,val])=>{
-        const dot=document.getElementById('dot-'+key);
-        if(dot){dot.className='section-status s'+val}
-        const sec=document.getElementById('sec-'+key);
-        if(sec){sec.classList.remove('status-3','status-4');if(val>=3)sec.classList.add('status-'+val)}
-      });
-
-      // Parse analysis into category cards
-      // Extract [ANALYSE] block if present, otherwise strip all markers and use full text
-      const analyseMatch=raw.match(/\[ANALYSE\]\s*([\s\S]*?)(?:\[\/ANALYSE\]|$)/i);
-      let analyseText=analyseMatch?analyseMatch[1]:raw;
-      // Strip any remaining markers
-      analyseText=analyseText.replace(/\[NIVEAU[:\s]*\d?\]/gi,'').replace(/\[RESUME_NIVEAU\]/gi,'').replace(/\[\/?(ACTIONS|ANALYSE)\]/gi,'').trim();
-      // Also strip text before first emoji header (leftover summaries, level text)
-      const firstEmojiIdx=analyseText.search(/(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s+\S/u);
-      if(firstEmojiIdx>0)analyseText=analyseText.substring(firstEmojiIdx);
-
-      // Split into categories by emoji headers
-      const blocks=[];
-      const lines=analyseText.split('\n');
-      let current=null;
-      const emojiHeaderRe=/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s+(.+)/u;
-      const plainHeaderRe=/^([A-ZÀ-Ü][a-zà-ÿA-ZÀ-Ü\s&]+?)\s*(?:\[(\d)\])?\s*:\s*$/;
-
-      for(const line of lines){
-        const trimmed=line.trim();
-        const m=trimmed.match(emojiHeaderRe);
-        const mp=!m?trimmed.match(plainHeaderRe):null;
-        if((m||mp) && !trimmed.startsWith('•') && !trimmed.startsWith('-')){
-          if(current)blocks.push(current);
-          if(m){
-            current={emoji:m[1],title:m[2].replace(/:$/,'').trim(),bullets:[]};
-          }else{
-            current={emoji:'📌',title:mp[1].trim()+(mp[2]?' ['+mp[2]+']':''),bullets:[]};
-          }
-        }else if(current){
-          const bullet=line.trim().replace(/^[-•*]\s*/,'').trim();
-          if(bullet.length>3)current.bullets.push(bullet);
-        }
-      }
-      if(current)blocks.push(current);
-
-      if(blocks.length>1){
-        content.className='ai-content grid-mode';
-        const levelLabels={1:'CALME',2:'VIGILANCE',3:'ALERTE',4:'CRISE'};
-        content.innerHTML=blocks.map(b=>{
-          // Parse [N] level from title
-          const lvlMatch=b.title.match(/\[(\d)\]\s*$/);
-          const lvl=lvlMatch?parseInt(lvlMatch[1]):0;
-          const cleanTitle=b.title.replace(/\s*\[\d\]\s*$/,'');
-          const isWatch=cleanTitle.toLowerCase().includes('surveiller');
-          let cls='ai-card';
-          if(isWatch)cls+=' ai-card--watch';
-          else if(lvl>0)cls+=' card-l'+lvl;
-          const dot=lvl>0?'<span class="ai-card-dot d'+lvl+'"></span>':'';
-          const badge=lvl>0?'<span class="ai-card-level l'+lvl+'">'+levelLabels[lvl]+'</span>':'';
-          const bulletsHtml=b.bullets.length?'<ul>'+b.bullets.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'';
-          return '<div class="'+cls+'"><div class="ai-card-title">'+dot+b.emoji+' '+cleanTitle+badge+'</div>'+bulletsHtml+'</div>';
-        }).join('');
-      }else{
-        content.className='ai-content';
-        content.textContent=analyseText||raw;
-      }
-
-      // Save to history with snapshot data
-      const snapshotMatch=raw.match(/\[SNAPSHOT\]\s*([\s\S]*?)\[\/SNAPSHOT\]/i);
-      const snapshot={};
-      if(snapshotMatch){
-        snapshotMatch[1].split('\n').forEach(line=>{
-          const m=line.trim().match(/^(\w+)\s*:\s*([\d.]+)/);
-          if(m)snapshot[m[1]]=parseFloat(m[2]);
-        });
-      }
-      saveToHistory(level,threatSummary.textContent,snapshot);
     }
 
-    // ── History: Google Sheets + localStorage fallback ──
-    let historyData=[];
-    let historyDisplayCount=10;
-
-    async function saveToHistory(level,summary,snapshot){
-      snapshot=snapshot||{};
-      const entry={date:new Date().toISOString(),level:level,summary:summary,snapshot:snapshot};
-      // Save to localStorage as immediate fallback
-      try{
-        const hist=JSON.parse(localStorage.getItem('macro-dash-history')||'[]');
-        hist.unshift(entry);
-        if(hist.length>50)hist.length=50;
-        localStorage.setItem('macro-dash-history',JSON.stringify(hist));
-      }catch(e){}
-      // Save to Google Sheets (attendre que l'écriture soit faite avant de relire)
-      await gasPost({
-        action:'addHistory',
-        date:entry.date,
-        level:entry.level,
-        summary:entry.summary,
-        vix:snapshot.vix||0,
-        or:snapshot.or||0,
-        brent:snapshot.brent||0,
-        sp95:snapshot.sp95||0,
-        gazole:snapshot.gazole||0,
-        eurusd:snapshot.eurusd||0,
-        cac40:snapshot.cac40||0,
-        sp500:snapshot.sp500||0,
-        btc:snapshot.btc||0,
-        ble:snapshot.ble||0,
-        mais:snapshot.mais||0
-      });
-      // Refresh display
-      await loadHistory();
+    if (!sites[currentTab].queries[query]) {
+      const isBranded = (BRAND_TERMS[currentTab] || []).some(t => query.toLowerCase().includes(t));
+      sites[currentTab].queries[query] = {
+        query,
+        type: isBranded ? 'branded' : 'authority',
+        repertory: currentRepertory || null,
+        months: {}
+      };
     }
 
-    async function loadHistory(){
-      // Try Google Sheets first
-      const data=await gasGet('getHistory');
-      if(data&&Array.isArray(data.history)&&data.history.length>0){
-        historyData=data.history;
-        try{localStorage.setItem('macro-dash-history',JSON.stringify(historyData.slice(0,50)))}catch(e){}
-      }else{
-        try{historyData=JSON.parse(localStorage.getItem('macro-dash-history')||'[]')}catch(e){historyData=[]}
-      }
-      historyDisplayCount=10;
-      renderHistory();
+    sites[currentTab].queries[query].months[month] = { impressions, clicks, ctr, position };
+  }
+
+  // Convert to array format
+  const months = [...allMonths].sort();
+  const siteList = Object.values(sites).map(s => ({
+    ...s,
+    queries: Object.values(s.queries)
+  })).sort((a, b) => a.code.localeCompare(b.code));
+
+  return { months, sites: siteList };
+}
+
+function normalizeMonth(raw) {
+  // Handle various date formats from Google Sheets
+  // "12/1/2025" or "1/1/2026" (M/D/YYYY)
+  let m = raw.match(/^(\d{1,2})\/\d{1,2}\/(\d{4})$/);
+  if (m) return m[2] + '-' + m[1].padStart(2, '0');
+
+  // "2025-12-01" or "2025-12"
+  m = raw.match(/^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/);
+  if (m) return m[1] + '-' + m[2].padStart(2, '0');
+
+  // "Dec 2025" or "December 2025"
+  const monthNames = { jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12' };
+  m = raw.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  if (m) {
+    const mo = monthNames[m[1].toLowerCase().slice(0, 3)];
+    if (mo) return m[2] + '-' + mo;
+  }
+
+  // "2025-7" (no leading zero)
+  m = raw.match(/^(\d{4})-(\d{1,2})$/);
+  if (m) return m[1] + '-' + m[2].padStart(2, '0');
+
+  return null;
+}
+
+// ======================================================
+// STATE
+// ======================================================
+let DATA = null;
+let state = { lang: 'all', month: null, tab: 'overview', selectedSite: null, sortCol: null, sortDir: 'asc' };
+
+// ======================================================
+// HELPERS
+// ======================================================
+const fmt = {
+  num: n => {
+    if (n == null) return '—';
+    if (Math.abs(n) >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (Math.abs(n) >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return n.toLocaleString('en-US');
+  },
+  numFull: n => n == null ? '—' : n.toLocaleString('en-US'),
+  pct: n => n == null ? '—' : n.toFixed(1) + '%',
+  pos: n => n == null ? '—' : n.toFixed(1),
+  change: (curr, prev) => {
+    if (prev == null || prev === 0) return { text: '—', cls: 'flat' };
+    const pct = ((curr - prev) / prev * 100);
+    if (Math.abs(pct) < 0.5) return { text: '0%', cls: 'flat' };
+    return { text: (pct > 0 ? '+' : '') + pct.toFixed(0) + '%', cls: pct > 0 ? 'up' : 'down' };
+  },
+  monthLabel: m => {
+    const [y, mo] = m.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[parseInt(mo)-1] + ' ' + y.slice(2);
+  },
+  shortMonth: m => {
+    const [y, mo] = m.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[parseInt(mo)-1] + ' ' + y.slice(2);
+  }
+};
+
+function getFilteredSites() {
+  return DATA.sites.filter(s => state.lang === 'all' || s.lang === state.lang);
+}
+
+function getSiteMonthData(site, month) {
+  let totalImp = 0, totalClicks = 0, posSum = 0, posCount = 0, ctrSum = 0, ctrCount = 0;
+  for (const q of site.queries) {
+    const m = q.months[month];
+    if (m) {
+      totalImp += m.impressions;
+      totalClicks += m.clicks;
+      if (m.position > 0) { posSum += m.position; posCount++; }
+      if (m.ctr > 0) { ctrSum += m.ctr; ctrCount++; }
     }
+  }
+  // CTR = average of per-query CTRs (not total clicks/impressions)
+  const avgCtr = ctrCount > 0 ? ctrSum / ctrCount : 0;
+  return {
+    impressions: totalImp, clicks: totalClicks,
+    ctr: Math.min(avgCtr, 100),
+    position: posCount > 0 ? posSum / posCount : 0
+  };
+}
 
-    function renderHistory(){
-      const el=document.getElementById('historyList');
-      const countEl=document.getElementById('historyCount');
-      const moreEl=document.getElementById('historyLoadMore');
-      if(!el)return;
+// Find the latest month that has actual data for a site
+function getLatestMonthWithData(site, upToMonth) {
+  const idx = DATA.months.indexOf(upToMonth);
+  for (let i = idx; i >= 0; i--) {
+    const d = getSiteMonthData(site, DATA.months[i]);
+    if (d.impressions > 0) return DATA.months[i];
+  }
+  return null;
+}
 
-      if(historyData.length===0){
-        el.innerHTML='<div class="history-loading">Aucune analyse enregistrée.</div>';
-        if(countEl)countEl.textContent='';
-        if(moreEl)moreEl.style.display='none';
-        return;
-      }
+// Get site data for selected month, falling back to latest available
+function getSiteEffectiveData(site, month) {
+  const d = getSiteMonthData(site, month);
+  if (d.impressions > 0) return { ...d, effectiveMonth: month };
+  const fallback = getLatestMonthWithData(site, month);
+  if (fallback) {
+    const fd = getSiteMonthData(site, fallback);
+    return { ...fd, effectiveMonth: fallback, isFallback: true };
+  }
+  return { ...d, effectiveMonth: month };
+}
 
-      if(countEl)countEl.textContent=historyData.length+' entrée'+(historyData.length>1?'s':'');
-      const icons={0:'⚪',1:'🟢',2:'🟡',3:'🟠',4:'🔴'};
-      const slice=historyData.slice(0,historyDisplayCount);
+function getNetworkMonthData(month) {
+  const sites = getFilteredSites();
+  let totalImp = 0, totalClicks = 0, posSum = 0, posCount = 0, activeSites = 0;
+  for (const s of sites) {
+    const d = getSiteMonthData(s, month);
+    if (d.impressions === 0 && d.clicks === 0) continue; // skip sites with no data this month
+    activeSites++;
+    totalImp += d.impressions;
+    totalClicks += d.clicks;
+    if (d.position > 0) { posSum += d.position; posCount++; }
+  }
+  return {
+    impressions: totalImp, clicks: totalClicks,
+    ctr: totalImp > 0 ? (totalClicks / totalImp * 100) : 0,
+    position: posCount > 0 ? posSum / posCount : 0,
+    sites: activeSites, queries: sites.reduce((a, s) => a + s.queries.length, 0)
+  };
+}
 
-      el.innerHTML=slice.map(h=>{
-        const d=new Date(h.date);
-        const ds=d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-        // Build snapshot mini-table if data exists
-        const snap=h.snapshot||{};
-        const hasSnap=snap.brent||snap.or||snap.sp95;
-        let snapHtml='';
-        if(hasSnap){
-          const vals=[];
-          if(snap.brent)vals.push('Brent $'+snap.brent);
-          if(snap.or)vals.push('Or $'+snap.or);
-          if(snap.sp95)vals.push('SP95 '+snap.sp95+'€');
-          if(snap.gazole)vals.push('Gazole '+snap.gazole+'€');
-          if(snap.eurusd)vals.push('EUR/USD '+snap.eurusd);
-          if(snap.cac40)vals.push('CAC '+snap.cac40);
-          if(snap.sp500)vals.push('S&P '+snap.sp500);
-          if(snap.btc)vals.push('BTC $'+snap.btc);
-          if(snap.vix)vals.push('VIX '+snap.vix);
-          snapHtml='<div class="history-entry-snap">'+vals.join(' · ')+'</div>';
-        }
-        return '<div class="history-entry">'+
-          '<span class="history-entry-icon">'+(icons[h.level]||'⚪')+'</span>'+
-          '<div class="history-entry-content">'+
-            '<div class="history-entry-top"><span class="history-entry-date">'+ds+'</span><span class="history-entry-summary">'+h.summary+'</span></div>'+
-            snapHtml+
-          '</div>'+
-        '</div>';
-      }).join('');
+function getPrevMonth(month) {
+  const idx = DATA.months.indexOf(month);
+  return idx > 0 ? DATA.months[idx - 1] : null;
+}
 
-      if(moreEl){
-        moreEl.style.display=historyData.length>historyDisplayCount?'block':'none';
-      }
+// ======================================================
+// SVG LINE CHART
+// ======================================================
+const COLORS = ['var(--series-1)','var(--series-2)','var(--series-3)','var(--series-4)',
+  'var(--series-5)','var(--series-6)','var(--series-7)','var(--series-8)'];
+
+function createLineChart(container, series, months, opts = {}) {
+  const W = opts.width || 560, H = opts.height || 240;
+  const pad = { top: 20, right: 24, bottom: 40, left: 60 };
+  const cw = W - pad.left - pad.right;
+  const ch = H - pad.top - pad.bottom;
+
+  let allVals = [];
+  for (const s of series) for (const m of months) if (s.data[m] != null) allVals.push(s.data[m]);
+  if (!allVals.length) { container.innerHTML = '<p style="color:var(--text-muted);font-size:13px;padding:20px;">No data</p>'; return; }
+
+  let yMin = Math.min(...allVals), yMax = Math.max(...allVals);
+  if (opts.invertY) [yMin, yMax] = [yMax, yMin];
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+  const yRange = yMax - yMin, yPad = yRange * 0.1;
+  yMin -= yPad; yMax += yPad;
+
+  const xScale = i => pad.left + (i / (months.length - 1)) * cw;
+  const yScale = v => opts.invertY
+    ? pad.top + ((v - yMin) / (yMax - yMin)) * ch
+    : pad.top + ch - ((v - yMin) / (yMax - yMin)) * ch;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="font-family:Inter,system-ui,sans-serif;">`;
+
+  // Grid
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (i / 4) * ch;
+    const val = opts.invertY ? yMin + (i / 4) * (yMax - yMin) : yMax - (i / 4) * (yMax - yMin);
+    svg += `<line x1="${pad.left}" y1="${y}" x2="${W - pad.right}" y2="${y}" stroke="var(--chart-grid)" stroke-width="1"/>`;
+    svg += `<text x="${pad.left - 8}" y="${y + 4}" text-anchor="end" fill="var(--chart-text-muted)" font-size="10">${opts.fmtY ? opts.fmtY(val) : fmt.num(Math.round(val))}</text>`;
+  }
+
+  // X labels
+  const skipX = months.length > 8 ? 3 : months.length > 5 ? 2 : 1;
+  for (let i = 0; i < months.length; i++) {
+    if (skipX > 1 && i % skipX !== 0 && i !== months.length - 1) continue;
+    svg += `<text x="${xScale(i)}" y="${H - 4}" text-anchor="middle" fill="var(--chart-text-muted)" font-size="10">${fmt.shortMonth(months[i])}</text>`;
+  }
+
+  // Lines + points
+  for (let si = 0; si < series.length; si++) {
+    const s = series[si], color = COLORS[si % COLORS.length];
+    let points = [];
+    for (let i = 0; i < months.length; i++) {
+      if (s.data[months[i]] != null) points.push({ x: xScale(i), y: yScale(s.data[months[i]]), val: s.data[months[i]], month: months[i] });
     }
+    if (points.length < 2) continue;
+    svg += `<path d="${points.map((p, i) => (i ? 'L' : 'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ')}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+    for (const p of points) svg += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="var(--chart-surface)" stroke="${color}" stroke-width="2"/>`;
+    // Direct label (<=4 series)
+    if (series.length <= 4 && points.length) {
+      const last = points[points.length - 1];
+      const lbl = s.label.length > 18 ? s.label.slice(0, 16) + '...' : s.label;
+      svg += `<text x="${last.x + 6}" y="${last.y + 4}" fill="var(--chart-text)" font-size="10" font-weight="500">${lbl}</text>`;
+    }
+  }
 
-    // History toggle
-    document.getElementById('historyToggle').addEventListener('click',()=>{
-      document.getElementById('historyBody').classList.toggle('open');
-      document.getElementById('historyChevron').classList.toggle('open');
+  // Hover targets
+  for (let i = 0; i < months.length; i++) {
+    const x = xScale(i), hw = cw / months.length / 2;
+    svg += `<rect x="${(x - hw).toFixed(1)}" y="${pad.top}" width="${(hw * 2).toFixed(1)}" height="${ch}" fill="transparent" data-mi="${i}" class="hover-target"/>`;
+  }
+  svg += '</svg>';
+  container.innerHTML = svg;
+
+  // Hover
+  const tooltip = document.getElementById('tooltip');
+  container.querySelectorAll('.hover-target').forEach(t => {
+    t.addEventListener('mouseenter', e => {
+      const mi = parseInt(t.dataset.mi), month = months[mi];
+      let html = `<div class="tooltip-title">${fmt.monthLabel(month)}</div>`;
+      for (let si = 0; si < series.length; si++) {
+        const val = series[si].data[month];
+        if (val != null) html += `<div class="tooltip-row"><span class="tooltip-label">${series[si].label}</span><span class="tooltip-value">${opts.fmtY ? opts.fmtY(val) : fmt.numFull(val)}</span></div>`;
+      }
+      tooltip.innerHTML = html;
+      tooltip.classList.add('show');
     });
+    t.addEventListener('mousemove', e => { tooltip.style.left = (e.clientX + 12) + 'px'; tooltip.style.top = (e.clientY - 10) + 'px'; });
+    t.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+  });
+}
 
-    // Load more button
-    document.getElementById('historyMoreBtn').addEventListener('click',()=>{
-      historyDisplayCount=Math.min(historyDisplayCount+20,50);
-      renderHistory();
+function createSparkline(values, w = 60, h = 20) {
+  if (!values || values.length < 2) return '';
+  const min = Math.min(...values), max = Math.max(...values), range = max - min || 1;
+  const pts = values.map((v, i) => `${(i / (values.length - 1) * w).toFixed(1)},${(h - ((v - min) / range) * (h - 4) - 2).toFixed(1)}`);
+  const color = values[values.length - 1] >= values[values.length - 2] ? 'var(--positive)' : 'var(--negative)';
+  return `<svg class="sparkline" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="vertical-align:middle"><polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+// ======================================================
+// RENDER FUNCTIONS
+// ======================================================
+function renderOverview() {
+  const month = state.month, prevMonth = getPrevMonth(month);
+  const curr = getNetworkMonthData(month);
+  const prev = prevMonth ? getNetworkMonthData(prevMonth) : null;
+
+  const impChange = prev ? fmt.change(curr.impressions, prev.impressions) : { text: '—', cls: 'flat' };
+  const clickChange = prev ? fmt.change(curr.clicks, prev.clicks) : { text: '—', cls: 'flat' };
+  const ctrChange = prev ? fmt.change(curr.ctr, prev.ctr) : { text: '—', cls: 'flat' };
+  // Position: lower = better. So decrease = green (up), increase = red (down)
+  const posChange = prev ? {
+    text: (curr.position - prev.position).toFixed(1),
+    cls: curr.position < prev.position ? 'up' : curr.position > prev.position ? 'down' : 'flat'
+  } : { text: '—', cls: 'flat' };
+
+  document.getElementById('kpiGrid').innerHTML = `
+    <div class="kpi-tile"><div class="kpi-label">Total Impressions</div><div class="kpi-value">${fmt.num(curr.impressions)}</div><span class="kpi-change ${impChange.cls}">${impChange.text} MoM</span></div>
+    <div class="kpi-tile"><div class="kpi-label">Total Clicks</div><div class="kpi-value">${fmt.num(curr.clicks)}</div><span class="kpi-change ${clickChange.cls}">${clickChange.text} MoM</span></div>
+    <div class="kpi-tile"><div class="kpi-label">Avg Position</div><div class="kpi-value">${fmt.pos(curr.position)}</div><span class="kpi-change ${posChange.cls}">${posChange.cls === 'up' ? '&#9650;' : posChange.cls === 'down' ? '&#9660;' : ''} ${posChange.text} MoM</span></div>
+  `;
+
+  renderAlerts();
+
+  const sites = getFilteredSites();
+  const sitesByImp = sites.map(s => ({ ...s, imp: getSiteMonthData(s, state.month).impressions })).sort((a, b) => b.imp - a.imp);
+  const topSites = sitesByImp.slice(0, 5);
+
+  document.getElementById('impressionsTrendSubtitle').textContent = fmt.monthLabel(DATA.months[0]) + ' – ' + fmt.monthLabel(DATA.months[DATA.months.length - 1]);
+  document.getElementById('positionTrendSubtitle').textContent = 'Lower is better';
+
+  createLineChart(document.getElementById('chartImpressions'),
+    topSites.map(s => ({ label: s.code, data: Object.fromEntries(DATA.months.map(m => [m, getSiteMonthData(s, m).impressions || null])) })), DATA.months);
+
+  createLineChart(document.getElementById('chartPosition'),
+    topSites.map(s => ({ label: s.code, data: Object.fromEntries(DATA.months.map(m => { const d = getSiteMonthData(s, m); return [m, d.position > 0 ? d.position : null]; })) })),
+    DATA.months, { invertY: true, fmtY: v => v.toFixed(1) });
+
+  renderSiteGrid();
+}
+
+function renderAlerts() {
+  const month = state.month, prevMonth = getPrevMonth(month);
+  if (!prevMonth) { document.getElementById('alerts').innerHTML = ''; return; }
+  const sites = getFilteredSites();
+  let alerts = [];
+
+  for (const s of sites) {
+    const curr = getSiteMonthData(s, month), prev = getSiteMonthData(s, prevMonth);
+    // Skip sites with no data in current month (not yet uploaded)
+    if (curr.impressions === 0 && curr.clicks === 0) continue;
+
+    // Position alerts (primary notoriety indicator)
+    const posWorsened = [], posImproved = [];
+    for (const q of s.queries) {
+      const cm = q.months[month], pm = q.months[prevMonth];
+      if (!cm || !pm || cm.position <= 0 || pm.position <= 0) continue;
+      const diff = cm.position - pm.position;
+      if (diff > 2) posWorsened.push({ query: q.query, from: pm.position, to: cm.position, diff });
+      if (diff < -2) posImproved.push({ query: q.query, from: pm.position, to: cm.position, diff });
+    }
+    if (posWorsened.length > 0) {
+      const details = posWorsened.slice(0, 3).map(q => `"${q.query}" ${fmt.pos(q.from)}→${fmt.pos(q.to)}`).join(', ');
+      const more = posWorsened.length > 3 ? ` +${posWorsened.length - 3} more` : '';
+      alerts.push({ type: 'bad', text: `<strong>${s.name}</strong> position worsened on: ${details}${more}` });
+    }
+    if (posImproved.length > 0) {
+      const details = posImproved.slice(0, 3).map(q => `"${q.query}" ${fmt.pos(q.from)}→${fmt.pos(q.to)}`).join(', ');
+      const more = posImproved.length > 3 ? ` +${posImproved.length - 3} more` : '';
+      alerts.push({ type: 'good', text: `<strong>${s.name}</strong> position improved on: ${details}${more}` });
+    }
+
+    // CTR alerts with query detail
+    const ctrDropped = [];
+    for (const q of s.queries) {
+      const cm = q.months[month], pm = q.months[prevMonth];
+      if (!cm || !pm || pm.ctr <= 0 || cm.ctr <= 0) continue;
+      if (cm.ctr < pm.ctr * 0.7) ctrDropped.push({ query: q.query, from: pm.ctr, to: cm.ctr });
+    }
+    if (ctrDropped.length > 0) {
+      const details = ctrDropped.slice(0, 3).map(q => `"${q.query}" ${fmt.pct(q.from)}→${fmt.pct(q.to)}`).join(', ');
+      const more = ctrDropped.length > 3 ? ` +${ctrDropped.length - 3} more` : '';
+      alerts.push({ type: 'warn', text: `<strong>${s.name}</strong> CTR dropped on: ${details}${more}` });
+    }
+
+    // Impression alerts with query detail (volume can change based on news, less critical)
+    if (prev.impressions > 1000) {
+      const dropPct = (curr.impressions - prev.impressions) / prev.impressions * 100;
+      if (dropPct < -30) {
+        const dropped = [];
+        for (const q of s.queries) {
+          const cm = q.months[month], pm = q.months[prevMonth];
+          if (!cm || !pm || pm.impressions <= 0) continue;
+          const qDrop = (cm.impressions - pm.impressions) / pm.impressions * 100;
+          if (qDrop < -30) dropped.push({ query: q.query, from: pm.impressions, to: cm.impressions, pct: qDrop });
+        }
+        dropped.sort((a, b) => a.pct - b.pct);
+        const details = dropped.slice(0, 3).map(q => `"${q.query}" ${fmt.num(q.from)}→${fmt.num(q.to)}`).join(', ');
+        const more = dropped.length > 3 ? ` +${dropped.length - 3} more` : '';
+        alerts.push({ type: 'warn', text: `<strong>${s.name}</strong> impressions dropped ${Math.abs(dropPct).toFixed(0)}% MoM. Driven by: ${details || 'spread across queries'}${more}` });
+      }
+      if (dropPct > 50) {
+        const grew = [];
+        for (const q of s.queries) {
+          const cm = q.months[month], pm = q.months[prevMonth];
+          if (!cm || !pm || pm.impressions <= 0) continue;
+          const qGrow = (cm.impressions - pm.impressions) / pm.impressions * 100;
+          if (qGrow > 50) grew.push({ query: q.query, from: pm.impressions, to: cm.impressions, pct: qGrow });
+        }
+        grew.sort((a, b) => b.pct - a.pct);
+        const details = grew.slice(0, 3).map(q => `"${q.query}" ${fmt.num(q.from)}→${fmt.num(q.to)}`).join(', ');
+        const more = grew.length > 3 ? ` +${grew.length - 3} more` : '';
+        alerts.push({ type: 'good', text: `<strong>${s.name}</strong> impressions grew ${dropPct.toFixed(0)}% MoM. Driven by: ${details || 'spread across queries'}${more}` });
+      }
+    }
+  }
+
+  // Sort: position alerts first (most important for notoriety), then CTR, then impressions
+  alerts.sort((a, b) => ({ bad: 0, warn: 1, good: 2 }[a.type] - { bad: 0, warn: 1, good: 2 }[b.type]));
+  const icons = { bad: '&#9888;', warn: '&#9888;', good: '&#10003;' };
+  document.getElementById('alerts').innerHTML = alerts.length === 0 ? '' :
+    alerts.slice(0, 8).map(a => `<div class="alert alert-${a.type}"><span class="alert-icon">${icons[a.type]}</span><span>${a.text}</span></div>`).join('');
+}
+
+function renderSiteGrid() {
+  const month = state.month, prevMonth = getPrevMonth(month);
+  const sites = getFilteredSites();
+  document.getElementById('siteGrid').innerHTML = sites.map(s => {
+    const eff = getSiteEffectiveData(s, month);
+    const prevData = eff.isFallback ? null : (prevMonth ? getSiteMonthData(s, prevMonth) : null);
+    const posChange = prevData && prevData.position > 0 && eff.position > 0 ? (() => {
+      const diff = eff.position - prevData.position;
+      if (Math.abs(diff) < 0.1) return { text: '', cls: 'flat' };
+      // Lower position = better, so negative diff = improvement = green
+      return { text: (diff > 0 ? '+' : '') + diff.toFixed(1), cls: diff < 0 ? 'up' : 'down' };
+    })() : { text: '', cls: 'flat' };
+    const fallbackNote = eff.isFallback ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Latest data: ${fmt.monthLabel(eff.effectiveMonth)}</div>` : '';
+    return `<div class="site-card" data-site="${s.code}">
+      <div class="site-card-header"><span class="site-card-name">${s.name}</span><span class="site-card-lang">${s.lang}</span></div>
+      <div class="site-card-stats">
+        <div><div class="site-stat-label">Impressions</div><div class="site-stat-value">${fmt.num(eff.impressions)}</div></div>
+        <div><div class="site-stat-label">Avg Position</div><div class="site-stat-value">${fmt.pos(eff.position)} ${posChange.text ? `<span class="kpi-change ${posChange.cls}" style="font-size:11px">${posChange.text} MoM</span>` : ''}</div></div>
+        <div><div class="site-stat-label">CTR</div><div class="site-stat-value">${fmt.pct(eff.ctr)}</div></div>
+        <div><div class="site-stat-label">Queries</div><div class="site-stat-value">${s.queries.length}</div></div>
+      </div>${fallbackNote}
+      <div class="site-ai-summary loading" id="ai-${s.code}">AI analysis loading...</div>
+      </div>`;
+  }).join('');
+  document.querySelectorAll('.site-card').forEach(c => c.addEventListener('click', () => { state.selectedSite = c.dataset.site; switchTab('detail'); }));
+  // Trigger AI summaries for all visible sites
+  if (AI_PROXY_URL) {
+    generateSiteAISummaries(sites);
+  } else {
+    sites.forEach(s => {
+      const el = document.getElementById('ai-' + s.code);
+      if (el) { el.textContent = 'Set AI_PROXY_URL in config.js for AI analysis'; el.classList.remove('loading'); }
     });
+  }
+}
 
-    // Initial load from Google Sheets
-    loadHistory();
+function renderDetail() {
+  const site = DATA.sites.find(s => s.code === state.selectedSite);
+  if (!site) return;
+  const month = state.month, prevMonth = getPrevMonth(month);
+  const curr = getSiteMonthData(site, month), prev = prevMonth ? getSiteMonthData(site, prevMonth) : null;
 
-    /* ── Fallback : Chat Completions (sans web search) ── */
-    async function fallbackChatCompletion(apiKey,sysPrompt,userPrompt,startTime){
-      const content=document.getElementById('aiContent');
-      const meta=document.getElementById('aiMeta');
-      const btn=document.getElementById('aiBtn');
+  document.getElementById('detailSiteName').textContent = site.name;
+  document.getElementById('detailSiteMeta').textContent = `${site.code} · ${site.lang.toUpperCase()} · ${site.queries.length} tracked queries`;
+  const siteObjectives = getObjectivesForSite(site.code, state.month);
+  document.getElementById('detailObjectives').innerHTML = siteObjectives
+    ? `<div class="objectives"><strong>Objectives:</strong> ${siteObjectives.replace(/\n/g, '<br>')}</div>` : '';
 
-      content.innerHTML='<div class="ai-loading"><div class="ai-spinner"></div>Analyse en cours (mode sans web — données potentiellement non à jour)…</div>';
+  const impChange = prev ? fmt.change(curr.impressions, prev.impressions) : { text: '—', cls: 'flat' };
+  const clickChange = prev ? fmt.change(curr.clicks, prev.clicks) : { text: '—', cls: 'flat' };
+  document.getElementById('detailKpis').innerHTML = `
+    <div class="kpi-tile"><div class="kpi-label">Impressions</div><div class="kpi-value">${fmt.num(curr.impressions)}</div><span class="kpi-change ${impChange.cls}">${impChange.text}</span></div>
+    <div class="kpi-tile"><div class="kpi-label">Clicks</div><div class="kpi-value">${fmt.num(curr.clicks)}</div><span class="kpi-change ${clickChange.cls}">${clickChange.text}</span></div>
+    <div class="kpi-tile"><div class="kpi-label">CTR</div><div class="kpi-value">${fmt.pct(curr.ctr)}</div></div>
+    <div class="kpi-tile"><div class="kpi-label">Avg Position</div><div class="kpi-value">${fmt.pos(curr.position)}</div></div>
+  `;
 
-      try{
-        const r=await fetch('https://api.openai.com/v1/chat/completions',{
-          method:'POST',
-          headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-          body:JSON.stringify({
-            model:'gpt-4o',
-            messages:[
-              {role:'system',content:sysPrompt+'\n\nATTENTION : tu n\'as pas accès au web pour cette requête. Donne ton analyse avec les données les plus récentes dont tu disposes. Indique clairement la date limite de tes connaissances et précise que les cours affichés peuvent ne pas être à jour.'},
-              {role:'user',content:userPrompt}
-            ],
-            max_tokens:3000
-          })
+  createLineChart(document.getElementById('chartDetailImpressions'),
+    site.queries.map(q => ({ label: q.query, data: Object.fromEntries(DATA.months.map(m => [m, q.months[m]?.impressions ?? null])) })), DATA.months);
+  createLineChart(document.getElementById('chartDetailPosition'),
+    site.queries.map(q => ({ label: q.query, data: Object.fromEntries(DATA.months.map(m => [m, q.months[m]?.position > 0 ? q.months[m].position : null])) })),
+    DATA.months, { invertY: true, fmtY: v => v.toFixed(1) });
+
+  renderDetailTable(site);
+}
+
+function renderDetailTable(site) {
+  const month = state.month, prevMonth = getPrevMonth(month);
+  let rows = site.queries.map(q => {
+    const curr = q.months[month] || {}, prev = prevMonth ? (q.months[prevMonth] || {}) : {};
+    return {
+      query: q.query, type: q.type,
+      impressions: curr.impressions || 0, clicks: curr.clicks || 0,
+      ctr: curr.ctr || 0, position: curr.position || 0,
+      impChange: prev.impressions > 0 ? ((curr.impressions || 0) - prev.impressions) / prev.impressions * 100 : null
+    };
+  });
+  if (state.sortCol) rows.sort((a, b) => {
+    let va = a[state.sortCol], vb = b[state.sortCol];
+    if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+    if (va == null) return 1; if (vb == null) return -1;
+    return state.sortDir === 'asc' ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+  document.getElementById('detailTableBody').innerHTML = rows.map(r => `<tr>
+    <td>${r.query}</td><td><span class="badge badge-${r.type}">${r.type}</span></td>
+    <td class="text-right">${fmt.num(r.impressions)}</td><td class="text-right">${fmt.num(r.clicks)}</td>
+    <td class="text-right">${fmt.pct(r.ctr)}</td><td class="text-right">${fmt.pos(r.position)}</td>
+    <td class="text-right">${r.impChange != null ? `<span class="${r.impChange > 0 ? 'text-positive' : r.impChange < -10 ? 'text-negative' : ''}">${r.impChange > 0 ? '+' : ''}${r.impChange.toFixed(0)}%</span>` : '—'}</td>
+  </tr>`).join('');
+}
+
+function renderQueries() {
+  const month = state.month, siteFilter = document.getElementById('querySiteFilter').value;
+  const sites = siteFilter === 'all' ? getFilteredSites() : DATA.sites.filter(s => s.code === siteFilter);
+  let rows = [];
+  for (const s of sites) for (const q of s.queries) {
+    const curr = q.months[month] || {};
+    rows.push({
+      site: s.code, siteName: s.name, query: q.query, type: q.type,
+      impressions: curr.impressions || 0, clicks: curr.clicks || 0,
+      ctr: curr.ctr || 0, position: curr.position || 0,
+      sparkVals: DATA.months.map(m => q.months[m]?.impressions || 0)
+    });
+  }
+  if (state.sortCol) rows.sort((a, b) => {
+    let va = a[state.sortCol], vb = b[state.sortCol];
+    if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+    if (va == null) return 1; if (vb == null) return -1;
+    return state.sortDir === 'asc' ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+  document.getElementById('queriesTableBody').innerHTML = rows.map(r => `<tr>
+    <td><span style="cursor:pointer;color:var(--accent)" data-goto="${r.site}">${r.site}</span></td>
+    <td>${r.query}</td><td><span class="badge badge-${r.type}">${r.type}</span></td>
+    <td class="text-right">${fmt.num(r.impressions)}</td><td class="text-right">${fmt.num(r.clicks)}</td>
+    <td class="text-right">${fmt.pct(r.ctr)}</td><td class="text-right">${fmt.pos(r.position)}</td>
+    <td>${createSparkline(r.sparkVals)}</td>
+  </tr>`).join('');
+  document.querySelectorAll('[data-goto]').forEach(el => el.addEventListener('click', () => { state.selectedSite = el.dataset.goto; switchTab('detail'); }));
+}
+
+// ======================================================
+// TAB SWITCHING
+// ======================================================
+function switchTab(tab) {
+  state.tab = tab; state.sortCol = null;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('view-overview').hidden = tab !== 'overview';
+  document.getElementById('view-detail').hidden = tab !== 'detail';
+  document.getElementById('view-queries').hidden = tab !== 'queries';
+  if (tab === 'overview') renderOverview();
+  else if (tab === 'detail') renderDetail();
+  else if (tab === 'queries') renderQueries();
+}
+
+// ======================================================
+// AI INSIGHTS
+// ======================================================
+async function generateInsights(scope) {
+  const panel = scope === 'overview' ? document.getElementById('aiInsightsOverview') : document.getElementById('aiInsightsDetail');
+  if (!AI_PROXY_URL) {
+    panel.innerHTML = `<div class="ai-panel"><div class="ai-panel-header"><span class="ai-panel-title">AI Insights</span></div><div class="ai-panel-body"><p style="color:var(--text-muted)">Set your AI_PROXY_URL in config.js to enable AI-generated insights.</p></div></div>`;
+    return;
+  }
+  panel.innerHTML = `<div class="ai-panel"><div class="ai-loading"><div class="spinner"></div>Generating insights...</div></div>`;
+  const month = state.month, prevMonth = getPrevMonth(month);
+  let prompt;
+  if (scope === 'overview') {
+    const summaries = getFilteredSites().map(s => {
+      const c = getSiteMonthData(s, month), p = prevMonth ? getSiteMonthData(s, prevMonth) : null;
+      return `${s.name} (${s.code}): ${c.impressions} imp, ${c.clicks} clicks, CTR ${c.ctr.toFixed(1)}%, Pos ${c.position.toFixed(1)}` + (p ? `, prev: ${p.impressions} imp, ${p.clicks} clicks` : '');
+    }).join('\n');
+    prompt = `You are a search analytics expert. Analyze the NSN sports media network's search query notoriety for ${fmt.monthLabel(month)}.\n\nData per site:\n${summaries}\n\nGive a concise network-wide summary (3-4 sentences): overall trend, standout performers, concerns. Then list 2-3 specific action items. Keep it brief and direct.`;
+  } else {
+    const site = DATA.sites.find(s => s.code === state.selectedSite);
+    const qd = site.queries.map(q => {
+      const c = q.months[month] || {}, p = prevMonth ? (q.months[prevMonth] || {}) : {};
+      return `"${q.query}" (${q.type}): ${c.impressions || 0} imp, ${c.clicks || 0} clicks, CTR ${(c.ctr || 0).toFixed(1)}%, Pos ${(c.position || 0).toFixed(1)}` + (p.impressions ? `, prev: ${p.impressions} imp` : '');
+    }).join('\n');
+    const detailObj = getObjectivesForSite(site.code, month);
+    prompt = `You are a search analytics expert. Analyze ${site.name}'s search query performance for ${fmt.monthLabel(month)}.\n\n${detailObj ? 'Objectives: ' + detailObj + '\n\n' : ''}Queries:\n${qd}\n\nGive: 1) Trend summary (2 sentences), 2) Highest visibility queries, 3) Best CTR performers, 4) Flags/concerns. Keep it brief and direct.`;
+  }
+  try {
+    const res = await fetch(AI_PROXY_URL + '?t=' + Date.now(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ prompt: prompt, max_tokens: 500 }),
+      redirect: 'follow'
+    });
+    const raw = await res.text();
+    let data; try { data = JSON.parse(raw); } catch { data = {}; }
+    const text = data.text || data.error || 'No response from proxy. Raw: ' + raw.slice(0, 200);
+    if (data.error) {
+      panel.innerHTML = `<div class="ai-panel"><div class="ai-panel-body" style="color:var(--negative)">Proxy error: ${data.error}</div></div>`;
+    } else {
+      panel.innerHTML = `<div class="ai-panel"><div class="ai-panel-header"><span class="ai-panel-title">AI Insights — ${fmt.monthLabel(month)}</span></div><div class="ai-panel-body">${text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')}</div></div>`;
+    }
+  } catch (err) {
+    panel.innerHTML = `<div class="ai-panel"><div class="ai-panel-body" style="color:var(--negative)">Failed: ${err.message}</div></div>`;
+  }
+}
+
+// ======================================================
+// AI SITE SUMMARIES (auto-generated on load)
+// ======================================================
+async function generateSiteAISummaries(sites) {
+  const month = state.month, prevMonth = getPrevMonth(month);
+  // Build all prompts and send in parallel (batched to avoid rate limits)
+  const batchSize = 2;
+  for (let i = 0; i < sites.length; i += batchSize) {
+    const batch = sites.slice(i, i + batchSize);
+    await Promise.all(batch.map(async (site) => {
+      const el = document.getElementById('ai-' + site.code);
+      if (!el) return;
+      const curr = getSiteMonthData(site, month);
+      const prev = prevMonth ? getSiteMonthData(site, prevMonth) : null;
+      const qSummary = site.queries.slice(0, 8).map(q => {
+        const c = q.months[month] || {};
+        return `"${q.query}": ${c.impressions || 0} imp, pos ${(c.position || 0).toFixed(1)}`;
+      }).join('; ');
+      const cardObj = getObjectivesForSite(site.code, month);
+      const prompt = `You are a search analytics expert. In exactly 1-2 sentences, summarize the search notoriety status of ${site.name} for ${fmt.monthLabel(month)}. Data: ${curr.impressions} impressions (${prev ? ((curr.impressions - prev.impressions) / (prev.impressions || 1) * 100).toFixed(0) + '% MoM' : 'no prior month'}), CTR ${curr.ctr.toFixed(1)}%, avg position ${curr.position.toFixed(1)}, ${site.queries.length} queries tracked. Top queries: ${qSummary}. ${cardObj ? 'Objectives: ' + cardObj.split('\n')[0] : ''}. Be direct and specific. No intro phrases.`;
+      try {
+        const res = await fetch(AI_PROXY_URL + '?t=' + Date.now(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ prompt: prompt, max_tokens: 100 }),
+          redirect: 'follow'
         });
-
-        if(!r.ok){
-          const e=await r.json().catch(()=>({}));
-          throw new Error(e.error?.message||'Erreur API ('+r.status+')');
-        }
-
-        const data=await r.json();
-        const elapsed=((Date.now()-startTime)/1000).toFixed(1);
-        let text=data.choices?.[0]?.message?.content||'Aucune réponse.';
-        text=text.replace(/^#{1,3}\s+/gm,'').replace(/\*\*/g,'').replace(/\*/g,'').trim();
-        const inTok=data.usage?.prompt_tokens||0;
-        const outTok=data.usage?.completion_tokens||0;
-        const cost=((inTok*2.5/1e6)+(outTok*10/1e6)).toFixed(4);
-
-        parseAndDisplay(text);
-        meta.textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+' · '+elapsed+'s · ~'+(inTok+outTok)+' tokens · ~$'+cost+' · ⚠️ sans web search';
-
-      }catch(err){
-        content.textContent='❌ '+err.message+'\n\nVérifie ta clé API dans ⚙️ et que tu as du crédit sur platform.openai.com.';
+        const raw = await res.text();
+        let data; try { data = JSON.parse(raw); } catch { data = {}; }
+        el.textContent = data.text || data.error || 'No response. Raw: ' + raw.slice(0, 100);
+        el.classList.remove('loading');
+      } catch (err) {
+        el.textContent = 'Fetch failed: ' + err.message;
+        el.classList.remove('loading');
       }
+    }));
+  }
+}
 
-      btn.disabled=false;btn.textContent='Analyser';
-    }
+// ======================================================
+// INIT: FETCH DATA FROM GOOGLE SHEETS
+// ======================================================
+async function init() {
+  try {
+    // Fetch data and objectives in parallel
+    const [dataRes, objRes] = await Promise.all([
+      fetch(SHEET_CSV_URL),
+      fetch(OBJECTIVES_CSV_URL).catch(() => null)
+    ]);
+    if (!dataRes.ok) throw new Error(`HTTP ${dataRes.status}: ${dataRes.statusText}`);
+    const csvText = await dataRes.text();
+    if (!csvText.trim()) throw new Error('Empty response from Google Sheets');
 
-    /* ═══════════════════════════════
-       WEATHER (Open-Meteo, free, no key)
-    ═══════════════════════════════ */
-    async function loadWeather(){
-      try{
-        const lat=44.58,lon=2.07;
-        const r=await fetch(`https://api.open-meteo.com/v1/meteofrance?latitude=${lat}&longitude=${lon}&hourly=precipitation,weather_code,precipitation_probability&daily=precipitation_sum,weather_code,precipitation_probability_max&timezone=Europe/Paris&forecast_days=4&past_days=2`);
-        if(!r.ok)return;
-        const d=await r.json();
-        const h=d.hourly, daily=d.daily;
-        const now=new Date();
-
-        // ── Past 24h and 48h totals ──
-        let startIdx=0;
-        for(let i=0;i<h.time.length;i++){
-          if(new Date(h.time[i])>=now){startIdx=Math.max(0,i-1);break}
-        }
-        const past48=h.precipitation.slice(Math.max(0,startIdx-48),startIdx);
-        const past24=past48.slice(-24);
-        const total24=past24.reduce((a,b)=>a+b,0);
-        const total48=past48.reduce((a,b)=>a+b,0);
-        const mmClass=(mm)=>mm===0?'dry':mm<2?'light':mm<10?'moderate':mm<30?'heavy':'extreme';
-
-        const pastEl=document.getElementById('weatherPast');
-        const needWater=total48<2;
-        pastEl.innerHTML=
-          `<div class="weather-day" style="flex:1"><div class="weather-day-label">Dernières 24h</div><div class="weather-day-mm ${mmClass(total24)}">${total24.toFixed(1)} mm</div></div>`+
-          `<div class="weather-day" style="flex:1"><div class="weather-day-label">Dernières 48h</div><div class="weather-day-mm ${mmClass(total48)}">${total48.toFixed(1)} mm</div></div>`+
-          `<div class="weather-day" style="flex:1"><div class="weather-day-label">Arrosage</div><div style="font-size:.75rem">${needWater?'💧 À prévoir':'✅ OK'}</div></div>`;
-
-        // ── Save today's total to history ──
-        saveDailyPrecip(daily);
-
-        // ── Next 24h bars ──
-        const bars=document.getElementById('weatherBars');
-        const hours=document.getElementById('weatherHours');
-        const slice=h.precipitation.slice(startIdx,startIdx+24);
-        const probs=h.precipitation_probability?h.precipitation_probability.slice(startIdx,startIdx+24):[];
-        const codes=h.weather_code.slice(startIdx,startIdx+24);
-        const times=h.time.slice(startIdx,startIdx+24);
-        const maxMm=Math.max(1,...slice);
-
-        let barsHtml='',hoursHtml='';
-        let hasStorm=false;
-        slice.forEach((mm,i)=>{
-          const pct=Math.max(3,(mm/maxMm)*100);
-          const cls=mm===0?'rain-0':mm<1?'rain-1':mm<5?'rain-2':mm<15?'rain-3':'rain-4';
-          const t=new Date(times[i]);
-          const hh=t.getHours().toString().padStart(2,'0')+'h';
-          const prob=probs[i]!==undefined?' ('+probs[i]+'%)':'';
-          barsHtml+=`<div class="weather-bar ${cls}" style="height:${mm===0?'2px':pct+'%'}" title="${hh}: ${mm.toFixed(1)} mm${prob}"></div>`;
-          if(i%3===0)hoursHtml+=`<span>${hh}</span>`;
-          if(codes[i]>=95)hasStorm=true;
-        });
-        bars.innerHTML=barsHtml;
-        hours.innerHTML=hoursHtml;
-
-        // ── 3-day forecast ──
-        const daysEl=document.getElementById('weatherDays');
-        const dayNames=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-        const wIcons=(c)=>c>=95?'⛈️':c>=80?'🌧️':c>=61?'🌧️':c>=51?'🌦️':c>=45?'🌫️':c>=3?'⛅':c>=1?'🌤️':'☀️';
-        let daysHtml='';
-        // Find today's index in daily array (past_days shifts it)
-        let todayIdx=0;
-        const todayStr=now.toISOString().slice(0,10);
-        for(let i=0;i<daily.time.length;i++){if(daily.time[i]===todayStr){todayIdx=i;break}}
-        for(let i=todayIdx+1;i<=todayIdx+3&&i<daily.precipitation_sum.length;i++){
-          const dt=new Date(daily.time[i]);
-          const label=dayNames[dt.getDay()]+' '+dt.getDate();
-          const mm=daily.precipitation_sum[i];
-          const probMax=daily.precipitation_probability_max?daily.precipitation_probability_max[i]:null;
-          const cls=mmClass(mm);
-          const icon=wIcons(daily.weather_code[i]);
-          const probStr=probMax!==null?'<div style="font-size:.55rem;color:var(--text-hint)">'+probMax+'% proba</div>':'';
-          daysHtml+=`<div class="weather-day"><div class="weather-day-label">${label}</div><div class="weather-day-icon">${icon}</div><div class="weather-day-mm ${cls}">${mm.toFixed(1)} mm</div>${probStr}</div>`;
-        }
-        daysEl.innerHTML=daysHtml;
-
-        // ── Render precipitation history ──
-        renderPrecipHistory();
-
-        // ── Alerts ──
-        const alertEl=document.getElementById('weatherAlert');
-        const totalNext24=slice.reduce((a,b)=>a+b,0);
-        if(hasStorm){
-          alertEl.innerHTML='<div class="weather-alert">⛈️ <strong>Orage prévu dans les 24h</strong> — vérifier écoulements, ne rien laisser en zone inondable bord du Lot.</div>';
-        }else if(totalNext24>30){
-          alertEl.innerHTML='<div class="weather-alert">🌊 <strong>Fortes pluies prévues ('+totalNext24.toFixed(0)+' mm/24h)</strong> — risque montée du Lot, vérifier <a href="https://www.vigicrues.gouv.fr" target="_blank" style="color:var(--accent)">Vigicrues</a>.</div>';
-        }else if(totalNext24>10){
-          alertEl.innerHTML='<div class="weather-alert">🌧️ Pluie modérée prévue ('+totalNext24.toFixed(0)+' mm/24h).</div>';
-        }else if(totalNext24===0&&needWater){
-          alertEl.innerHTML='<div style="margin-top:.4rem;font-size:.65rem;color:var(--text-hint)">💧 Sec depuis 48h et 0 pluie prévue — arrosage potager recommandé.</div>';
-        }else if(totalNext24===0){
-          alertEl.innerHTML='<div style="margin-top:.4rem;font-size:.65rem;color:var(--text-hint)">☀️ Sec sur 24h.</div>';
-        }else{
-          alertEl.innerHTML='';
-        }
-      }catch(e){
-        console.error('Weather:',e);
+    // Parse objectives if available
+    if (objRes && objRes.ok) {
+      const objCsv = await objRes.text();
+      if (objCsv.trim()) {
+        const objRows = parseCSV(objCsv);
+        OBJECTIVES_DATA = objRows.map(r => ({
+          site: (r['Site'] || '').trim(),
+          start: normalizeMonth(r['Start'] || '') || '2000-01',
+          end: normalizeMonth(r['End'] || '') || '2099-12',
+          objective: (r['Objective'] || '').trim()
+        })).filter(o => o.site && o.objective);
       }
     }
 
-    function saveDailyPrecip(daily){
-      try{
-        const hist=JSON.parse(localStorage.getItem('macro-dash-precip')||'{}');
-        // Save each day from the API response
-        for(let i=0;i<daily.time.length;i++){
-          if(daily.precipitation_sum[i]!==null){
-            hist[daily.time[i]]=daily.precipitation_sum[i];
-          }
-        }
-        // Keep only last 30 days
-        const keys=Object.keys(hist).sort();
-        if(keys.length>30){
-          keys.slice(0,keys.length-30).forEach(k=>delete hist[k]);
-        }
-        localStorage.setItem('macro-dash-precip',JSON.stringify(hist));
-      }catch(e){}
-    }
+    const rows = parseCSV(csvText);
+    if (rows.length === 0) throw new Error('No data rows found in the sheet');
 
-    function renderPrecipHistory(){
-      const el=document.getElementById('weatherHistory');
-      if(!el)return;
-      try{
-        const hist=JSON.parse(localStorage.getItem('macro-dash-precip')||'{}');
-        const dayNames=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-        const today=new Date().toISOString().slice(0,10);
-        const keys=Object.keys(hist).sort().reverse().filter(k=>k<today).slice(0,7).reverse();
-        if(keys.length===0){el.innerHTML='<div style="font-size:.6rem;color:var(--text-hint);font-style:italic">Se remplit jour après jour.</div>';return}
-        const mmClass=(mm)=>mm===0?'dry':mm<2?'light':mm<10?'moderate':mm<30?'heavy':'extreme';
-        el.innerHTML=keys.map(k=>{
-          const dt=new Date(k+'T12:00:00');
-          const label=dayNames[dt.getDay()]+' '+dt.getDate();
-          const mm=hist[k];
-          return `<div class="weather-day"><div class="weather-day-label">${label}</div><div class="weather-day-mm ${mmClass(mm)}">${mm.toFixed(1)}</div></div>`;
-        }).join('');
-      }catch(e){}
-    }
+    DATA = processSheetData(rows);
+    if (DATA.sites.length === 0) throw new Error('No sites found after processing');
 
-    loadWeather();
-    setInterval(loadWeather,1800000);
+    // Populate controls
+    const monthSelect = document.getElementById('monthSelect');
+    const months = [...DATA.months].reverse();
+    monthSelect.innerHTML = months.map(m => `<option value="${m}">${fmt.monthLabel(m)}</option>`).join('');
+    state.month = months[0];
 
-    /* ═══════════════════════════════
-       TRADINGVIEW
-    ═══════════════════════════════ */
-    function tvTheme(){return document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light'}
+    const qFilter = document.getElementById('querySiteFilter');
+    qFilter.innerHTML = '<option value="all">All sites</option>' + DATA.sites.map(s => `<option value="${s.code}">${s.name} (${s.code})</option>`).join('');
 
-    function miniChart(id,symbol,range){
-      const el=document.getElementById(id);if(!el)return;
-      const label=el.querySelector('.widget-label');
-      el.innerHTML='';if(label)el.appendChild(label);
-      const w=document.createElement('div');w.className='tradingview-widget-container';w.style.cssText='width:100%;height:100%';
-      const inner=document.createElement('div');inner.className='tradingview-widget-container__widget';inner.style.cssText='width:100%;height:100%';w.appendChild(inner);
-      const s=document.createElement('script');s.type='text/javascript';
-      s.src='https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';s.async=true;
-      s.textContent=JSON.stringify({symbol:symbol,width:'100%',height:'100%',locale:'fr',dateRange:range||'3M',colorTheme:tvTheme(),isTransparent:true,autosize:true,largeChartUrl:'',noTimeScale:false,chartOnly:false});
-      w.appendChild(s);el.appendChild(w);
-    }
+    // Show data source info
+    document.getElementById('dataSourceBar').textContent = `Live data from Google Sheets · ${DATA.sites.length} sites · ${DATA.sites.reduce((a, s) => a + s.queries.length, 0)} queries · ${DATA.months.length} months (${fmt.monthLabel(DATA.months[0])} – ${fmt.monthLabel(DATA.months[DATA.months.length - 1])})`;
 
-    function tickerTape(){
-      const el=document.getElementById('tickerTape');if(!el)return;el.innerHTML='';
-      const w=document.createElement('div');w.className='tradingview-widget-container';
-      const inner=document.createElement('div');inner.className='tradingview-widget-container__widget';w.appendChild(inner);
-      const s=document.createElement('script');s.type='text/javascript';
-      s.src='https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';s.async=true;
-      s.textContent=JSON.stringify({
-        symbols:[
-          {proName:'AMEX:VIXY',title:'Volatilité'},{proName:'TVC:GOLD',title:'Or'},
-          {proName:'TVC:UKOIL',title:'Brent'},{proName:'TVC:USOIL',title:'WTI'},
-          {proName:'AMEX:WEAT',title:'Blé'},{proName:'AMEX:CORN',title:'Maïs'},
-          {proName:'AMEX:SOYB',title:'Soja'},{proName:'AMEX:JO',title:'Café'},
-          {proName:'EURONEXT:PX1',title:'CAC 40'},{proName:'AMEX:SPY',title:'S&P 500'},
-          {proName:'NASDAQ:QQQ',title:'Nasdaq'},{proName:'AMEX:EEM',title:'Émergents'},
-          {proName:'FX:EURUSD',title:'EUR/USD'},{proName:'BITSTAMP:BTCUSD',title:'Bitcoin'}
-        ],
-        showSymbolLogo:true,isTransparent:true,displayMode:'adaptive',colorTheme:tvTheme(),locale:'fr'
-      });
-      w.appendChild(s);el.appendChild(w);
-    }
+    // Wire up events
+    document.getElementById('langSelect').addEventListener('change', e => { state.lang = e.target.value; switchTab(state.tab); });
+    monthSelect.addEventListener('change', e => { state.month = e.target.value; switchTab(state.tab); });
+    document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+    document.getElementById('backBtn').addEventListener('click', () => switchTab('overview'));
+    document.getElementById('aiBtn').addEventListener('click', () => generateInsights(state.tab === 'detail' ? 'detail' : 'overview'));
+    document.querySelectorAll('th[data-sort]').forEach(th => th.addEventListener('click', () => {
+      const col = th.dataset.sort;
+      if (state.sortCol === col) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+      else { state.sortCol = col; state.sortDir = col === 'query' || col === 'site' || col === 'type' ? 'asc' : 'desc'; }
+      if (state.tab === 'detail') renderDetail(); else if (state.tab === 'queries') renderQueries();
+    }));
+    qFilter.addEventListener('change', () => renderQueries());
 
-    function buildAllWidgets(){
+    // Hide loading, show app
+    document.getElementById('loadingScreen').hidden = true;
+    document.getElementById('app').hidden = false;
+    renderOverview();
 
-      // Stress — ETFs that always work in free widgets
-      miniChart('chart-vix','AMEX:VIXY','6M');
-      miniChart('chart-gold','TVC:GOLD','6M');
-      miniChart('chart-dxy','AMEX:UUP','6M');
-      miniChart('chart-us10y','NASDAQ:TLT','6M');
-      miniChart('chart-copx','AMEX:COPX','6M');
+  } catch (err) {
+    document.getElementById('loadingScreen').innerHTML = `
+      <div class="loading-error">
+        <p><strong>Failed to load data</strong></p>
+        <p>${err.message}</p>
+        <p style="margin-top:12px;font-size:12px;color:var(--text-muted)">Make sure the Google Sheet's ALL tab is published to the web and the URL in SHEET_CSV_URL is correct.</p>
+      </div>`;
+  }
+}
 
-      // Énergie — ETFs
-      miniChart('chart-brent','TVC:UKOIL','3M');
-      miniChart('chart-wti','TVC:USOIL','3M');
-      miniChart('chart-natgas','AMEX:UNG','3M');
-      miniChart('chart-icln','NASDAQ:ICLN','3M');
-
-      // Sécurité alimentaire — ETFs
-      miniChart('chart-wheat','AMEX:WEAT','6M');
-      miniChart('chart-corn','AMEX:CORN','6M');
-      miniChart('chart-soy','AMEX:SOYB','6M');
-      miniChart('chart-sugar','AMEX:CANE','6M');
-
-      // Marchés
-      miniChart('chart-sp500','AMEX:SPY','3M');
-      miniChart('chart-cac40','EURONEXT:PX1','3M');
-      miniChart('chart-nasdaq','NASDAQ:QQQ','3M');
-      miniChart('chart-eem','AMEX:EEM','3M');
-      miniChart('chart-fxi','AMEX:FXI','3M');
-
-      // Devises & Crypto
-      miniChart('chart-eurusd','FX:EURUSD','3M');
-      miniChart('chart-btc','BITSTAMP:BTCUSD','3M');
-    }
-
-    buildAllWidgets();
-    // Load API key from Google Sheets on startup
-    loadApiKey();
-  </script>
-</body>
-</html>
+init();
+</script>
