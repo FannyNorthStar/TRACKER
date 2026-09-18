@@ -251,6 +251,33 @@
     }
     .action-item:last-child{margin-bottom:0}
 
+    /* ── Climate Tracker ── */
+    .climate-section{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem}
+    .climate-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+    .climate-title{font-size:.78rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:.4rem}
+    .climate-subtitle{font-size:.62rem;font-weight:400;color:var(--text-hint)}
+    .climate-header-right{display:flex;align-items:center;gap:.5rem}
+    .climate-age{font-size:.6rem;color:var(--text-hint)}
+    .climate-refresh-btn{padding:.25rem .55rem;font-size:.75rem;min-width:0}
+    .climate-body{font-size:.74rem;line-height:1.6;color:var(--text)}
+    .climate-placeholder{font-size:.7rem;color:var(--text-hint);font-style:italic}
+    .climate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.55rem}
+    .climate-card{background:var(--bg-card-alt);border:1px solid var(--border);border-radius:8px;padding:.65rem .8rem;font-size:.72rem;line-height:1.55}
+    .climate-card-title{font-weight:700;font-size:.74rem;margin-bottom:.3rem;display:flex;align-items:center;gap:.35rem}
+    .climate-card-tag{font-size:.52rem;font-weight:600;padding:.1rem .3rem;border-radius:3px;margin-left:auto;flex-shrink:0}
+    .climate-card-tag.tag-red{background:rgba(239,68,68,.12);color:#dc2626}
+    .climate-card-tag.tag-orange{background:rgba(249,115,22,.12);color:#ea580c}
+    .climate-card-tag.tag-yellow{background:rgba(234,179,8,.12);color:#ca8a04}
+    .climate-card-tag.tag-blue{background:rgba(59,130,246,.12);color:#2563eb}
+    .climate-card-tag.tag-green{background:rgba(34,197,94,.12);color:#16a34a}
+    .climate-card ul{margin:0;padding-left:1rem;list-style:disc}
+    .climate-card li{margin-bottom:.15rem}
+    .climate-card--enso{border-left:3px solid #f97316}
+    .climate-card--extreme{border-left:3px solid #ef4444}
+    .climate-card--watch{border-left:3px solid #eab308}
+    .climate-card--ocean{border-left:3px solid #3b82f6}
+    .climate-card--forecast{border-left:3px solid #22c55e}
+
     /* ── History section ── */
     .history-section{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
     .history-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;cursor:pointer;user-select:none;transition:background .2s}
@@ -357,6 +384,20 @@
         </div>
       </div>
       <div id="weatherAlert"></div>
+    </div>
+
+    <!-- ═══ CLIMATE TRACKER ═══ -->
+    <div class="climate-section" id="climateSection">
+      <div class="climate-header">
+        <div class="climate-title">🌍 Climate Tracker <span class="climate-subtitle">alertes climat · auto 7 jours</span></div>
+        <div class="climate-header-right">
+          <span class="climate-age" id="climateAge"></span>
+          <button class="ai-btn climate-refresh-btn" id="climateRefreshBtn" onclick="loadClimate(true)">↻</button>
+        </div>
+      </div>
+      <div id="climateContent" class="climate-body">
+        <div class="climate-placeholder">Chargement au premier lancement…</div>
+      </div>
     </div>
 
     <!-- ═══ AI SUMMARY ═══ -->
@@ -1308,6 +1349,189 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
 
     loadWeather();
     setInterval(loadWeather,1800000);
+
+    /* ═══════════════════════════════
+       CLIMATE TRACKER
+    ═══════════════════════════════ */
+    const CLIMATE_CACHE_KEY='macro-dash-climate';
+    const CLIMATE_TTL=7*24*60*60*1000; // 7 jours
+
+    async function loadClimate(force){
+      const apiKey=getApiKey();
+      if(!apiKey)return;
+
+      // Check cache from Google Sheets first
+      if(!force){
+        try{
+          const cached=await gasGet('getClimate');
+          if(cached&&cached.ts&&(Date.now()-cached.ts<CLIMATE_TTL)){
+            renderClimate(cached);
+            return;
+          }
+          // Fallback localStorage
+          const local=JSON.parse(localStorage.getItem(CLIMATE_CACHE_KEY)||'null');
+          if(local&&local.ts&&(Date.now()-local.ts<CLIMATE_TTL)){
+            renderClimate(local);
+            return;
+          }
+        }catch(e){}
+      }
+
+      const el=document.getElementById('climateContent');
+      const btn=document.getElementById('climateRefreshBtn');
+      el.innerHTML='<div class="ai-loading"><div class="ai-spinner"></div>Recherche des alertes climat des 7 derniers jours…</div>';
+      btn.disabled=true;
+
+      const climateSys=`Tu es un veilleur climat/environnement. Tu produis un bulletin des 7 derniers jours sur les signaux climatiques et environnementaux GLOBAUX qui peuvent avoir un impact sur la vie quotidienne, l'agriculture, l'énergie ou les prix. Pas de météo locale — du CLIMAT et des événements environnementaux.
+
+FORMAT STRICT — respecte les marqueurs :
+[CLIMATE]
+Catégories dynamiques, chacune avec un emoji, un titre, et un tag de sévérité entre crochets.
+Tags possibles : [CRITIQUE] [ALERTE] [VIGILANCE] [INFO] [POSITIF]
+2-4 bullets par catégorie, chaque bullet = FAIT + LIEU + IMPACT.
+Catégories typiques (adapte selon l'actu, n'invente pas) :
+🌡️ ENSO & oscillations — statut El Niño/La Niña, IOD, NAO
+🌊 Océans & glaces — température océanique, niveau mer, banquise, courants
+🔥 Événements extrêmes — canicules, sécheresses, inondations, incendies, tempêtes EN COURS dans le monde
+🌾 Impact agriculture — récoltes menacées, restrictions eau, rendements
+🏭 Émissions & politiques — COP, décisions gouvernementales, rapports GIEC/WMO
+👀 Prévisions 2-4 semaines — ce qui arrive (saison cyclonique, mousson, vague de chaleur prévue)
+
+Termine par :
+[CLIMATE_SUMMARY]
+Une phrase résumant le signal climat dominant cette semaine.
+[/CLIMATE]
+
+Langue : français. Max 400 mots. Pas de sources/URLs.`;
+
+      const climateUser=`Recherche les ÉVÉNEMENTS CLIMAT ET ENVIRONNEMENT des 7 DERNIERS JOURS dans le monde. Inclus aussi les événements en cours même s'ils ont commencé avant (sécheresses, El Niño, saison des feux, etc).
+
+Cherche :
+— Statut ENSO actuel (El Niño / La Niña / neutre) et prévisions
+— Températures océaniques records, anomalies SST
+— Vapeur d'eau atmosphérique, anomalies climatiques
+— Événements extrêmes en cours : canicules, sécheresses, inondations, cyclones, incendies (OÙ dans le monde)
+— Impact sur les récoltes mondiales (blé, maïs, riz, fruits)
+— Niveau banquise Arctique/Antarctique
+— Annonces climat (rapports WMO, GIEC, COP, politiques nationales)
+— Restrictions eau en France, alertes Météo-France sécheresse/canicule
+— Prévisions saisonnières pour les 2-4 prochaines semaines
+
+COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
+
+      try{
+        const response=await fetch('https://api.openai.com/v1/responses',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+          body:JSON.stringify({
+            model:'gpt-4o',
+            tools:[{type:'web_search_preview',search_context_size:'medium'}],
+            instructions:climateSys,
+            input:climateUser
+          })
+        });
+
+        let text='';
+        if(response.ok){
+          const data=await response.json();
+          if(data.output){
+            for(const item of data.output){
+              if(item.type==='message'&&item.content){
+                for(const c of item.content){
+                  if(c.type==='output_text')text+=c.text;
+                }
+              }
+            }
+          }
+        }
+
+        if(!text){
+          // Fallback chat completions
+          const r2=await fetch('https://api.openai.com/v1/chat/completions',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+            body:JSON.stringify({model:'gpt-4o',messages:[{role:'system',content:climateSys},{role:'user',content:climateUser}],max_tokens:2000})
+          });
+          if(r2.ok){const d2=await r2.json();text=d2.choices?.[0]?.message?.content||''}
+        }
+
+        text=text.replace(/\*\*/g,'').replace(/\*/g,'').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/\(?\[?https?:\/\/[^\s\])]+\]?\)?/g,'').replace(/\s*\([\w.-]+\.\w{2,4}\)/g,'').replace(/\(\s*\)/g,'').trim();
+
+        const cached={ts:Date.now(),text:text};
+        localStorage.setItem(CLIMATE_CACHE_KEY,JSON.stringify(cached));
+        // Save to Google Sheets for cross-device access
+        await gasPost({action:'setClimate',ts:cached.ts,text:cached.text});
+        renderClimate(cached);
+
+      }catch(err){
+        el.innerHTML='<div class="climate-placeholder">❌ '+err.message+'</div>';
+      }
+      btn.disabled=false;
+    }
+
+    function renderClimate(cached){
+      const el=document.getElementById('climateContent');
+      const ageEl=document.getElementById('climateAge');
+      if(!el)return;
+
+      // Show age
+      if(cached.ts&&ageEl){
+        const ago=Date.now()-cached.ts;
+        const hours=Math.floor(ago/3600000);
+        const days=Math.floor(ago/86400000);
+        ageEl.textContent=days>0?'il y a '+days+'j':hours>0?'il y a '+hours+'h':'à l\'instant';
+      }
+
+      const raw=cached.text||'';
+      const climateMatch=raw.match(/\[CLIMATE\]\s*([\s\S]*?)(?:\[CLIMATE_SUMMARY\]|\[\/CLIMATE\]|$)/i);
+      let body=climateMatch?climateMatch[1]:raw;
+      body=body.replace(/\[\/?(CLIMATE|CLIMATE_SUMMARY)\]/gi,'').trim();
+
+      // Parse summary
+      const sumMatch=raw.match(/\[CLIMATE_SUMMARY\]\s*([\s\S]*?)(?:\[\/CLIMATE\]|$)/i);
+      const summary=sumMatch?sumMatch[1].trim():'';
+
+      // Parse into category cards
+      const blocks=[];
+      const lines=body.split('\n');
+      let current=null;
+      const emojiRe=/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s+(.+)/u;
+
+      for(const line of lines){
+        const trimmed=line.trim();
+        const m=trimmed.match(emojiRe);
+        if(m&&!trimmed.startsWith('•')&&!trimmed.startsWith('-')){
+          if(current)blocks.push(current);
+          current={emoji:m[1],title:m[2].replace(/:$/,'').trim(),bullets:[]};
+        }else if(current){
+          const bullet=trimmed.replace(/^[-•*]\s*/,'').trim();
+          if(bullet.length>3)current.bullets.push(bullet);
+        }
+      }
+      if(current)blocks.push(current);
+
+      if(blocks.length>0){
+        const tagMap={'CRITIQUE':'tag-red','ALERTE':'tag-orange','VIGILANCE':'tag-yellow','INFO':'tag-blue','POSITIF':'tag-green'};
+        const cardTypeMap={'enso':'climate-card--enso','ocean':'climate-card--ocean','extrême':'climate-card--extreme','événement':'climate-card--extreme','prévision':'climate-card--forecast','surveiller':'climate-card--watch','agriculture':'climate-card--watch'};
+
+        el.innerHTML=(summary?'<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:.6rem;padding:.4rem .6rem;background:var(--bg-card-alt);border-radius:6px;border-left:3px solid var(--accent)">'+summary+'</div>':'')+
+          '<div class="climate-grid">'+blocks.map(b=>{
+            const tagMatch=b.title.match(/\[(CRITIQUE|ALERTE|VIGILANCE|INFO|POSITIF)\]\s*$/i);
+            const tag=tagMatch?tagMatch[1].toUpperCase():'';
+            const cleanTitle=b.title.replace(/\s*\[(?:CRITIQUE|ALERTE|VIGILANCE|INFO|POSITIF)\]\s*$/i,'');
+            let cardClass='climate-card';
+            for(const[kw,cls]of Object.entries(cardTypeMap)){if(cleanTitle.toLowerCase().includes(kw)){cardClass+=' '+cls;break}}
+            const tagHtml=tag?'<span class="climate-card-tag '+(tagMap[tag]||'tag-blue')+'">'+tag+'</span>':'';
+            const bulletsHtml=b.bullets.length?'<ul>'+b.bullets.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'';
+            return '<div class="'+cardClass+'"><div class="climate-card-title">'+b.emoji+' '+cleanTitle+tagHtml+'</div>'+bulletsHtml+'</div>';
+          }).join('')+'</div>';
+      }else{
+        el.innerHTML='<div style="font-size:.74rem;line-height:1.6;white-space:pre-wrap">'+raw+'</div>';
+      }
+    }
+
+    // Auto-load climate on startup
+    loadClimate(false);
 
     /* ═══════════════════════════════
        TRADINGVIEW
