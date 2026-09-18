@@ -278,6 +278,65 @@
     .climate-card--ocean{border-left:3px solid #3b82f6}
     .climate-card--forecast{border-left:3px solid #22c55e}
 
+    /* ── Tab navigation ── */
+    .tab-nav{display:flex;gap:0;background:var(--header-bg);border-bottom:1px solid var(--border);padding:0 1rem;position:sticky;top:52px;z-index:99}
+    .tab-btn{background:none;border:none;color:#8b8fa3;font-family:inherit;font-size:.72rem;font-weight:600;padding:.6rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+    .tab-btn:hover{color:var(--header-text)}
+    .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+
+    /* ── Potager ── */
+    .potager-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
+    .potager-title{font-size:1rem;font-weight:700;color:var(--text)}
+    .potager-date{font-size:.68rem;color:var(--text-hint)}
+    .potager-sub-nav{display:flex;gap:.3rem;margin-bottom:1rem}
+    .potager-sub-btn{background:var(--bg-card-alt);color:var(--text-muted);border:1px solid var(--border);border-radius:6px;padding:.35rem .8rem;font-size:.68rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s}
+    .potager-sub-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .potager-weather{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;margin-bottom:1rem}
+    .potager-weather-title{font-size:.72rem;font-weight:700;color:var(--text);margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+    .potager-weather-grid{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.3rem}
+    .potager-weather-day{flex:0 0 auto;min-width:62px;background:var(--bg-card-alt);border-radius:7px;padding:.4rem .45rem;text-align:center;font-size:.62rem;border:1px solid var(--border)}
+    .potager-weather-day.good{border-color:#22c55e;background:rgba(34,197,94,.06)}
+    .potager-weather-day.bad{border-color:#f97316;background:rgba(249,115,22,.05)}
+    .potager-weather-day-label{font-weight:600;color:var(--text)}
+    .potager-weather-day-icon{font-size:.9rem;margin:.15rem 0}
+    .potager-weather-day-temp{font-size:.6rem;color:var(--text-muted)}
+    .potager-weather-day-rain{font-size:.55rem;color:#3b82f6}
+    .potager-weather-day-tag{font-size:.48rem;font-weight:600;padding:.1rem .25rem;border-radius:3px;margin-top:.2rem;display:inline-block}
+    .potager-weather-day-tag.garden-ok{background:rgba(34,197,94,.12);color:#16a34a}
+    .potager-weather-day-tag.garden-no{background:rgba(249,115,22,.12);color:#ea580c}
+
+    .potager-section{margin-bottom:1.2rem}
+    .potager-section-title{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+    .potager-task{display:flex;align-items:flex-start;gap:.6rem;padding:.5rem .7rem;margin-bottom:.35rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;font-size:.72rem;line-height:1.55;transition:opacity .3s}
+    .potager-task.done{opacity:.5}
+    .potager-task.done .potager-task-text{text-decoration:line-through}
+    .potager-task-check{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;cursor:pointer;flex-shrink:0;margin-top:.1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;background:var(--bg)}
+    .potager-task-check:hover{border-color:var(--accent)}
+    .potager-task-check.checked{background:var(--accent);border-color:var(--accent);color:#fff;font-size:.65rem}
+    .potager-task-body{flex:1;min-width:0}
+    .potager-task-text{color:var(--text)}
+    .potager-task-detail{font-size:.65rem;color:var(--text-muted);margin-top:.15rem}
+    .potager-task-meta{display:flex;gap:.4rem;margin-top:.2rem;flex-wrap:wrap}
+    .potager-task-tag{font-size:.5rem;font-weight:600;padding:.1rem .3rem;border-radius:3px;background:var(--tag-bg);color:var(--tag-text)}
+    .potager-task-tag.tag-urgent{background:rgba(239,68,68,.1);color:#dc2626}
+    .potager-task-tag.tag-weather{background:rgba(34,197,94,.1);color:#16a34a}
+    .potager-task-tag.tag-cat{background:rgba(59,130,246,.1);color:#2563eb}
+
+    .potager-inv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.5rem}
+    .potager-inv-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;font-size:.7rem}
+    .potager-inv-card-title{font-weight:700;font-size:.74rem;margin-bottom:.25rem;display:flex;align-items:center;gap:.3rem}
+    .potager-inv-list{color:var(--text-muted);line-height:1.6}
+
+    .potager-ai-meta{font-size:.6rem;color:var(--text-hint);margin-top:.5rem}
+    .potager-empty{font-size:.72rem;color:var(--text-hint);font-style:italic;padding:1rem 0}
+
+    @media(max-width:640px){
+      .potager-weather-grid{gap:.3rem}
+      .potager-inv-grid{grid-template-columns:1fr}
+    }
+
     /* ── History section ── */
     .history-section{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
     .history-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;cursor:pointer;user-select:none;transition:background .2s}
@@ -327,6 +386,12 @@
 
   <div class="ticker-container" id="tickerTape" style="display:none"></div>
 
+  <!-- Tab Navigation -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">🌡️ Dashboard</button>
+    <button class="tab-btn" data-tab="potager" onclick="switchTab('potager')">🌱 Potager</button>
+  </nav>
+
   <!-- Settings Modal -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal">
@@ -345,6 +410,8 @@
     </div>
   </div>
 
+  <!-- ═══ TAB: DASHBOARD ═══ -->
+  <div id="tab-dashboard" class="tab-content active">
   <main class="main">
 
     <!-- ═══ THREAT LEVEL ═══ -->
@@ -551,6 +618,55 @@
     </div>
 
   </main>
+  </div><!-- /tab-dashboard -->
+
+  <!-- ═══ TAB: POTAGER ═══ -->
+  <div id="tab-potager" class="tab-content">
+  <main class="main">
+
+    <div class="potager-header">
+      <div>
+        <div class="potager-title">🌱 Potager — Jardin-Forêt Capdenac</div>
+        <div class="potager-date" id="potagerDate"></div>
+      </div>
+      <div style="display:flex;gap:.4rem;align-items:center">
+        <span class="potager-ai-meta" id="potagerAge"></span>
+        <button class="ai-btn" id="potagerRefreshBtn" onclick="loadPotager(true)" style="font-size:.68rem;padding:.3rem .8rem">🔄 Actualiser</button>
+      </div>
+    </div>
+
+    <!-- Météo 10 jours jardin -->
+    <div class="potager-weather" id="potagerWeather">
+      <div class="potager-weather-title">☀️ Météo jardin — 10 prochains jours</div>
+      <div class="potager-weather-grid" id="potagerWeatherGrid"></div>
+    </div>
+
+    <!-- Sub-navigation -->
+    <div class="potager-sub-nav">
+      <button class="potager-sub-btn active" onclick="switchPotagerTab('month')">🗓️ Ce mois-ci</button>
+      <button class="potager-sub-btn" onclick="switchPotagerTab('all')">📋 Tout</button>
+      <button class="potager-sub-btn" onclick="switchPotagerTab('inventory')">🌳 Inventaire</button>
+    </div>
+
+    <!-- Sub-tab: Ce mois-ci -->
+    <div id="potager-month" class="potager-subtab">
+      <div id="potagerMonthContent"><div class="potager-empty">Clique sur « Actualiser » pour générer les tâches du mois basées sur la météo et ton jardin.</div></div>
+    </div>
+
+    <!-- Sub-tab: Tout -->
+    <div id="potager-all" class="potager-subtab" style="display:none">
+      <div id="potagerAllContent"><div class="potager-empty">Aucune tâche générée.</div></div>
+    </div>
+
+    <!-- Sub-tab: Inventaire -->
+    <div id="potager-inventory" class="potager-subtab" style="display:none">
+      <div id="potagerInventory"></div>
+    </div>
+
+    <div class="potager-ai-meta" id="potagerMeta"></div>
+
+  </main>
+  </div><!-- /tab-potager -->
 
   <footer class="footer">
     Données <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a> · Analyse IA via <a href="https://platform.openai.com/" target="_blank" rel="noopener">OpenAI</a> · Cours différés
@@ -1532,6 +1648,334 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
 
     // Auto-load climate on startup
     loadClimate(false);
+
+    /* ═══════════════════════════════
+       TAB SWITCHING
+    ═══════════════════════════════ */
+    function switchTab(tab){
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+      document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+      const el=document.getElementById('tab-'+tab);
+      if(el)el.classList.add('active');
+      if(tab==='potager'){
+        loadPotagerWeather();
+        loadPotager(false);
+        renderInventory();
+        const monthNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+        const now=new Date();
+        document.getElementById('potagerDate').textContent=monthNames[now.getMonth()]+' '+now.getFullYear()+' · Semaine '+getWeekNumber(now);
+      }
+    }
+    function getWeekNumber(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));return Math.ceil(((t-new Date(Date.UTC(t.getUTCFullYear(),0,1)))/86400000+1)/7)}
+
+    function switchPotagerTab(sub){
+      document.querySelectorAll('.potager-sub-btn').forEach((b,i)=>b.classList.toggle('active',['month','all','inventory'][i]===sub));
+      ['month','all','inventory'].forEach(s=>{const el=document.getElementById('potager-'+s);if(el)el.style.display=s===sub?'block':'none'});
+    }
+
+    /* ═══════════════════════════════
+       POTAGER — WEATHER 10 JOURS
+    ═══════════════════════════════ */
+    async function loadPotagerWeather(){
+      try{
+        const r=await fetch('https://api.open-meteo.com/v1/meteofrance?latitude=44.58&longitude=2.07&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max&timezone=Europe/Paris&forecast_days=10');
+        if(!r.ok)return;
+        const d=await r.json();
+        const grid=document.getElementById('potagerWeatherGrid');
+        const dayNames=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+        const wIcon=(c)=>c>=95?'⛈️':c>=80?'🌧️':c>=61?'🌧️':c>=51?'🌦️':c>=45?'🌫️':c>=3?'⛅':c>=1?'🌤️':'☀️';
+        let html='';
+        window._potagerForecast=[];
+        for(let i=0;i<d.daily.time.length;i++){
+          const dt=new Date(d.daily.time[i]+'T12:00:00');
+          const label=dayNames[dt.getDay()]+' '+dt.getDate()+'/'+(dt.getMonth()+1);
+          const tmax=d.daily.temperature_2m_max[i];
+          const tmin=d.daily.temperature_2m_min[i];
+          const rain=d.daily.precipitation_sum[i];
+          const prob=d.daily.precipitation_probability_max[i];
+          const wind=d.daily.wind_speed_10m_max[i];
+          const code=d.daily.weather_code[i];
+          const gardenOk=rain<5&&wind<30&&tmax>8&&tmax<38;
+          window._potagerForecast.push({date:d.daily.time[i],label,tmax,tmin,rain,prob,wind,code,gardenOk});
+          html+='<div class="potager-weather-day '+(gardenOk?'good':'bad')+'">'+
+            '<div class="potager-weather-day-label">'+label+'</div>'+
+            '<div class="potager-weather-day-icon">'+wIcon(code)+'</div>'+
+            '<div class="potager-weather-day-temp">'+Math.round(tmin)+'° / '+Math.round(tmax)+'°</div>'+
+            (rain>0?'<div class="potager-weather-day-rain">'+rain.toFixed(1)+'mm</div>':'')+
+            '<div class="potager-weather-day-tag '+(gardenOk?'garden-ok':'garden-no')+'">'+(gardenOk?'Jardinage OK':'Défavorable')+'</div>'+
+          '</div>';
+        }
+        grid.innerHTML=html;
+      }catch(e){console.error('Potager weather:',e)}
+    }
+
+    /* ═══════════════════════════════
+       POTAGER — GARDEN PROFILE
+    ═══════════════════════════════ */
+    const GARDEN_PROFILE=`JARDIN-FORÊT PERMACULTURE — CAPDENAC-GARE (12700, Aveyron, vallée du Lot, zone 8a-8b)
+Contexte climat : étés très chauds et secs dès juin, crues Lot en hiver sur potager bas, zone parmi les plus en réchauffement d'Occitanie.
+Approche : permaculture, agroforesterie, sol vivant, dry farming, sélection massale, associations, autosemeuses.
+
+ESPACES : Potager bas (bord Lot, alluvial, inondable hiver) | Potager haut (buttes, fruitiers, IBC récup eau) | Jardin de ville (conteneurs, aromatiques)
+
+FRUITIERS ÉTABLIS : abricotiers Hunza, pêchers, poiriers, pommier, cognassier, pruniers, amandier, kaki, figuiers, grenadier, feijoa, mûrier blanc, argousier, camérisier, cassis, groseilliers, caseille, framboisiers, kiwi, actinidia, goji, noisetiers, jujubier Lang, sumac, saules crevettes, bouleau, bambous, poivrier Sichuan, épines-vinettes
+Agrumes en pots : yuzu, citronnier, kumquat, kalamansi (fragile)
+
+COMMANDÉ À PLANTER (automne 2026) : asiminier October Moon, néflier du Japon, jujubier Lang greffé, olivier Arbequine, orange sanguine corse, yuzu N°3, mandarine Keraji, abricotier Hunza supp., vigne Muscat Galanth, kiwi Boskoop, groseillier Captivator x2, groseillier blanc/rouge, cassis Boskoop+Noir de Bourgogne, prunus tomentosa, cerisier Ste Lucie, genévrier rampant, thé Crète, za'atar x2, thym pin, chèvrefeuille arbustif, agastache Blue Fortune+Apache Sunset, lavande Siesta x2, crocus sativus x60, consoude, thym praecox x3, coreopsis x3, achillée crithmifolia x2, cyclamen Naples+coum, osmanthus, hémérocalles x9, échinacée
+
+ANNUELLES EN PLACE (fin saison 2026, types à replanter 2027) :
+Tomates (30+ pieds : Fantasio, Anacoeur, Montfavet, Liguria, Noire Crimée, Rose Berne, Green Zébra, Cornue Andes, Saint Pierre, Sasha, etc.) — plants achetés
+Solanacées : poivrons x4, aubergines x4, physalis x8, piments Espelette+antillais, tomatillos x3
+Cucurbitacées (semis direct) : courgettes rondes/trompette/Alger, courges musquées/Lady Godiva/giraumon, melons Piel de Sapo/Kazakhe/hiver, concombres, pastèques, kiwano
+Légumineuses : haricots Pinto/Gloire de Deuil/Comtesse/blauhilde/longs, soja, desmodium
+Céréales : maïs popcorn+doux, millet, sarrasin
+Feuilles/racines : blettes, kale, poireaux, PDT, oseille, raifort, daikon, radis, cima di rapa
+Aromatiques : basilic, basilic thaï, tulsi, shiso, aneth, persil, ciboule, garlic chives, thym, hysope, carvi, trigonelle, épazote, estragon, menthes, agastache
+Fleurs : tournesols, pavots, amarante, camomille, tagètes, zinnia, capucines, bourrache, cosmos, roses trémières, nigelle
+
+VIVACES : fenouil, artichaut, cardon, romarin, lavande, houblon, réglisse, livèche, achillée, monarde, camomille romaine, roquette vivace, jiaogulan, lupin vivace, asperges des bois, tussilage
+
+PRINCIPES ADAPTATION CLIMAT :
+- PDT : planter tôt (février-mars) car chaleurs dès juin, elles ne tiennent pas
+- Ail : planter mi-septembre à fin septembre MAX (pas plus tard à Capdenac)
+- Tomates/solanacées : semis intérieur février, plants en terre après derniers gels (mi-avril)
+- Cucurbitacées : semis direct mai-juin, sol chaud
+- Dry farming : tomates, physalis, poivrons, maïs, tournesols, haricots grain
+- Taille fruitiers : hiver (déc-fév) pour les à pépins, été pour les à noyau
+- Engrais verts : phacélie, moutarde, sarrasin en couvre-sol automne-hiver`;
+
+    /* ═══════════════════════════════
+       POTAGER — INVENTORY RENDER
+    ═══════════════════════════════ */
+    function renderInventory(){
+      const el=document.getElementById('potagerInventory');
+      if(!el)return;
+      el.innerHTML='<div class="potager-inv-grid">'+
+        '<div class="potager-inv-card"><div class="potager-inv-card-title">🍎 Fruitiers établis</div><div class="potager-inv-list">Abricotiers Hunza · Pêchers · Poiriers · Pommier · Cognassier · Pruniers · Amandier · Kaki · Figuiers · Grenadier · Feijoa · Mûrier blanc · Argousier · Camérisier · Noisetiers · Jujubier Lang · Kiwi · Goji · Poivrier Sichuan</div></div>'+
+        '<div class="potager-inv-card"><div class="potager-inv-card-title">🫐 Petits fruits</div><div class="potager-inv-list">Cassis (plusieurs) · Groseilliers · Caseille · Framboisiers · Fraisiers</div></div>'+
+        '<div class="potager-inv-card"><div class="potager-inv-card-title">🍋 Agrumes en pots</div><div class="potager-inv-list">Yuzu · Citronnier · Kumquat · Kalamansi (fragile, hivernage intérieur)</div></div>'+
+        '<div class="potager-inv-card"><div class="potager-inv-card-title">🍅 Tomates (30+ pieds)</div><div class="potager-inv-list">Fantasio · Anacoeur · Montfavet · Liguria · Noire Crimée · Rose Berne · Green Zébra · Cornue des Andes · Saint Pierre · Sasha · DOU · BC · ALK · Merveille<br><em style="color:var(--text-hint)">À planter plus tard : Cobra, Agora, Pyros</em></div></div>'+
+        '<div class="potager-inv-card"><div class="potager-inv-card-title">🫑 Solanacées</div><div class="potager-inv-list">Poivrons x4 · Aubergines x4 (syrienne, thaï, Listada) · Physalis x8 · Piments (Espelette, antillais) · Tomatillos x3</div></div>'+
+        '<div class="potager-inv-card"><div class="potager-inv-card-title">🎃 Cucurbitacées</div><div class="potager-inv-list">Courgettes (rondes, Piacenza, trompette, Alger) · Courges (musquée Provence/Nice, Lady Godiva, giraumon) · Melons (Piel de Sapo, Kazakhe, hiver) · Concombres · Pastèques · Kiwano</div></div>'+
+        '<div class="potager-inv-card"><div class="potager-inv-card-title">🫘 Légumineuses</div><div class="potager-inv-list">Haricots Pinto · Gloire de Deuil · Comtesse · Blauhilde · Longs · Soja · Desmodium</div></div>'+
+        '<div class="potager-inv-card"><div class="potager-inv-card-title">🌿 Aromatiques</div><div class="potager-inv-list">Basilic · Basilic thaï · Tulsi · Shiso · Aneth · Persil · Ciboule · Garlic chives · Thym · Hysope · Carvi · Trigonelle · Épazote · Estragon · Menthes · Agastache · Herbe à curry</div></div>'+
+        '<div class="potager-inv-card"><div class="potager-inv-card-title">📦 Commandé — à planter automne 2026</div><div class="potager-inv-list">Asiminier October Moon · Néflier du Japon · Jujubier Lang greffé · Olivier Arbequine · Orange sanguine corse · Yuzu N°3 · Mandarine Keraji · Vigne Muscat Galanth · Kiwi Boskoop · Groseilliers (Captivator, blanc, rouge) · Cassis (Boskoop, Noir Bourgogne) · Prunus tomentosa · Cerisier Ste Lucie · Crocus sativus x60 · Hémérocalles x9 · Échinacée · + aromatiques</div></div>'+
+      '</div>';
+    }
+
+    /* ═══════════════════════════════
+       POTAGER — AI TASK GENERATION
+    ═══════════════════════════════ */
+    const POTAGER_CACHE_KEY='macro-dash-potager';
+    const POTAGER_TTL=7*24*60*60*1000;
+    let potagerTasks=[];
+
+    async function loadPotager(force){
+      const apiKey=getApiKey();
+      if(!apiKey)return;
+
+      if(!force){
+        try{
+          const cached=await gasGet('getPotager');
+          if(cached&&cached.ts&&(Date.now()-cached.ts<POTAGER_TTL)){
+            parsePotagerTasks(cached.text);
+            renderPotagerTasks();
+            updatePotagerAge(cached.ts);
+            return;
+          }
+          const local=JSON.parse(localStorage.getItem(POTAGER_CACHE_KEY)||'null');
+          if(local&&local.ts&&(Date.now()-local.ts<POTAGER_TTL)){
+            parsePotagerTasks(local.text);
+            renderPotagerTasks();
+            updatePotagerAge(local.ts);
+            return;
+          }
+        }catch(e){}
+      }
+
+      const el=document.getElementById('potagerMonthContent');
+      const btn=document.getElementById('potagerRefreshBtn');
+      el.innerHTML='<div class="ai-loading"><div class="ai-spinner"></div>Analyse du jardin en cours (météo + saison + inventaire)…</div>';
+      btn.disabled=true;
+
+      // Build weather context
+      let weatherCtx='Pas de prévisions disponibles.';
+      if(window._potagerForecast&&window._potagerForecast.length>0){
+        weatherCtx='PRÉVISIONS 10 JOURS :\n'+window._potagerForecast.map(d=>
+          d.label+' : '+Math.round(d.tmin)+'–'+Math.round(d.tmax)+'°C, '+d.rain.toFixed(1)+'mm, vent '+Math.round(d.wind)+'km/h'+(d.gardenOk?' ✅':' ❌')
+        ).join('\n');
+      }
+
+      const now=new Date();
+      const monthNames=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+      const potagerSys=`Tu es un expert en permaculture, agroforesterie et jardinage adapté au changement climatique. Tu gères un jardin-forêt à Capdenac-Gare (Aveyron, vallée du Lot).
+
+${GARDEN_PROFILE}
+
+MÉTÉO ACTUELLE :
+${weatherCtx}
+
+Nous sommes le ${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}.
+
+GÉNÈRE UNE LISTE DE TÂCHES structurée. Format strict :
+
+[TACHES]
+Chaque tâche sur une ligne, format :
+CAT|PRIORITÉ|TÂCHE|DÉTAIL|MÉTÉO
+- CAT = emoji catégorie (🌱semis 🪴plantation 🔪taille ✂️bouture 💧arrosage 🧹entretien 🌿récolte 📦commande 🛡️protection 🌾couverture 🧪conservation)
+- PRIORITÉ = 1(urgent cette semaine) 2(ce mois) 3(à planifier)
+- TÂCHE = action courte
+- DÉTAIL = explication avec quantités, emplacements, timing
+- MÉTÉO = recommandation météo basée sur les prévisions ("idéal mardi, sec et 22°C" ou "attendre après les pluies de jeudi")
+
+RÈGLES :
+- Inclure la TAILLE des fruitiers si c'est la saison (à pépins = hiver, à noyau = été après récolte)
+- L'AIL doit être planté entre mi et fin septembre MAXIMUM à Capdenac — URGENT si on est en septembre
+- Les commandes reçues doivent être plantées rapidement — détailler les emplacements et associations
+- Pour chaque tâche de plantation, indiquer les ASSOCIATIONS bénéfiques (permaculture)
+- Adapter au climat RÉEL (pas théorique) : PDT tôt car chaleurs juin, cucurbitacées en sol chaud mai-juin
+- Inclure les récoltes en cours et la conservation (lactofermentation, séchage, conserves)
+- Inclure l'entretien courant (paillage, arrosage, désherbage, compost)
+- Inclure les engrais verts et couvre-sols à semer en automne
+- Max 25 tâches, classées par priorité
+
+[/TACHES]
+[POTAGER_SUMMARY]
+2-3 phrases résumant les priorités du moment pour le jardin.
+[/POTAGER_SUMMARY]
+
+Langue : français. COMMENCE par [TACHES].`;
+
+      try{
+        let text='';
+        const response=await fetch('https://api.openai.com/v1/responses',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+          body:JSON.stringify({model:'gpt-4o',tools:[{type:'web_search_preview',search_context_size:'low'}],instructions:potagerSys,input:'Génère les tâches pour le jardin ce mois-ci. Commence par [TACHES].'})
+        });
+        if(response.ok){
+          const data=await response.json();
+          if(data.output){for(const item of data.output){if(item.type==='message'&&item.content){for(const c of item.content){if(c.type==='output_text')text+=c.text}}}}
+        }
+        if(!text){
+          const r2=await fetch('https://api.openai.com/v1/chat/completions',{
+            method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+            body:JSON.stringify({model:'gpt-4o',messages:[{role:'system',content:potagerSys},{role:'user',content:'Génère les tâches pour le jardin ce mois-ci. Commence par [TACHES].'}],max_tokens:3000})
+          });
+          if(r2.ok){const d2=await r2.json();text=d2.choices?.[0]?.message?.content||''}
+        }
+
+        text=text.replace(/\*\*/g,'').replace(/\*/g,'').trim();
+        const cached={ts:Date.now(),text:text};
+        localStorage.setItem(POTAGER_CACHE_KEY,JSON.stringify(cached));
+        await gasPost({action:'setPotager',ts:cached.ts,text:cached.text});
+
+        parsePotagerTasks(text);
+        renderPotagerTasks();
+        updatePotagerAge(cached.ts);
+      }catch(err){
+        el.innerHTML='<div class="potager-empty">❌ '+err.message+'</div>';
+      }
+      btn.disabled=false;
+    }
+
+    function updatePotagerAge(ts){
+      const ageEl=document.getElementById('potagerAge');
+      if(!ageEl||!ts)return;
+      const ago=Date.now()-ts;
+      const h=Math.floor(ago/3600000);
+      const d=Math.floor(ago/86400000);
+      ageEl.textContent='Dernière analyse : '+(d>0?'il y a '+d+'j':h>0?'il y a '+h+'h':'à l\'instant');
+    }
+
+    function parsePotagerTasks(raw){
+      potagerTasks=[];
+      const match=raw.match(/\[TACHES\]\s*([\s\S]*?)(?:\[\/TACHES\]|\[POTAGER_SUMMARY\]|$)/i);
+      if(!match)return;
+      // Load done status from localStorage
+      let doneMap={};
+      try{doneMap=JSON.parse(localStorage.getItem('macro-dash-potager-done')||'{}')}catch(e){}
+
+      const lines=match[1].split('\n').filter(l=>l.trim().includes('|'));
+      lines.forEach((line,idx)=>{
+        const parts=line.trim().split('|').map(s=>s.trim());
+        if(parts.length>=4){
+          const id='task-'+idx;
+          potagerTasks.push({
+            id:id,
+            cat:parts[0]||'🌱',
+            priority:parseInt(parts[1])||2,
+            task:parts[2]||'',
+            detail:parts[3]||'',
+            weather:parts[4]||'',
+            done:!!doneMap[id]
+          });
+        }
+      });
+      potagerTasks.sort((a,b)=>a.priority-b.priority);
+
+      // Parse summary
+      const sumMatch=raw.match(/\[POTAGER_SUMMARY\]\s*([\s\S]*?)(?:\[\/POTAGER_SUMMARY\]|$)/i);
+      window._potagerSummary=sumMatch?sumMatch[1].trim():'';
+    }
+
+    function renderPotagerTasks(){
+      const monthEl=document.getElementById('potagerMonthContent');
+      const allEl=document.getElementById('potagerAllContent');
+      if(!monthEl||!allEl)return;
+
+      if(potagerTasks.length===0){
+        monthEl.innerHTML='<div class="potager-empty">Aucune tâche générée. Clique sur Actualiser.</div>';
+        allEl.innerHTML=monthEl.innerHTML;
+        return;
+      }
+
+      const summary=window._potagerSummary||'';
+      const sumHtml=summary?'<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:.8rem;padding:.5rem .7rem;background:var(--bg-card-alt);border-radius:7px;border-left:3px solid var(--accent)">'+summary+'</div>':'';
+
+      // Month view: priority 1 and 2
+      const monthTasks=potagerTasks.filter(t=>t.priority<=2);
+      const allTasks=potagerTasks;
+
+      monthEl.innerHTML=sumHtml+renderTaskList(monthTasks);
+      allEl.innerHTML=renderTaskList(allTasks);
+    }
+
+    function renderTaskList(tasks){
+      if(tasks.length===0)return '<div class="potager-empty">Aucune tâche.</div>';
+      const prioLabel={1:'URGENT',2:'Ce mois',3:'À planifier'};
+      const prioClass={1:'tag-urgent',2:'',3:''};
+      return tasks.map(t=>{
+        const checkedClass=t.done?'checked':'';
+        const doneClass=t.done?'done':'';
+        return '<div class="potager-task '+doneClass+'" id="'+t.id+'">'+
+          '<div class="potager-task-check '+checkedClass+'" onclick="togglePotagerTask(\''+t.id+'\')">'+(t.done?'✓':'')+'</div>'+
+          '<div class="potager-task-body">'+
+            '<div class="potager-task-text">'+t.cat+' '+t.task+'</div>'+
+            (t.detail?'<div class="potager-task-detail">'+t.detail+'</div>':'')+
+            '<div class="potager-task-meta">'+
+              '<span class="potager-task-tag tag-cat">'+prioLabel[t.priority]+'</span>'+
+              (t.weather?'<span class="potager-task-tag tag-weather">☀️ '+t.weather+'</span>':'')+
+            '</div>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+    }
+
+    function togglePotagerTask(id){
+      const task=potagerTasks.find(t=>t.id===id);
+      if(!task)return;
+      task.done=!task.done;
+      // Save done state
+      let doneMap={};
+      try{doneMap=JSON.parse(localStorage.getItem('macro-dash-potager-done')||'{}')}catch(e){}
+      if(task.done){doneMap[id]=true}else{delete doneMap[id]}
+      localStorage.setItem('macro-dash-potager-done',JSON.stringify(doneMap));
+      // Also save to Google Sheets
+      gasPost({action:'setPotagerDone',doneMap:doneMap});
+      renderPotagerTasks();
+    }
 
     /* ═══════════════════════════════
        TRADINGVIEW
