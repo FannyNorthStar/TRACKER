@@ -1703,7 +1703,7 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
     ═══════════════════════════════ */
     async function loadPotagerWeather(){
       try{
-        const r=await fetch('https://api.open-meteo.com/v1/meteofrance?latitude=44.58&longitude=2.07&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max&timezone=Europe/Paris&forecast_days=10');
+        const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max&timezone=Europe/Paris&forecast_days=10');
         if(!r.ok)return;
         const d=await r.json();
         const grid=document.getElementById('potagerWeatherGrid');
