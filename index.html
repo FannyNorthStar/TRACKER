@@ -625,10 +625,37 @@ currencies:X
 [/STATUS]
 (X = 1 à 4 pour chaque section. Évalue chaque domaine individuellement.)
 [ACTIONS]
-3-5 lignes commençant par •. Concrètes, avec produit + quantité + timing. Adapter à la saison (bois au printemps, crues en automne, gaz bouteille moins cher en été). Si RAS : "• Indicateurs dans les normes, pas d'action."
+3-5 actions ULTRA-CONCRÈTES et DATÉES. Chaque action = un VERBE + un OBJET PRÉCIS + un SEUIL ou PRIX + un TIMING.
+
+ACTIONS INTERDITES (trop vagues, zéro valeur ajoutée) :
+❌ "Surveiller les prix du gaz" → Tout le monde sait ça.
+❌ "Rester informé des développements géopolitiques" → Conseil de journal télévisé.
+❌ "Évaluer les stocks de produits alimentaires" → N'importe qui pourrait écrire ça sans données.
+❌ "Anticiper d'éventuelles hausses" → Aucune info actionnable.
+
+ACTIONS EXIGÉES (spécifiques, chiffrées, timing clair) :
+✅ "Gaz bouteille : le propane est à 2,15€/kg, prochain ajustement réglementaire le 1er juillet — racheter une bouteille d'avance CETTE SEMAINE si stock < 2."
+✅ "Bois de chauffage : les prix livraison montent de 8% dès juin (demande estivale) — commander avant fin mai si pas encore fait (budget ~350€ la stère chêne livrée, prévoir 5-6 stères)."
+✅ "SP95 à 1.87€/L en Aveyron (+4 cts en 2 semaines) — faire le plein maintenant, tendance haussière liée au Brent qui repasse au-dessus de 80$."
+✅ "Farine/pâtes : le blé CBOT est à +12% sur 3 mois — acheter 5-10 kg de farine et pâtes stockables cette semaine, les prix en rayon suivront dans 6-8 semaines."
+✅ "Niveau du Lot à Capdenac : 1.2m (normal). Pas d'alerte crue. RAS côté inondation."
+✅ "Pas d'action urgente cette semaine — tous les indicateurs sont dans les normes saisonnières."
+
+RÈGLE : si tu ne peux pas donner un PRIX, une DATE ou un SEUIL dans l'action, c'est que tu n'as pas assez cherché. Cherche plus. Si vraiment rien de notable : "• RAS cette semaine — indicateurs stables, pas d'action."
 [/ACTIONS]
 [ANALYSE]
-Catégories dynamiques (emoji+titre suivi de [1] à [4] pour le niveau de risque de cette catégorie, ex: "⚡ Énergie [3]"). 2-4 bullets chacune. Terminer par 👀 À surveiller. Max 500 mots. Donne du CONTEXTE et de la PROFONDEUR — pas juste "X a baissé de Y%" mais le pourquoi géopolitique/politique/économique derrière. Pas de sources/URLs.
+Catégories dynamiques (emoji+titre suivi de [1] à [4] pour le niveau de risque de cette catégorie, ex: "⚡ Énergie [3]"). 2-4 bullets chacune. Terminer par 👀 À surveiller. Max 600 mots.
+
+PROFONDEUR EXIGÉE — chaque bullet doit contenir :
+1. Le FAIT (asset + direction + chiffre exact)
+2. La CAUSE (géopolitique, décision politique, donnée éco)
+3. L'IMPACT CONCRET pour un particulier en France rurale (prix à la pompe, rayon supermarché, facture énergie, emploi local)
+
+BULLET INTERDIT : "Le pétrole est en hausse, ce qui pourrait impacter les prix" → Zéro info.
+BULLET EXIGÉ : "Brent à 83.4$ (+6% sur 1 mois) : OPEP+ prolonge les coupes de 500k b/j jusqu'en septembre + tensions Hormuz après saisie d'un tanker. Impact : SP95 devrait passer de 1.84 à ~1.92€/L d'ici 2-3 semaines en Aveyron."
+
+Pour 👀 À surveiller : UNIQUEMENT des DATES PRÉCISES d'événements à venir (réunion Fed le X, publication chiffres emploi le X, échéance politique le X, date de récolte, prochaine décision OPEP). Pas de "surveiller l'évolution de…"
+Pas de sources/URLs.
 RÈGLE CLÉ : chaque chiffre = un fait + son POURQUOI (géopolitique, décision politique, données éco). Interdit de citer un mouvement sans cause.
 [/ANALYSE]
 
@@ -638,13 +665,13 @@ Langue : français.`;
 
 DONNÉES À CHERCHER :
 Stress : VIX, Or, DXY, Taux US 10 ans, Cuivre
-Énergie : Brent, WTI, Gaz naturel, prix essence SP95 + gazole France, propane/butane France
-Alimentation : Blé, Maïs, Soja, Riz, Café, Cacao, Sucre + indice FAO des prix alimentaires (dernier chiffre publié)
+Énergie : Brent, WTI, Gaz naturel, prix essence SP95 + gazole France AUJOURD'HUI (chercher "prix SP95 France" ou "prix carburant Aveyron"), prix propane/butane bouteille France (chercher "prix gaz bouteille propane France"), prochaine date d'ajustement réglementaire gaz
+Alimentation : Blé, Maïs, Soja, Riz, Café, Cacao, Sucre + indice FAO des prix alimentaires (dernier chiffre publié). Pour chaque matière en hausse >5% sur 1 mois : estimer le DÉLAI et l'IMPACT en rayon France (ex: blé +10% → farine +5-8% en rayon dans 6-8 semaines)
 Marchés : S&P 500, CAC 40, Nasdaq 100, EEM, FXI (Chine)
 Devises : EUR/USD, Bitcoin
-Logistique : Baltic Dry Index, tensions Hormuz/Suez/mer Rouge
-Climat : statut ENSO, alertes Météo-France Lot/Aveyron, VÉRIFIER vigicrues.gouv.fr pour le niveau actuel du Lot
-Énergie France : électricité spot, uranium/nucléaire
+Logistique : Baltic Dry Index, tensions Hormuz/Suez/mer Rouge, surcoûts fret conteneur
+Climat : statut ENSO, alertes Météo-France Lot/Aveyron, VÉRIFIER vigicrues.gouv.fr pour le niveau actuel du Lot à Capdenac
+Énergie France : électricité spot, uranium/nucléaire, prochaine hausse tarifaire EDF annoncée
 
 CONTEXTE EXIGÉ pour chaque mouvement :
 — Géopolitique : Houthis/mer Rouge, Ukraine-Russie (gaz, blé, oléoducs), Iran/Hormuz, Taïwan/semi-conducteurs
@@ -668,24 +695,24 @@ markets:X
 currencies:X
 [/STATUS]
 [ACTIONS]
-• action concrète 1
-• action concrète 2
-• action concrète 3
+• action ULTRA-CONCRÈTE avec prix/seuil/date (voir instructions système)
+• action 2
+• action 3
 [/ACTIONS]
 [ANALYSE]
 🚨 Stress du marché [X]
-• bullet avec fait + chiffre + contexte géopolitique/politique
+• fait + chiffre EXACT + cause géopolitique/politique + impact concret France
 • bullet
 
 ⚡ Énergie [X]
-• bullet
+• asset + prix exact + cause + impact prix pompe/gaz bouteille en €
 • bullet
 
 (autres catégories dynamiques avec emoji, chacune avec [1-4])
 
 👀 À surveiller
-• échéance 1
-• échéance 2
+• DATE PRÉCISE + événement (ex: "18 juin : décision Fed sur les taux")
+• DATE PRÉCISE + événement
 [/ANALYSE]
 
 COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
