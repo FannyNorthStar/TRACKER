@@ -344,10 +344,70 @@
     .potager-ajout-del:hover{color:#ef4444}
     .potager-ajout-hint{font-size:.58rem;color:var(--text-hint);font-style:italic;margin-bottom:.6rem}
 
+    /* ── How-To Panel ── */
+    .potager-howto-btn{background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:5px;padding:.2rem .5rem;font-size:.58rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.25rem;margin-left:.3rem}
+    .potager-howto-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .potager-howto-btn.loading{opacity:.6;cursor:wait}
+    .potager-howto-btn.open{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .potager-howto-panel{display:none;margin-top:.5rem;padding:.65rem .8rem;background:var(--bg-card-alt);border:1px solid var(--border);border-radius:8px;font-size:.68rem;line-height:1.65;color:var(--text);animation:fadeIn .25s ease}
+    .potager-howto-panel.open{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    .potager-howto-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.4rem}
+    @media(max-width:640px){.potager-howto-grid{grid-template-columns:1fr}}
+    .potager-howto-card{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:.5rem .65rem}
+    .potager-howto-card-title{font-weight:700;font-size:.66rem;margin-bottom:.25rem;display:flex;align-items:center;gap:.3rem}
+    .potager-howto-card ul{margin:0;padding-left:.9rem;list-style:disc;font-size:.64rem;color:var(--text-muted)}
+    .potager-howto-card li{margin-bottom:.15rem}
+    .potager-howto-steps{margin-top:.4rem;padding:.5rem .65rem;background:var(--bg);border:1px solid var(--border);border-radius:7px}
+    .potager-howto-steps-title{font-weight:700;font-size:.66rem;margin-bottom:.25rem;display:flex;align-items:center;gap:.3rem}
+    .potager-howto-steps ol{margin:0;padding-left:1.1rem;font-size:.64rem;color:var(--text-muted);line-height:1.6}
+    .potager-howto-steps li{margin-bottom:.15rem}
+    .potager-howto-warn{margin-top:.4rem;padding:.4rem .6rem;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:6px;font-size:.64rem;color:#dc2626;display:flex;align-items:flex-start;gap:.3rem}
+    .potager-howto-spinner{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+
     @media(max-width:640px){
       .potager-weather-grid{gap:.3rem}
       .potager-inv-grid{grid-template-columns:1fr}
     }
+
+    /* ── Plan du Jardin ── */
+    .plan-zone{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;margin-bottom:.75rem;overflow:hidden}
+    .plan-zone-header{display:flex;align-items:center;justify-content:space-between;padding:.7rem .9rem;cursor:pointer;user-select:none;transition:background .2s}
+    .plan-zone-header:hover{background:var(--bg-card-alt)}
+    .plan-zone-title{font-size:.76rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:.4rem}
+    .plan-zone-count{font-size:.55rem;font-weight:500;background:var(--tag-bg);color:var(--tag-text);padding:.1rem .35rem;border-radius:3px}
+    .plan-zone-chevron{font-size:.65rem;color:var(--text-muted);transition:transform .25s}
+    .plan-zone-chevron.open{transform:rotate(90deg)}
+    .plan-zone-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+    .plan-zone-body.open{max-height:5000px}
+    .plan-zone-inner{padding:.1rem .9rem .8rem}
+    .plan-plant-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.45rem;margin-bottom:.5rem}
+    .plan-plant{background:var(--bg-card-alt);border:1px solid var(--border);border-radius:7px;padding:.45rem .6rem;font-size:.68rem;line-height:1.5}
+    .plan-plant-name{font-weight:700;font-size:.7rem;display:flex;align-items:center;gap:.3rem;margin-bottom:.15rem}
+    .plan-plant-status{font-size:.48rem;font-weight:600;padding:.08rem .25rem;border-radius:3px;margin-left:auto;flex-shrink:0}
+    .plan-plant-status.s-active{background:rgba(34,197,94,.12);color:#16a34a}
+    .plan-plant-status.s-dormant{background:rgba(156,163,175,.12);color:#6b7280}
+    .plan-plant-status.s-coming{background:rgba(59,130,246,.12);color:#2563eb}
+    .plan-plant-status.s-harvest{background:rgba(234,179,8,.12);color:#ca8a04}
+    .plan-plant-detail{font-size:.62rem;color:var(--text-muted)}
+    .plan-plant-succession{font-size:.6rem;color:var(--accent);margin-top:.2rem;font-style:italic}
+    .plan-notes-section{margin-top:.5rem}
+    .plan-notes-title{font-size:.68rem;font-weight:600;color:var(--text-muted);margin-bottom:.3rem;display:flex;align-items:center;gap:.3rem}
+    .plan-note-entry{display:flex;align-items:flex-start;gap:.4rem;padding:.35rem .55rem;margin-bottom:.25rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:.64rem;border-left:3px solid var(--accent)}
+    .plan-note-date{color:var(--text-hint);flex-shrink:0;font-size:.56rem;min-width:42px}
+    .plan-note-text{color:var(--text);flex:1;line-height:1.5}
+    .plan-note-del{background:none;border:none;color:var(--text-hint);cursor:pointer;font-size:.65rem;padding:0 .2rem;flex-shrink:0}
+    .plan-note-del:hover{color:#ef4444}
+    .plan-add-note{display:flex;gap:.35rem;margin-top:.4rem}
+    .plan-add-input{flex:1;padding:.4rem .6rem;border:1px solid var(--border);border-radius:6px;font-size:.66rem;font-family:inherit;background:var(--bg);color:var(--text)}
+    .plan-add-input::placeholder{color:var(--text-hint)}
+    .plan-add-input:focus{outline:none;border-color:var(--accent)}
+    .plan-add-btn{background:var(--btn-bg);color:var(--btn-text);border:none;border-radius:6px;padding:.35rem .65rem;font-size:.62rem;font-weight:600;font-family:inherit;cursor:pointer;flex-shrink:0}
+    .plan-toolbar{display:flex;gap:.4rem;align-items:center;margin-bottom:.8rem;flex-wrap:wrap}
+    .plan-gen-btn{padding:.35rem .8rem;font-size:.68rem}
+    .plan-age{font-size:.6rem;color:var(--text-hint)}
+    .plan-summary{font-size:.72rem;color:var(--text-muted);margin-bottom:.8rem;padding:.5rem .7rem;background:var(--bg-card-alt);border-radius:7px;border-left:3px solid var(--accent);line-height:1.6}
+    @media(max-width:640px){.plan-plant-grid{grid-template-columns:1fr}}
 
     /* ── History section ── */
     .history-section{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
@@ -649,7 +709,7 @@
 
     <!-- Ajout dynamique -->
     <div class="potager-add-bar">
-      <input type="text" id="potagerAddInput" class="potager-add-input" placeholder="Ex: Acheté graines mâche + épinard d'hiver, ou : Reçu commande pépinière Jardin Forêt" onkeydown="if(event.key==='Enter')addPotagerItem()">
+      <input type="text" id="potagerAddInput" class="potager-add-input" placeholder="Ex: Ajouter un grenadier · Acheté graines mâche · Reçu commande pépinière" onkeydown="if(event.key==='Enter')addPotagerItem()">
       <button class="ai-btn" onclick="addPotagerItem()" style="flex-shrink:0">+ Ajouter</button>
     </div>
     <div id="potagerAjoutsList" class="potager-ajouts-list"></div>
@@ -665,6 +725,7 @@
       <button class="potager-sub-btn active" onclick="switchPotagerTab('month')">🗓️ Ce mois-ci</button>
       <button class="potager-sub-btn" onclick="switchPotagerTab('all')">📋 Tout</button>
       <button class="potager-sub-btn" onclick="switchPotagerTab('inventory')">🌳 Inventaire</button>
+      <button class="potager-sub-btn" onclick="switchPotagerTab('plan')">📐 Plan</button>
     </div>
 
     <!-- Sub-tab: Ce mois-ci -->
@@ -680,6 +741,15 @@
     <!-- Sub-tab: Inventaire -->
     <div id="potager-inventory" class="potager-subtab" style="display:none">
       <div id="potagerInventory"></div>
+    </div>
+
+    <!-- Sub-tab: Plan -->
+    <div id="potager-plan" class="potager-subtab" style="display:none">
+      <div class="plan-toolbar">
+        <button class="ai-btn plan-gen-btn" id="planGenBtn" onclick="generatePlan(true)">🤖 Générer / Actualiser le plan</button>
+        <span class="plan-age" id="planAge"></span>
+      </div>
+      <div id="planContent"><div class="potager-empty">Clique sur « Générer » pour créer le plan du jardin basé sur ton inventaire et tes notes.</div></div>
     </div>
 
     <div class="potager-ai-meta" id="potagerMeta"></div>
@@ -1694,8 +1764,10 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
     function getWeekNumber(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));return Math.ceil(((t-new Date(Date.UTC(t.getUTCFullYear(),0,1)))/86400000+1)/7)}
 
     function switchPotagerTab(sub){
-      document.querySelectorAll('.potager-sub-btn').forEach((b,i)=>b.classList.toggle('active',['month','all','inventory'][i]===sub));
-      ['month','all','inventory'].forEach(s=>{const el=document.getElementById('potager-'+s);if(el)el.style.display=s===sub?'block':'none'});
+      const tabs=['month','all','inventory','plan'];
+      document.querySelectorAll('.potager-sub-btn').forEach((b,i)=>b.classList.toggle('active',tabs[i]===sub));
+      tabs.forEach(s=>{const el=document.getElementById('potager-'+s);if(el)el.style.display=s===sub?'block':'none'});
+      if(sub==='plan')loadPlan(false);
     }
 
     /* ═══════════════════════════════
@@ -2002,6 +2074,9 @@ Langue : français. COMMENCE par [TACHES].`;
       return tasks.map(t=>{
         const checkedClass=t.done?'checked':'';
         const doneClass=t.done?'done':'';
+        const howtoId='howto-'+t.id;
+        const hasCached=!!howtoCache[t.id];
+        const btnClass='potager-howto-btn'+(hasCached?' open':'');
         return '<div class="potager-task '+doneClass+'" id="'+t.id+'">'+
           '<div class="potager-task-check '+checkedClass+'" onclick="togglePotagerTask(\''+t.id+'\')">'+(t.done?'✓':'')+'</div>'+
           '<div class="potager-task-body">'+
@@ -2010,7 +2085,9 @@ Langue : français. COMMENCE par [TACHES].`;
             '<div class="potager-task-meta">'+
               '<span class="potager-task-tag tag-cat">'+prioLabel[t.priority]+'</span>'+
               (t.weather?'<span class="potager-task-tag tag-weather">☀️ '+t.weather+'</span>':'')+
+              '<button class="'+btnClass+'" id="btn-'+howtoId+'" onclick="toggleHowTo(\''+t.id+'\')">📖 Comment faire</button>'+
             '</div>'+
+            '<div class="potager-howto-panel'+(hasCached?' open':'')+'" id="'+howtoId+'">'+(hasCached?renderHowToContent(howtoCache[t.id]):'')+'</div>'+
           '</div>'+
         '</div>';
       }).join('');
@@ -2026,6 +2103,456 @@ Langue : français. COMMENCE par [TACHES].`;
       localStorage.setItem('macro-dash-potager-done',JSON.stringify(doneMap));
       gasPost({action:'setPotagerDone',doneMap:doneMap});
       renderPotagerTasks();
+    }
+
+    /* ═══════════════════════════════
+       POTAGER — HOW TO
+    ═══════════════════════════════ */
+    let howtoCache={};
+    try{howtoCache=JSON.parse(localStorage.getItem('macro-dash-potager-howto')||'{}')}catch(e){howtoCache={}}
+
+    function toggleHowTo(taskId){
+      const panel=document.getElementById('howto-'+taskId);
+      const btn=document.getElementById('btn-howto-'+taskId);
+      if(!panel||!btn)return;
+      if(panel.classList.contains('open')){
+        panel.classList.remove('open');
+        btn.classList.remove('open');
+        return;
+      }
+      if(howtoCache[taskId]){
+        panel.innerHTML=renderHowToContent(howtoCache[taskId]);
+        panel.classList.add('open');
+        btn.classList.add('open');
+        return;
+      }
+      loadHowTo(taskId);
+    }
+
+    async function loadHowTo(taskId){
+      const apiKey=getApiKey();
+      if(!apiKey){document.getElementById('settingsBtn').click();return}
+      const task=potagerTasks.find(t=>t.id===taskId);
+      if(!task)return;
+      const panel=document.getElementById('howto-'+taskId);
+      const btn=document.getElementById('btn-howto-'+taskId);
+      if(!panel||!btn)return;
+      btn.classList.add('loading');
+      panel.innerHTML='<div style="display:flex;align-items:center;gap:.5rem;font-size:.68rem;color:var(--text-muted)"><span class="potager-howto-spinner"></span>Génération du guide…</div>';
+      panel.classList.add('open');
+
+      const howtoPrompt=`Tu es un expert en permaculture et jardinage adapté au climat de Capdenac-Gare (Aveyron, vallée du Lot, zone 8a-8b, étés très chauds et secs).
+
+Contexte jardin :
+${GARDEN_PROFILE}
+
+TÂCHE : ${task.cat} ${task.task}
+DÉTAIL : ${task.detail}
+
+Génère un guide pratique COMPLET pour cette tâche. Format JSON strict, pas de markdown, pas de backticks :
+{
+  "steps": ["Étape 1 détaillée", "Étape 2", "..."],
+  "avoid": ["Erreur 1 à éviter", "Erreur 2", "..."],
+  "companions": ["Plante compagne 1 (pourquoi)", "Plante compagne 2 (pourquoi)", "..."],
+  "incompatible": ["Plante incompatible 1 (pourquoi)", "Plante incompatible 2 (pourquoi)", "..."],
+  "placement": "Où planter/agir : type de sol idéal, orientation (soleil/mi-ombre/ombre), emplacement recommandé dans le jardin (potager bas/haut/ville), drainage, espacement",
+  "timing": "Quand exactement faire cette tâche à Capdenac : mois, moment de la journée, conditions météo idéales, lune si pertinent",
+  "tips": "1-2 astuces de permaculteur expérimenté spécifiques à cette tâche et ce climat"
+}
+
+RÈGLES :
+- Si c'est une taille : expliquer précisément OÙ couper (au-dessus de quel bourgeon, quel type de bois), à quel angle, quels outils
+- Si c'est un semis/plantation : profondeur exacte, espacement, préparation du sol, arrosage initial
+- Pour TOUTES les plantes mentionnées : donner les plantes compagnes ET incompatibles en permaculture
+- Adapter au climat local (chaleurs précoces, sécheresse estivale, crues hivernales)
+- "steps" doit avoir 3-8 étapes concrètes
+- "avoid" doit avoir 2-4 erreurs courantes
+- "companions" et "incompatible" : 3-6 plantes chacun avec la raison entre parenthèses
+- Réponse UNIQUEMENT en JSON valide, rien d'autre`;
+
+      try{
+        const response=await fetch('https://api.openai.com/v1/chat/completions',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+          body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'user',content:howtoPrompt}],max_tokens:1500,temperature:0.3})
+        });
+        if(!response.ok)throw new Error('Erreur API ('+response.status+')');
+        const data=await response.json();
+        let text=data.choices?.[0]?.message?.content||'';
+        text=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+        const parsed=JSON.parse(text);
+        howtoCache[taskId]=parsed;
+        localStorage.setItem('macro-dash-potager-howto',JSON.stringify(howtoCache));
+        panel.innerHTML=renderHowToContent(parsed);
+        btn.classList.remove('loading');
+        btn.classList.add('open');
+      }catch(err){
+        panel.innerHTML='<div style="font-size:.68rem;color:#dc2626">❌ '+err.message+'</div>';
+        btn.classList.remove('loading');
+      }
+    }
+
+    function renderHowToContent(d){
+      if(!d)return '';
+      let html='';
+
+      // Steps
+      if(d.steps&&d.steps.length){
+        html+='<div class="potager-howto-steps"><div class="potager-howto-steps-title">🛠️ Comment faire</div><ol>'+
+          d.steps.map(s=>'<li>'+escHtml(s)+'</li>').join('')+'</ol></div>';
+      }
+
+      // Grid: companions + incompatible
+      html+='<div class="potager-howto-grid">';
+      if(d.companions&&d.companions.length){
+        html+='<div class="potager-howto-card"><div class="potager-howto-card-title">🤝 Plantes compagnes</div><ul>'+
+          d.companions.map(c=>'<li>'+escHtml(c)+'</li>').join('')+'</ul></div>';
+      }
+      if(d.incompatible&&d.incompatible.length){
+        html+='<div class="potager-howto-card"><div class="potager-howto-card-title">⛔ À éloigner</div><ul>'+
+          d.incompatible.map(c=>'<li>'+escHtml(c)+'</li>').join('')+'</ul></div>';
+      }
+      html+='</div>';
+
+      // Placement
+      if(d.placement){
+        html+='<div class="potager-howto-card" style="margin-top:.5rem"><div class="potager-howto-card-title">📍 Où planter / Sol & Orientation</div><div style="font-size:.64rem;color:var(--text-muted);line-height:1.6">'+escHtml(d.placement)+'</div></div>';
+      }
+
+      // Timing
+      if(d.timing){
+        html+='<div class="potager-howto-card" style="margin-top:.5rem"><div class="potager-howto-card-title">📅 Quand</div><div style="font-size:.64rem;color:var(--text-muted);line-height:1.6">'+escHtml(d.timing)+'</div></div>';
+      }
+
+      // Avoid
+      if(d.avoid&&d.avoid.length){
+        html+='<div class="potager-howto-warn" style="margin-top:.5rem"><div><strong style="font-size:.64rem">⚠️ Erreurs à éviter</strong><ul style="margin:.2rem 0 0;padding-left:.9rem;list-style:disc;font-size:.62rem">'+
+          d.avoid.map(a=>'<li>'+escHtml(a)+'</li>').join('')+'</ul></div></div>';
+      }
+
+      // Tips
+      if(d.tips){
+        html+='<div style="margin-top:.5rem;padding:.4rem .6rem;background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.15);border-radius:6px;font-size:.64rem;color:var(--text)"><strong>💡 Astuce permaculture :</strong> '+escHtml(d.tips)+'</div>';
+      }
+
+      return html;
+    }
+
+    /* ═══════════════════════════════
+       POTAGER — PLAN DU JARDIN
+    ═══════════════════════════════ */
+    const PLAN_CACHE_KEY='macro-dash-plan';
+    const PLAN_NOTES_KEY='macro-dash-plan-notes';
+    const PLAN_TTL=14*24*60*60*1000;
+    let planData=null;
+    let planNotes={};
+    try{planNotes=JSON.parse(localStorage.getItem(PLAN_NOTES_KEY)||'{}')}catch(e){planNotes={}}
+
+    async function loadPlanNotes(){
+      try{
+        const data=await gasGet('getPlanNotes');
+        if(data&&data.notes){
+          planNotes=data.notes;
+          localStorage.setItem(PLAN_NOTES_KEY,JSON.stringify(planNotes));
+        }
+      }catch(e){}
+    }
+
+    async function savePlanNotes(){
+      localStorage.setItem(PLAN_NOTES_KEY,JSON.stringify(planNotes));
+      await gasPost({action:'setPlanNotes',notes:planNotes});
+    }
+
+    function addPlanNote(zoneId){
+      const input=document.getElementById('plan-input-'+zoneId);
+      if(!input)return;
+      const text=input.value.trim();
+      if(!text)return;
+      if(!planNotes[zoneId])planNotes[zoneId]=[];
+      planNotes[zoneId].push({date:new Date().toISOString(),text:text});
+      input.value='';
+      savePlanNotes();
+      renderPlan();
+    }
+
+    function removePlanNote(zoneId,idx){
+      if(!planNotes[zoneId])return;
+      planNotes[zoneId].splice(idx,1);
+      if(planNotes[zoneId].length===0)delete planNotes[zoneId];
+      savePlanNotes();
+      renderPlan();
+    }
+
+    async function loadPlan(force){
+      await loadPlanNotes();
+      if(!force){
+        try{
+          const remote=await gasGet('getPlan');
+          if(remote&&remote.ts&&(Date.now()-remote.ts<PLAN_TTL)){
+            planData=JSON.parse(remote.text||'null');
+            localStorage.setItem(PLAN_CACHE_KEY,JSON.stringify({ts:remote.ts,data:planData}));
+            renderPlan();
+            updatePlanAge(remote.ts);
+            return;
+          }
+        }catch(e){}
+        try{
+          const local=JSON.parse(localStorage.getItem(PLAN_CACHE_KEY)||'null');
+          if(local&&local.ts&&(Date.now()-local.ts<PLAN_TTL)&&local.data){
+            planData=local.data;
+            renderPlan();
+            updatePlanAge(local.ts);
+            return;
+          }
+        }catch(e){}
+      }
+      if(!force){renderPlan();return}
+      await generatePlan(true);
+    }
+
+    function updatePlanAge(ts){
+      const el=document.getElementById('planAge');
+      if(!el||!ts)return;
+      const ago=Date.now()-ts;
+      const h=Math.floor(ago/3600000);
+      const d=Math.floor(ago/86400000);
+      el.textContent='Dernier plan : '+(d>0?'il y a '+d+'j':h>0?'il y a '+h+'h':'à l\'instant');
+    }
+
+    async function generatePlan(force){
+      const apiKey=getApiKey();
+      if(!apiKey){document.getElementById('settingsBtn').click();return}
+      const el=document.getElementById('planContent');
+      const btn=document.getElementById('planGenBtn');
+      btn.disabled=true;
+      el.innerHTML='<div class="ai-loading"><div class="ai-spinner"></div>Génération du plan du jardin…</div>';
+
+      // Collect all notes for context
+      let notesCtx='';
+      for(const[zid,notes]of Object.entries(planNotes)){
+        if(notes.length>0){
+          notesCtx+='\nZone "'+zid+'" — notes récentes :\n';
+          notes.forEach(n=>{
+            const d=new Date(n.date);
+            notesCtx+='  - '+d.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})+' : '+n.text+'\n';
+          });
+        }
+      }
+
+      // Collect dynamic additions
+      let ajoutsCtx='';
+      if(potagerAjouts.length>0){
+        ajoutsCtx='\nAJOUTS RÉCENTS (non encore intégrés) :\n'+
+          potagerAjouts.map(a=>'- '+new Date(a.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' : '+a.text).join('\n');
+      }
+
+      const now=new Date();
+      const monthNames=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+      const planPrompt=`Tu es un expert en permaculture et agroforesterie. Tu gères le plan d'un jardin-forêt à Capdenac-Gare.
+
+${GARDEN_PROFILE}
+
+NOTES ET MODIFICATIONS DU JARDINIER :${notesCtx||'\nAucune note pour l\'instant.'}
+${ajoutsCtx}
+
+Nous sommes le ${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}.
+
+GÉNÈRE LE PLAN COMPLET DU JARDIN en JSON strict (pas de markdown, pas de backticks).
+
+Le plan doit refléter l'état ACTUEL du jardin en intégrant TOUTES les notes du jardinier.
+Quand une note dit "semé X au pied de Y" : X apparaît dans le plan avec sa localisation (au pied de Y), et quand Y sera arraché, le plan indique la succession.
+
+Format JSON :
+{
+  "summary": "2-3 phrases sur l'état actuel du jardin et les priorités",
+  "zones": [
+    {
+      "id": "potager-bas",
+      "name": "Potager bas (bord du Lot)",
+      "emoji": "🏞️",
+      "description": "Sol alluvial riche, inondable en hiver, plein soleil",
+      "plants": [
+        {
+          "name": "Nom de la plante/variété",
+          "status": "active|dormant|coming|harvest",
+          "statusLabel": "En place|Dormant|À planter|Récolte",
+          "detail": "Emplacement précis, état actuel, associations en place",
+          "succession": "Si applicable : quelle plante prendra le relais et quand (ex: 'Ail semé au pied, prendra le relais automne-hiver quand les concombres seront arrachés')"
+        }
+      ]
+    },
+    {
+      "id": "potager-haut",
+      "name": "Potager haut (buttes & fruitiers)",
+      "emoji": "⛰️",
+      "description": "Buttes permanentes, fruitiers, IBC récupération eau",
+      "plants": [...]
+    },
+    {
+      "id": "jardin-ville",
+      "name": "Jardin de ville (conteneurs)",
+      "emoji": "🏡",
+      "description": "Conteneurs, aromatiques, agrumes en pots",
+      "plants": [...]
+    },
+    {
+      "id": "fruitiers",
+      "name": "Verger & petits fruits",
+      "emoji": "🍎",
+      "description": "Fruitiers établis et petits fruits",
+      "plants": [...]
+    },
+    {
+      "id": "commandes",
+      "name": "Commandé — à planter",
+      "emoji": "📦",
+      "description": "Commandes en attente de plantation",
+      "plants": [...]
+    }
+  ]
+}
+
+RÈGLES :
+- Intégrer TOUTES les notes du jardinier dans le plan (nouvelles plantations, modifications, observations)
+- Quand une note mentionne une succession (ex: "ail semé au pied des concombres"), créer l'entrée avec le champ "succession" rempli
+- Pour les plantes annuelles en septembre : indiquer si elles sont en fin de cycle, en récolte, ou encore productives
+- Placer chaque plante dans la zone la plus probable d'après le GARDEN_PROFILE
+- "status" : active = en croissance/production, dormant = repos hivernal, coming = à planter bientôt, harvest = en récolte active
+- Regrouper les variétés similaires (ex: toutes les tomates en une entrée avec les variétés en détail)
+- Max 15-20 plantes par zone pour rester lisible
+- Réponse UNIQUEMENT en JSON valide`;
+
+      try{
+        const response=await fetch('https://api.openai.com/v1/chat/completions',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+          body:JSON.stringify({model:'gpt-4o',messages:[{role:'user',content:planPrompt}],max_tokens:4000,temperature:0.2})
+        });
+        if(!response.ok)throw new Error('Erreur API ('+response.status+')');
+        const data=await response.json();
+        let text=data.choices?.[0]?.message?.content||'';
+        text=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+        planData=JSON.parse(text);
+        const cached={ts:Date.now(),data:planData};
+        localStorage.setItem(PLAN_CACHE_KEY,JSON.stringify(cached));
+        await gasPost({action:'setPlan',ts:cached.ts,text:JSON.stringify(planData)});
+        renderPlan();
+        updatePlanAge(cached.ts);
+      }catch(err){
+        el.innerHTML='<div class="potager-empty">❌ '+err.message+'</div>';
+      }
+      btn.disabled=false;
+    }
+
+    function togglePlanZone(zoneId){
+      const body=document.getElementById('plan-body-'+zoneId);
+      const chev=document.getElementById('plan-chev-'+zoneId);
+      if(!body||!chev)return;
+      body.classList.toggle('open');
+      chev.classList.toggle('open');
+    }
+
+    function renderPlan(){
+      const el=document.getElementById('planContent');
+      if(!el)return;
+      if(!planData||!planData.zones||planData.zones.length===0){
+        if(!planData)el.innerHTML='<div class="potager-empty">Clique sur « Générer » pour créer le plan du jardin.</div>';
+        else el.innerHTML='<div class="potager-empty">Plan vide. Ajoute des notes et régénère.</div>';
+        return;
+      }
+
+      let html='';
+      if(planData.summary){
+        html+='<div class="plan-summary">'+escHtml(planData.summary)+'</div>';
+      }
+
+      planData.zones.forEach(zone=>{
+        const zid=zone.id||'zone-'+Math.random().toString(36).substr(2,5);
+        const plantCount=zone.plants?zone.plants.length:0;
+        const notes=planNotes[zid]||[];
+
+        html+='<div class="plan-zone">';
+        html+='<div class="plan-zone-header" onclick="togglePlanZone(\''+zid+'\')">';
+        html+='<div class="plan-zone-title">'+(zone.emoji||'📍')+' '+escHtml(zone.name)+' <span class="plan-zone-count">'+plantCount+' plantes</span></div>';
+        html+='<span class="plan-zone-chevron open" id="plan-chev-'+zid+'">▸</span>';
+        html+='</div>';
+        html+='<div class="plan-zone-body open" id="plan-body-'+zid+'">';
+        html+='<div class="plan-zone-inner">';
+
+        if(zone.description){
+          html+='<div style="font-size:.62rem;color:var(--text-hint);margin-bottom:.5rem;font-style:italic">'+escHtml(zone.description)+'</div>';
+        }
+
+        // Plants grid
+        if(zone.plants&&zone.plants.length){
+          html+='<div class="plan-plant-grid">';
+          zone.plants.forEach(p=>{
+            const statusCls={'active':'s-active','dormant':'s-dormant','coming':'s-coming','harvest':'s-harvest'}[p.status]||'s-active';
+            html+='<div class="plan-plant">';
+            html+='<div class="plan-plant-name">'+(p.name?escHtml(p.name):'?')+' <span class="plan-plant-status '+statusCls+'">'+(p.statusLabel||p.status||'')+'</span></div>';
+            if(p.detail)html+='<div class="plan-plant-detail">'+escHtml(p.detail)+'</div>';
+            if(p.succession)html+='<div class="plan-plant-succession">🔄 '+escHtml(p.succession)+'</div>';
+            html+='</div>';
+          });
+          html+='</div>';
+        }
+
+        // Notes section
+        html+='<div class="plan-notes-section">';
+        html+='<div class="plan-notes-title">📝 Notes & modifications</div>';
+        if(notes.length>0){
+          notes.forEach((n,i)=>{
+            const d=new Date(n.date);
+            const ds=d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+            html+='<div class="plan-note-entry">';
+            html+='<span class="plan-note-date">'+ds+'</span>';
+            html+='<span class="plan-note-text">'+escHtml(n.text)+'</span>';
+            html+='<button class="plan-note-del" onclick="removePlanNote(\''+zid+'\','+i+')" title="Supprimer">✕</button>';
+            html+='</div>';
+          });
+        }
+        html+='<div class="plan-add-note">';
+        html+='<input type="text" class="plan-add-input" id="plan-input-'+zid+'" placeholder="Ex: Semé radis entre les rangs de carottes · Arraché les courgettes" onkeydown="if(event.key===\'Enter\')addPlanNote(\''+zid+'\')">';
+        html+='<button class="plan-add-btn" onclick="addPlanNote(\''+zid+'\')">+ Note</button>';
+        html+='</div>';
+        html+='</div>'; // notes-section
+
+        html+='</div>'; // zone-inner
+        html+='</div>'; // zone-body
+        html+='</div>'; // zone
+      });
+
+      // Global notes (not tied to a zone)
+      const globalNotes=planNotes['global']||[];
+      html+='<div class="plan-zone">';
+      html+='<div class="plan-zone-header" onclick="togglePlanZone(\'global\')">';
+      html+='<div class="plan-zone-title">📋 Notes générales <span class="plan-zone-count">'+globalNotes.length+' notes</span></div>';
+      html+='<span class="plan-zone-chevron'+(globalNotes.length>0?' open':'')+'" id="plan-chev-global">▸</span>';
+      html+='</div>';
+      html+='<div class="plan-zone-body'+(globalNotes.length>0?' open':'')+'" id="plan-body-global">';
+      html+='<div class="plan-zone-inner">';
+      html+='<div style="font-size:.62rem;color:var(--text-hint);margin-bottom:.4rem;font-style:italic">Notes qui s\'appliquent à tout le jardin ou dont la zone n\'est pas précisée.</div>';
+      if(globalNotes.length>0){
+        globalNotes.forEach((n,i)=>{
+          const d=new Date(n.date);
+          const ds=d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+          html+='<div class="plan-note-entry">';
+          html+='<span class="plan-note-date">'+ds+'</span>';
+          html+='<span class="plan-note-text">'+escHtml(n.text)+'</span>';
+          html+='<button class="plan-note-del" onclick="removePlanNote(\'global\','+i+')" title="Supprimer">✕</button>';
+          html+='</div>';
+        });
+      }
+      html+='<div class="plan-add-note">';
+      html+='<input type="text" class="plan-add-input" id="plan-input-global" placeholder="Ex: Prévu de pailler tout le potager avec BRF en novembre" onkeydown="if(event.key===\'Enter\')addPlanNote(\'global\')">';
+      html+='<button class="plan-add-btn" onclick="addPlanNote(\'global\')">+ Note</button>';
+      html+='</div>';
+      html+='</div></div></div>';
+
+      html+='<div style="font-size:.62rem;color:var(--text-hint);margin-top:.6rem;line-height:1.6">💡 Ajoute des notes dans chaque zone pour documenter les changements (semis, arrachages, successions). Clique « Générer / Actualiser » pour que l\'IA intègre tes notes dans le plan.</div>';
+
+      el.innerHTML=html;
     }
 
     /* ═══════════════════════════════
