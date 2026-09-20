@@ -312,8 +312,15 @@
     .potager-section{margin-bottom:1.2rem}
     .potager-section-title{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
     .potager-task{display:flex;align-items:flex-start;gap:.6rem;padding:.5rem .7rem;margin-bottom:.35rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;font-size:.72rem;line-height:1.55;transition:opacity .3s}
-    .potager-task.done{opacity:.5}
+    .potager-task.done{opacity:.45}
     .potager-task.done .potager-task-text{text-decoration:line-through}
+    .potager-done-section{margin-top:.8rem;border-top:1px solid var(--border);padding-top:.5rem}
+    .potager-done-header{font-size:.7rem;font-weight:600;color:var(--text-hint);cursor:pointer;padding:.35rem .5rem;border-radius:6px;transition:background .2s;user-select:none}
+    .potager-done-header:hover{background:var(--bg-card-alt)}
+    .potager-done-chevron{display:inline-block;transition:transform .2s;font-size:.6rem}
+    .potager-done-section.open .potager-done-chevron{transform:rotate(90deg)}
+    .potager-done-body{display:none;margin-top:.3rem}
+    .potager-done-section.open .potager-done-body{display:block}
     .potager-task-check{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;cursor:pointer;flex-shrink:0;margin-top:.1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;background:var(--bg)}
     .potager-task-check:hover{border-color:var(--accent)}
     .potager-task-check.checked{background:var(--accent);border-color:var(--accent);color:#fff;font-size:.65rem}
@@ -2309,27 +2316,44 @@ Langue : français. COMMENCE par [TACHES].`;
 
     function renderTaskList(tasks){
       if(tasks.length===0)return '<div class="potager-empty">Aucune tâche.</div>';
+      const active=tasks.filter(t=>!t.done);
+      const done=tasks.filter(t=>t.done);
+      let html='';
+      if(active.length===0&&done.length>0){
+        html+='<div class="potager-empty" style="margin-bottom:.6rem">✅ Toutes les tâches sont terminées !</div>';
+      }
+      html+=active.map(t=>renderSingleTask(t)).join('');
+      if(done.length>0){
+        html+='<div class="potager-done-section">';
+        html+='<div class="potager-done-header" onclick="this.parentElement.classList.toggle(\'open\')">';
+        html+='<span class="potager-done-chevron">▸</span> ';
+        html+='✅ Terminé ('+done.length+')</div>';
+        html+='<div class="potager-done-body">'+done.map(t=>renderSingleTask(t)).join('')+'</div>';
+        html+='</div>';
+      }
+      return html;
+    }
+
+    function renderSingleTask(t){
       const prioLabel={1:'URGENT',2:'Ce mois',3:'À planifier'};
-      return tasks.map(t=>{
-        const checkedClass=t.done?'checked':'';
-        const doneClass=t.done?'done':'';
-        const howtoId='howto-'+t.id;
-        const hasCached=!!howtoCache[t.id];
-        const btnClass='potager-howto-btn'+(hasCached?' open':'');
-        return '<div class="potager-task '+doneClass+'" id="'+t.id+'">'+
-          '<div class="potager-task-check '+checkedClass+'" onclick="togglePotagerTask(\''+t.id+'\')">'+(t.done?'✓':'')+'</div>'+
-          '<div class="potager-task-body">'+
-            '<div class="potager-task-text">'+t.cat+' '+t.task+'</div>'+
-            (t.detail?'<div class="potager-task-detail">'+t.detail+'</div>':'')+
-            '<div class="potager-task-meta">'+
-              '<span class="potager-task-tag tag-cat">'+prioLabel[t.priority]+'</span>'+
-              (t.weather?'<span class="potager-task-tag tag-weather">☀️ '+t.weather+'</span>':'')+
-              '<button class="'+btnClass+'" id="btn-'+howtoId+'" onclick="toggleHowTo(\''+t.id+'\')">📖 Comment faire</button>'+
-            '</div>'+
-            '<div class="potager-howto-panel'+(hasCached?' open':'')+'" id="'+howtoId+'">'+(hasCached?renderHowToContent(howtoCache[t.id]):'')+'</div>'+
+      const checkedClass=t.done?'checked':'';
+      const doneClass=t.done?'done':'';
+      const howtoId='howto-'+t.id;
+      const hasCached=!!howtoCache[t.id];
+      const btnClass='potager-howto-btn'+(hasCached?' open':'');
+      return '<div class="potager-task '+doneClass+'" id="'+t.id+'">'+
+        '<div class="potager-task-check '+checkedClass+'" onclick="togglePotagerTask(\''+t.id+'\')">'+(t.done?'✓':'')+'</div>'+
+        '<div class="potager-task-body">'+
+          '<div class="potager-task-text">'+t.cat+' '+t.task+'</div>'+
+          (t.detail?'<div class="potager-task-detail">'+t.detail+'</div>':'')+
+          '<div class="potager-task-meta">'+
+            '<span class="potager-task-tag tag-cat">'+prioLabel[t.priority]+'</span>'+
+            (t.weather?'<span class="potager-task-tag tag-weather">☀️ '+t.weather+'</span>':'')+
+            '<button class="'+btnClass+'" id="btn-'+howtoId+'" onclick="toggleHowTo(\''+t.id+'\')">📖 Comment faire</button>'+
           '</div>'+
-        '</div>';
-      }).join('');
+          '<div class="potager-howto-panel'+(hasCached?' open':'')+'" id="'+howtoId+'">'+(hasCached?renderHowToContent(howtoCache[t.id]):'')+'</div>'+
+        '</div>'+
+      '</div>';
     }
 
     function togglePotagerTask(id){
