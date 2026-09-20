@@ -290,7 +290,7 @@
     .potager-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
     .potager-title{font-size:1rem;font-weight:700;color:var(--text)}
     .potager-date{font-size:.68rem;color:var(--text-hint)}
-    .potager-sub-nav{display:flex;gap:.3rem;margin-bottom:1rem}
+    .potager-sub-nav{display:flex;gap:.3rem;margin-bottom:1rem;flex-wrap:wrap}
     .potager-sub-btn{background:var(--bg-card-alt);color:var(--text-muted);border:1px solid var(--border);border-radius:6px;padding:.35rem .8rem;font-size:.68rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s}
     .potager-sub-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
     .potager-weather{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;margin-bottom:1rem}
@@ -1971,6 +1971,19 @@ Langue : français. COMMENCE par [TACHES].`;
           potagerAjouts.map(a=>'- '+new Date(a.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' : '+a.text).join('\n')+
           '\n\nPour chaque ajout, génère les tâches appropriées : quand semer/planter (selon la saison et la météo), où dans le jardin (associations permaculture), comment (profondeur, espacement, arrosage). Si c\'est un achat de graines pour une saison future, indiquer quand les semer.';
       }
+      // Inject plan notes for context (what was planted where, successions in progress)
+      try{
+        const pn=JSON.parse(localStorage.getItem(PLAN_NOTES_KEY)||'{}');
+        const noteLines=[];
+        for(const[zid,notes]of Object.entries(pn)){
+          if(notes&&notes.length>0){
+            notes.forEach(n=>noteLines.push(zid+' : '+n.text));
+          }
+        }
+        if(noteLines.length>0){
+          userMsg+='\n\nNOTES DU PLAN DE JARDIN (actions déjà faites, à prendre en compte) :\n'+noteLines.map(l=>'- '+l).join('\n');
+        }
+      }catch(e){}
 
       try{
         let text='';
@@ -2021,12 +2034,14 @@ Langue : français. COMMENCE par [TACHES].`;
       let doneMap={};
       try{doneMap=JSON.parse(localStorage.getItem('macro-dash-potager-done')||'{}')}catch(e){}
 
+      const newIds=new Set();
       const lines=match[1].split('\n').filter(l=>l.trim().includes('|'));
       lines.forEach((line,idx)=>{
         const parts=line.trim().split('|').map(s=>s.trim());
         if(parts.length>=4){
           // Content-based ID so checkboxes survive reordering
           const id='t-'+hashStr(parts[2]||''+idx);
+          newIds.add(id);
           potagerTasks.push({
             id:id,
             cat:parts[0]||'🌱',
@@ -2039,6 +2054,13 @@ Langue : français. COMMENCE par [TACHES].`;
         }
       });
       potagerTasks.sort((a,b)=>a.priority-b.priority);
+
+      // Clean howtoCache: remove entries for tasks that no longer exist
+      let cleaned=false;
+      for(const key of Object.keys(howtoCache)){
+        if(!newIds.has(key)){delete howtoCache[key];cleaned=true}
+      }
+      if(cleaned){try{localStorage.setItem('macro-dash-potager-howto',JSON.stringify(howtoCache))}catch(e){}}
 
       // Parse summary
       const sumMatch=raw.match(/\[POTAGER_SUMMARY\]\s*([\s\S]*?)(?:\[\/POTAGER_SUMMARY\]|$)/i);
@@ -2070,7 +2092,6 @@ Langue : français. COMMENCE par [TACHES].`;
     function renderTaskList(tasks){
       if(tasks.length===0)return '<div class="potager-empty">Aucune tâche.</div>';
       const prioLabel={1:'URGENT',2:'Ce mois',3:'À planifier'};
-      const prioClass={1:'tag-urgent',2:'',3:''};
       return tasks.map(t=>{
         const checkedClass=t.done?'checked':'';
         const doneClass=t.done?'done':'';
@@ -2176,18 +2197,26 @@ RÈGLES :
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
           body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'user',content:howtoPrompt}],max_tokens:1500,temperature:0.3})
         });
-        if(!response.ok)throw new Error('Erreur API ('+response.status+')');
+        if(!response.ok){
+          const errData=await response.json().catch(()=>({}));
+          throw new Error(errData.error?.message||'Erreur API ('+response.status+')');
+        }
         const data=await response.json();
         let text=data.choices?.[0]?.message?.content||'';
         text=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
-        const parsed=JSON.parse(text);
+        if(!text)throw new Error('Aucune réponse.');
+        let parsed;
+        try{parsed=JSON.parse(text)}catch(e){
+          console.error('HowTo JSON error:',e,'\nRaw:',text.substring(0,300));
+          throw new Error('Format invalide. Réessaie.');
+        }
         howtoCache[taskId]=parsed;
         localStorage.setItem('macro-dash-potager-howto',JSON.stringify(howtoCache));
         panel.innerHTML=renderHowToContent(parsed);
         btn.classList.remove('loading');
         btn.classList.add('open');
       }catch(err){
-        panel.innerHTML='<div style="font-size:.68rem;color:#dc2626">❌ '+err.message+'</div>';
+        panel.innerHTML='<div style="font-size:.68rem;color:#dc2626">❌ '+escHtml(err.message)+'</div>';
         btn.classList.remove('loading');
       }
     }
@@ -2429,18 +2458,25 @@ RÈGLES :
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
           body:JSON.stringify({model:'gpt-4o',messages:[{role:'user',content:planPrompt}],max_tokens:4000,temperature:0.2})
         });
-        if(!response.ok)throw new Error('Erreur API ('+response.status+')');
+        if(!response.ok){
+          const errData=await response.json().catch(()=>({}));
+          throw new Error(errData.error?.message||'Erreur API ('+response.status+')');
+        }
         const data=await response.json();
         let text=data.choices?.[0]?.message?.content||'';
         text=text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
-        planData=JSON.parse(text);
+        if(!text)throw new Error('Aucune réponse de l\'API.');
+        try{planData=JSON.parse(text)}catch(jsonErr){
+          console.error('Plan JSON parse error:',jsonErr,'\nRaw:',text.substring(0,500));
+          throw new Error('L\'IA a renvoyé un format invalide. Réessaie.');
+        }
         const cached={ts:Date.now(),data:planData};
         localStorage.setItem(PLAN_CACHE_KEY,JSON.stringify(cached));
         await gasPost({action:'setPlan',ts:cached.ts,text:JSON.stringify(planData)});
         renderPlan();
         updatePlanAge(cached.ts);
       }catch(err){
-        el.innerHTML='<div class="potager-empty">❌ '+err.message+'</div>';
+        el.innerHTML='<div class="potager-empty">❌ '+escHtml(err.message)+'</div>';
       }
       btn.disabled=false;
     }
@@ -2468,13 +2504,13 @@ RÈGLES :
       }
 
       planData.zones.forEach(zone=>{
-        const zid=zone.id||'zone-'+Math.random().toString(36).substr(2,5);
+        const zid=zone.id||'zone-'+hashStr(zone.name||'unknown');
         const plantCount=zone.plants?zone.plants.length:0;
         const notes=planNotes[zid]||[];
 
         html+='<div class="plan-zone">';
         html+='<div class="plan-zone-header" onclick="togglePlanZone(\''+zid+'\')">';
-        html+='<div class="plan-zone-title">'+(zone.emoji||'📍')+' '+escHtml(zone.name)+' <span class="plan-zone-count">'+plantCount+' plantes</span></div>';
+        html+='<div class="plan-zone-title">'+escHtml(zone.emoji||'📍')+' '+escHtml(zone.name)+' <span class="plan-zone-count">'+plantCount+' plantes</span></div>';
         html+='<span class="plan-zone-chevron open" id="plan-chev-'+zid+'">▸</span>';
         html+='</div>';
         html+='<div class="plan-zone-body open" id="plan-body-'+zid+'">';
