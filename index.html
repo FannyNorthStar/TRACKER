@@ -298,6 +298,7 @@
     .potager-weather-grid{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.3rem}
     .potager-weather-day{flex:0 0 auto;min-width:62px;background:var(--bg-card-alt);border-radius:7px;padding:.4rem .45rem;text-align:center;font-size:.62rem;border:1px solid var(--border)}
     .potager-weather-day.good{border-color:#22c55e;background:rgba(34,197,94,.06)}
+    .potager-weather-day.partial{border-color:#eab308;background:rgba(234,179,8,.06)}
     .potager-weather-day.bad{border-color:#f97316;background:rgba(249,115,22,.05)}
     .potager-weather-day-label{font-weight:600;color:var(--text)}
     .potager-weather-day-icon{font-size:.9rem;margin:.15rem 0}
@@ -305,6 +306,7 @@
     .potager-weather-day-rain{font-size:.55rem;color:#3b82f6}
     .potager-weather-day-tag{font-size:.48rem;font-weight:600;padding:.1rem .25rem;border-radius:3px;margin-top:.2rem;display:inline-block}
     .potager-weather-day-tag.garden-ok{background:rgba(34,197,94,.12);color:#16a34a}
+    .potager-weather-day-tag.garden-partial{background:rgba(234,179,8,.12);color:#ca8a04}
     .potager-weather-day-tag.garden-no{background:rgba(249,115,22,.12);color:#ea580c}
 
     .potager-section{margin-bottom:1.2rem}
@@ -1775,9 +1777,87 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
     ═══════════════════════════════ */
     async function loadPotagerWeather(){
       try{
-        const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max&timezone=Europe/Paris&forecast_days=10');
-        if(!r.ok)return;
-        const d=await r.json();
+        // Fetch daily + hourly data for rain windows
+        const [rDaily,rHourly]=await Promise.all([
+          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max&timezone=Europe/Paris&forecast_days=10'),
+          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&hourly=precipitation,weather_code&timezone=Europe/Paris&forecast_days=10')
+        ]);
+        if(!rDaily.ok)return;
+        const d=await rDaily.json();
+        const h=rHourly.ok?await rHourly.json():null;
+
+        // Build hourly rain map per day: { "2026-09-27": [{hour:16,mm:1.2,code:95},...] }
+        const hourlyByDay={};
+        if(h&&h.hourly&&h.hourly.time){
+          for(let i=0;i<h.hourly.time.length;i++){
+            const ts=h.hourly.time[i]; // "2026-09-27T16:00"
+            const dayKey=ts.substring(0,10);
+            const hour=parseInt(ts.substring(11,13));
+            const mm=h.hourly.precipitation[i]||0;
+            const wc=h.hourly.weather_code[i]||0;
+            if(mm>0||wc>=51){
+              if(!hourlyByDay[dayKey])hourlyByDay[dayKey]=[];
+              hourlyByDay[dayKey].push({hour,mm,code:wc});
+            }
+          }
+        }
+
+        // Helper: describe rain window for a day
+        function describeRain(dayKey,dailyCode){
+          const hours=hourlyByDay[dayKey];
+          if(!hours||hours.length===0)return '';
+          // Determine type from worst code
+          const worstCode=Math.max(...hours.map(h=>h.code),dailyCode||0);
+          let type='Pluie';
+          if(worstCode>=95)type='Orage';
+          else if(worstCode>=80)type='Averses';
+          else if(worstCode>=71)type='Neige';
+          else if(worstCode>=61)type='Pluie';
+          else if(worstCode>=51)type='Bruine';
+          // Find contiguous windows
+          const sorted=hours.map(h=>h.hour).sort((a,b)=>a-b);
+          const windows=[];
+          let wStart=sorted[0],wEnd=sorted[0];
+          for(let i=1;i<sorted.length;i++){
+            if(sorted[i]<=wEnd+1){wEnd=sorted[i]}
+            else{windows.push([wStart,wEnd+1]);wStart=sorted[i];wEnd=sorted[i]}
+          }
+          windows.push([wStart,wEnd+1]);
+          // Format windows
+          const parts=windows.map(w=>w[0]+'h–'+w[1]+'h');
+          return type+' '+parts.join(' et ');
+        }
+
+        // Helper: find garden-ok hours (no rain, 7h-20h range)
+        function gardenHours(dayKey){
+          const hours=hourlyByDay[dayKey];
+          if(!hours||hours.length===0)return null;
+          const rainHours=new Set(hours.map(h=>h.hour));
+          // Filter to daylight gardening hours (7-20)
+          const okSlots=[];
+          for(let hr=7;hr<20;hr++){
+            if(!rainHours.has(hr))okSlots.push(hr);
+          }
+          if(okSlots.length===0)return 'Toute la journée';
+          if(okSlots.length>=13)return null; // all ok
+          // Find the avoid window instead (simpler for the user)
+          const avoidHours=[];
+          for(let hr=7;hr<20;hr++){
+            if(rainHours.has(hr))avoidHours.push(hr);
+          }
+          if(avoidHours.length===0)return null;
+          // Build avoid windows
+          const sorted=avoidHours.sort((a,b)=>a-b);
+          const windows=[];
+          let ws=sorted[0],we=sorted[0];
+          for(let i=1;i<sorted.length;i++){
+            if(sorted[i]<=we+1){we=sorted[i]}
+            else{windows.push([ws,we+1]);ws=sorted[i];we=sorted[i]}
+          }
+          windows.push([ws,we+1]);
+          return windows.map(w=>w[0]+'h–'+w[1]+'h').join(' et ');
+        }
+
         const grid=document.getElementById('potagerWeatherGrid');
         const dayNames=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
         const wIcon=(c)=>c>=95?'⛈️':c>=80?'🌧️':c>=61?'🌧️':c>=51?'🌦️':c>=45?'🌫️':c>=3?'⛅':c>=1?'🌤️':'☀️';
@@ -1786,7 +1866,6 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
         for(let i=0;i<d.daily.time.length;i++){
           const tmax=d.daily.temperature_2m_max[i];
           const tmin=d.daily.temperature_2m_min[i];
-          // Skip days with no data
           if(tmax===null||tmax===undefined||tmin===null||tmin===undefined)continue;
           const dt=new Date(d.daily.time[i]+'T12:00:00');
           const label=dayNames[dt.getDay()]+' '+dt.getDate()+'/'+(dt.getMonth()+1);
@@ -1794,14 +1873,39 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
           const prob=d.daily.precipitation_probability_max[i]||0;
           const wind=d.daily.wind_speed_10m_max[i]||0;
           const code=d.daily.weather_code[i]||0;
-          const gardenOk=rain<5&&wind<30&&tmax>8&&tmax<38;
-          window._potagerForecast.push({date:d.daily.time[i],label,tmax,tmin,rain,prob,wind,code,gardenOk});
-          html+='<div class="potager-weather-day '+(gardenOk?'good':'bad')+'">'+
+          const dayKey=d.daily.time[i];
+          const gardenOk=rain<15&&wind<30&&tmax>8&&tmax<38;
+          const rainDesc=describeRain(dayKey,code);
+          const avoidWindow=gardenHours(dayKey);
+
+          // Build rain detail line
+          let rainLine='';
+          if(rain>0&&rainDesc){
+            rainLine='<div class="potager-weather-day-rain">'+rain.toFixed(1)+'mm · '+rainDesc+'</div>';
+          }else if(rain>0){
+            rainLine='<div class="potager-weather-day-rain">'+rain.toFixed(1)+'mm</div>';
+          }
+
+          // Build tag
+          let tagClass=gardenOk?'garden-ok':'garden-no';
+          let tagText='';
+          if(!gardenOk){
+            tagText='Défavorable';
+          }else if(avoidWindow){
+            tagText='OK · éviter '+avoidWindow;
+            tagClass='garden-partial';
+          }else{
+            tagText='Jardinage OK';
+          }
+
+          const forecastEntry={date:dayKey,label,tmax,tmin,rain,prob,wind,code,gardenOk,rainDesc};
+          window._potagerForecast.push(forecastEntry);
+          html+='<div class="potager-weather-day '+(gardenOk?(avoidWindow?'partial':'good'):'bad')+'">'+
             '<div class="potager-weather-day-label">'+label+'</div>'+
             '<div class="potager-weather-day-icon">'+wIcon(code)+'</div>'+
             '<div class="potager-weather-day-temp">'+Math.round(tmin)+'° / '+Math.round(tmax)+'°</div>'+
-            (rain>0?'<div class="potager-weather-day-rain">'+rain.toFixed(1)+'mm</div>':'')+
-            '<div class="potager-weather-day-tag '+(gardenOk?'garden-ok':'garden-no')+'">'+(gardenOk?'Jardinage OK':'Défavorable')+'</div>'+
+            rainLine+
+            '<div class="potager-weather-day-tag '+tagClass+'">'+tagText+'</div>'+
           '</div>';
         }
         grid.innerHTML=html;
@@ -2024,7 +2128,7 @@ ENGRAIS VERTS : phacélie, moutarde, sarrasin en couvre-sol automne-hiver`;
       let weatherCtx='Pas de prévisions disponibles.';
       if(window._potagerForecast&&window._potagerForecast.length>0){
         weatherCtx='PRÉVISIONS 10 JOURS :\n'+window._potagerForecast.map(d=>
-          d.label+' : '+Math.round(d.tmin)+'–'+Math.round(d.tmax)+'°C, '+d.rain.toFixed(1)+'mm, vent '+Math.round(d.wind)+'km/h'+(d.gardenOk?' ✅':' ❌')
+          d.label+' : '+Math.round(d.tmin)+'–'+Math.round(d.tmax)+'°C, '+d.rain.toFixed(1)+'mm'+(d.rainDesc?' ('+d.rainDesc+')':'')+', vent '+Math.round(d.wind)+'km/h'+(d.gardenOk?' ✅':' ❌')
         ).join('\n');
       }
 
