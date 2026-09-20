@@ -1840,7 +1840,8 @@ PRINCIPES ADAPTATION CLIMAT :
 - Tomates/solanacées : semis intérieur février, plants en terre après derniers gels (mi-avril)
 - Cucurbitacées : semis direct mai-juin, sol chaud
 - Dry farming : tomates, physalis, poivrons, maïs, tournesols, haricots grain
-- Taille fruitiers : hiver (déc-fév) pour les à pépins, été pour les à noyau
+- Taille fruitiers À NOYAU (pêchers, abricotiers, pruniers, cerisiers) : en ÉTÉ uniquement, juste après la récolte (juillet-août). JAMAIS en hiver (risque de gommose).
+- Taille fruitiers À PÉPINS (pommier, poiriers, cognassier) : en HIVER (décembre-février), pendant le repos végétatif, hors gel.
 - Engrais verts : phacélie, moutarde, sarrasin en couvre-sol automne-hiver`;
 
     /* ═══════════════════════════════
@@ -1947,7 +1948,14 @@ CAT|PRIORITÉ|TÂCHE|DÉTAIL|MÉTÉO
 - MÉTÉO = recommandation météo basée sur les prévisions ("idéal mardi, sec et 22°C" ou "attendre après les pluies de jeudi")
 
 RÈGLES :
-- Inclure la TAILLE des fruitiers si c'est la saison (à pépins = hiver, à noyau = été après récolte)
+- TAILLE FRUITIERS — TIMING STRICT À CAPDENAC :
+  • À NOYAU (pêchers, abricotiers, pruniers, cerisiers) : taille en été UNIQUEMENT, juste après la récolte (juillet-août pour pêchers, juin-juillet pour cerisiers). JAMAIS en hiver → risque de gommose et maladies. En septembre, la taille des pêchers est TERMINÉE (trop tard).
+  • À PÉPINS (pommier, poiriers, cognassier) : taille en hiver (décembre-février), pendant le repos végétatif, hors gel.
+  • FIGUIERS : taille légère en fin d'hiver (février-mars), supprimer bois mort.
+  • KIWI/ACTINIDIA : taille hiver (décembre-janvier) + taille verte été (pincer les rameaux en juin-juillet).
+  • PETITS FRUITS (cassis, groseilliers, framboisiers) : taille après récolte (été) ou fin d'hiver selon espèce.
+  • AGRUMES en pots : taille douce au printemps (mars-avril).
+  • NE PAS RECOMMANDER de taille si ce n'est pas le bon mois pour cette espèce.
 - L'AIL doit être planté entre mi et fin septembre MAXIMUM à Capdenac — URGENT si on est en septembre
 - Les commandes reçues doivent être plantées rapidement — détailler les emplacements et associations
 - Pour chaque tâche de plantation, indiquer les ASSOCIATIONS bénéfiques (permaculture)
@@ -2162,13 +2170,33 @@ Langue : français. COMMENCE par [TACHES].`;
       panel.innerHTML='<div style="display:flex;align-items:center;gap:.5rem;font-size:.68rem;color:var(--text-muted)"><span class="potager-howto-spinner"></span>Génération du guide…</div>';
       panel.classList.add('open');
 
+      const now=new Date();
+      const moisNow=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'][now.getMonth()];
+
       const howtoPrompt=`Tu es un expert en permaculture et jardinage adapté au climat de Capdenac-Gare (Aveyron, vallée du Lot, zone 8a-8b, étés très chauds et secs).
 
 Contexte jardin :
 ${GARDEN_PROFILE}
 
+Nous sommes en ${moisNow} ${now.getFullYear()}.
+
 TÂCHE : ${task.cat} ${task.task}
 DÉTAIL : ${task.detail}
+MÉTÉO RECOMMANDÉE : ${task.weather||'non précisée'}
+
+RÈGLES DE TIMING STRICTES À CAPDENAC (le champ "timing" DOIT respecter ces règles) :
+- TAILLE À NOYAU (pêchers, abricotiers, pruniers, cerisiers) : été UNIQUEMENT, juste après récolte (juil-août). JAMAIS en hiver (gommose). Si nous ne sommes pas en juil-août, dire que ce n'est PAS le moment.
+- TAILLE À PÉPINS (pommier, poiriers, cognassier) : hiver (déc-fév), repos végétatif, hors gel.
+- TAILLE FIGUIERS : fin d'hiver (fév-mars), bois mort uniquement.
+- TAILLE KIWI/ACTINIDIA : hiver (déc-jan) + taille verte été (pincer en juin-juil).
+- TAILLE PETITS FRUITS : après récolte été ou fin d'hiver selon espèce.
+- TAILLE AGRUMES en pots : printemps (mars-avril).
+- AIL : planter mi-septembre à fin septembre MAX à Capdenac.
+- PDT : planter tôt (fév-mars) car chaleurs dès juin.
+- Cucurbitacées : semis direct mai-juin, sol chaud.
+- Tomates/solanacées : semis intérieur fév, en terre après derniers gels (mi-avril).
+
+COHÉRENCE OBLIGATOIRE : le champ "timing" doit être cohérent avec la tâche et le mois actuel (${moisNow}). Si la tâche dit "tailler les pêchers" et qu'on est en septembre → timing doit dire "Trop tard pour cette année, la taille des pêchers (arbre à noyau) se fait en juillet-août juste après la récolte."
 
 Génère un guide pratique COMPLET pour cette tâche. Format JSON strict, pas de markdown, pas de backticks :
 {
@@ -2177,11 +2205,11 @@ Génère un guide pratique COMPLET pour cette tâche. Format JSON strict, pas de
   "companions": ["Plante compagne 1 (pourquoi)", "Plante compagne 2 (pourquoi)", "..."],
   "incompatible": ["Plante incompatible 1 (pourquoi)", "Plante incompatible 2 (pourquoi)", "..."],
   "placement": "Où planter/agir : type de sol idéal, orientation (soleil/mi-ombre/ombre), emplacement recommandé dans le jardin (potager bas/haut/ville), drainage, espacement",
-  "timing": "Quand exactement faire cette tâche à Capdenac : mois, moment de la journée, conditions météo idéales, lune si pertinent",
+  "timing": "Quand exactement faire cette tâche à Capdenac : mois précis, moment de la journée, conditions météo idéales. Si ce n'est PAS la bonne période, le dire clairement et indiquer quand le faire.",
   "tips": "1-2 astuces de permaculteur expérimenté spécifiques à cette tâche et ce climat"
 }
 
-RÈGLES :
+RÈGLES SUPPLÉMENTAIRES :
 - Si c'est une taille : expliquer précisément OÙ couper (au-dessus de quel bourgeon, quel type de bois), à quel angle, quels outils
 - Si c'est un semis/plantation : profondeur exacte, espacement, préparation du sol, arrosage initial
 - Pour TOUTES les plantes mentionnées : donner les plantes compagnes ET incompatibles en permaculture
