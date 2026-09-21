@@ -736,17 +736,22 @@
 
     <!-- Météo 10 jours jardin -->
     <div class="potager-weather" id="potagerWeather">
-      <div class="potager-weather-title">☀️ Météo jardin — 10 prochains jours</div>
-      <div class="potager-weather-grid" id="potagerWeatherGrid"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="potager-weather-title">☀️ Météo jardin — 10 prochains jours</div>
+        <button class="ai-btn" style="padding:.15rem .45rem;font-size:.55rem" onclick="loadPotagerWeather(true)">↻ Rafraîchir</button>
+      </div>
+      <div class="potager-weather-grid" id="potagerWeatherGrid">
+        <div style="font-size:.66rem;color:var(--text-hint);padding:.5rem">Chargement météo…</div>
+      </div>
 
       <!-- Astro bar: moon + sunrise/sunset -->
       <div class="potager-astro-bar" id="potagerAstroBar"></div>
 
-      <!-- Rain radar -->
+      <!-- Rain radar (defer src until tab visible) -->
       <div class="potager-radar-section">
         <div class="potager-radar-title">🛰️ Radar pluie — temps réel</div>
         <div class="potager-radar-wrap">
-          <iframe id="potagerRadarFrame" src="https://www.rainviewer.com/map.html?loc=44.58,2.07,9&oFa=1&oC=1&oU=1&oCS=1&oF=0&oAP=1&c=1&o=83&lm=1&layer=radar&sm=1&sn=1" width="100%" height="320" frameborder="0" style="border-radius:8px" loading="lazy" allow="geolocation"></iframe>
+          <iframe id="potagerRadarFrame" data-src="https://www.rainviewer.com/map.html?loc=44.58,2.07,9&oFa=1&oC=1&oU=1&oCS=1&oF=0&oAP=1&c=1&o=83&lm=1&layer=radar&sm=1&sn=1" width="100%" height="320" frameborder="0" style="border-radius:8px" allow="geolocation"></iframe>
         </div>
       </div>
     </div>
@@ -1784,12 +1789,16 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
       const el=document.getElementById('tab-'+tab);
       if(el)el.classList.add('active');
       if(tab==='potager'){
-        await loadPotagerWeather();
-        loadPotager(false);
-        renderInventory();
         const monthNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
         const now=new Date();
         document.getElementById('potagerDate').textContent=monthNames[now.getMonth()]+' '+now.getFullYear()+' · Semaine '+getWeekNumber(now);
+        renderInventory();
+        // Non-blocking: show tab immediately, load data in background
+        loadPotagerWeather();
+        loadPotager(false);
+        // Lazy-load radar iframe
+        const radar=document.getElementById('potagerRadarFrame');
+        if(radar&&!radar.src&&radar.dataset.src)radar.src=radar.dataset.src;
       }
     }
     function getWeekNumber(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));return Math.ceil(((t-new Date(Date.UTC(t.getUTCFullYear(),0,1)))/86400000+1)/7)}
@@ -1804,13 +1813,28 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
     /* ═══════════════════════════════
        POTAGER — WEATHER 10 JOURS
     ═══════════════════════════════ */
-    async function loadPotagerWeather(){
+    const WEATHER_CACHE_KEY='macro-dash-potager-weather';
+    const WEATHER_TTL=30*60*1000; // 30 minutes
+
+    async function loadPotagerWeather(force){
+      // Check memory + localStorage cache
+      if(!force&&window._potagerForecast&&window._potagerForecast.length>0)return;
+      if(!force){
+        try{
+          const c=JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY)||'null');
+          if(c&&c.ts&&(Date.now()-c.ts<WEATHER_TTL)){
+            window._potagerForecast=c.forecast;
+            renderWeatherCards(c.dailyData);
+            renderAstroBar(c.dailyData);
+            return;
+          }
+        }catch(e){}
+      }
       try{
-        // Fetch daily + hourly + astronomy data
-        const [rDaily,rHourly,rAstro]=await Promise.all([
+        // 2 fetches only (sunrise/sunset included in daily)
+        const [rDaily,rHourly]=await Promise.all([
           fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max,sunrise,sunset&timezone=Europe/Paris&forecast_days=10'),
-          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&hourly=precipitation,weather_code&timezone=Europe/Paris&forecast_days=10'),
-          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&daily=sunrise,sunset&timezone=Europe/Paris&forecast_days=1')
+          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&hourly=precipitation,weather_code&timezone=Europe/Paris&forecast_days=10')
         ]);
         if(!rDaily.ok)return;
         const d=await rDaily.json();
@@ -1888,16 +1912,15 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
           return windows.map(w=>w[0]+'h–'+w[1]+'h').join(' et ');
         }
 
-        const grid=document.getElementById('potagerWeatherGrid');
-        const dayNames=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-        const wIcon=(c)=>c>=95?'⛈️':c>=80?'🌧️':c>=61?'🌧️':c>=51?'🌦️':c>=45?'🌫️':c>=3?'⛅':c>=1?'🌤️':'☀️';
-        let html='';
+        // Build forecast data from hourly rain analysis
         window._potagerForecast=[];
+        const dailyData={daily:d.daily};
         for(let i=0;i<d.daily.time.length;i++){
           const tmax=d.daily.temperature_2m_max[i];
           const tmin=d.daily.temperature_2m_min[i];
           if(tmax===null||tmax===undefined||tmin===null||tmin===undefined)continue;
           const dt=new Date(d.daily.time[i]+'T12:00:00');
+          const dayNames=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
           const label=dayNames[dt.getDay()]+' '+dt.getDate()+'/'+(dt.getMonth()+1);
           const rain=d.daily.precipitation_sum[i]||0;
           const prob=d.daily.precipitation_probability_max[i]||0;
@@ -1906,43 +1929,52 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
           const dayKey=d.daily.time[i];
           const gardenOk=rain<15&&wind<30&&tmax>8&&tmax<38;
           const rainDesc=describeRain(dayKey,code);
-          const avoidWindow=gardenHours(dayKey);
-
-          // Build rain detail line
-          let rainLine='';
-          if(rain>0&&rainDesc){
-            rainLine='<div class="potager-weather-day-rain">'+rain.toFixed(1)+'mm · '+rainDesc+'</div>';
-          }else if(rain>0){
-            rainLine='<div class="potager-weather-day-rain">'+rain.toFixed(1)+'mm</div>';
-          }
-
-          // Build tag
-          let tagClass=gardenOk?'garden-ok':'garden-no';
-          let tagText='';
-          if(!gardenOk){
-            tagText='Défavorable';
-          }else if(avoidWindow){
-            tagText='OK · éviter '+avoidWindow;
-            tagClass='garden-partial';
-          }else{
-            tagText='Jardinage OK';
-          }
-
-          const forecastEntry={date:dayKey,label,tmax,tmin,rain,prob,wind,code,gardenOk,rainDesc};
-          window._potagerForecast.push(forecastEntry);
-          html+='<div class="potager-weather-day '+(gardenOk?(avoidWindow?'partial':'good'):'bad')+'">'+
-            '<div class="potager-weather-day-label">'+label+'</div>'+
-            '<div class="potager-weather-day-icon">'+wIcon(code)+'</div>'+
-            '<div class="potager-weather-day-temp">'+Math.round(tmin)+'° / '+Math.round(tmax)+'°</div>'+
-            rainLine+
-            '<div class="potager-weather-day-tag '+tagClass+'">'+tagText+'</div>'+
-          '</div>';
+          window._potagerForecast.push({date:dayKey,label,tmax,tmin,rain,prob,wind,code,gardenOk,rainDesc});
         }
-        grid.innerHTML=html;
 
-        // ── Astro bar: sunrise/sunset + moon phase ──
-        renderAstroBar(d);
+        renderWeatherCards(dailyData);
+        renderAstroBar(dailyData);
+
+        // Cache weather
+        try{localStorage.setItem(WEATHER_CACHE_KEY,JSON.stringify({ts:Date.now(),forecast:window._potagerForecast,dailyData:dailyData}))}catch(e){}
       }catch(e){console.error('Potager weather:',e)}
+    }
+
+    function renderWeatherCards(dailyData){
+      const grid=document.getElementById('potagerWeatherGrid');
+      if(!grid||!window._potagerForecast)return;
+      const wIcon=(c)=>c>=95?'⛈️':c>=80?'🌧️':c>=61?'🌧️':c>=51?'🌦️':c>=45?'🌫️':c>=3?'⛅':c>=1?'🌤️':'☀️';
+      let html='';
+      window._potagerForecast.forEach(f=>{
+        const avoidWindow=gardenHoursForEntry(f);
+        let rainLine='';
+        if(f.rain>0&&f.rainDesc){
+          rainLine='<div class="potager-weather-day-rain">'+f.rain.toFixed(1)+'mm · '+f.rainDesc+'</div>';
+        }else if(f.rain>0){
+          rainLine='<div class="potager-weather-day-rain">'+f.rain.toFixed(1)+'mm</div>';
+        }
+        let tagClass=f.gardenOk?'garden-ok':'garden-no';
+        let tagText='';
+        if(!f.gardenOk){tagText='Défavorable'}
+        else if(avoidWindow){tagText='OK · éviter '+avoidWindow;tagClass='garden-partial'}
+        else{tagText='Jardinage OK'}
+        html+='<div class="potager-weather-day '+(f.gardenOk?(avoidWindow?'partial':'good'):'bad')+'">'+
+          '<div class="potager-weather-day-label">'+f.label+'</div>'+
+          '<div class="potager-weather-day-icon">'+wIcon(f.code)+'</div>'+
+          '<div class="potager-weather-day-temp">'+Math.round(f.tmin)+'° / '+Math.round(f.tmax)+'°</div>'+
+          rainLine+
+          '<div class="potager-weather-day-tag '+tagClass+'">'+tagText+'</div>'+
+        '</div>';
+      });
+      grid.innerHTML=html;
+    }
+    // Simplified avoidWindow from cached forecast (no hourly data needed)
+    function gardenHoursForEntry(f){
+      if(!f.rainDesc||!f.gardenOk)return null;
+      // Extract hour ranges from rainDesc like "Orage 16h–18h"
+      const m=f.rainDesc.match(/(\d+)h[–-](\d+)h/g);
+      if(!m)return null;
+      return m.join(' et ');
     }
 
     function getMoonPhase(date){
@@ -2153,7 +2185,8 @@ ENGRAIS VERTS : phacélie, moutarde, sarrasin en couvre-sol automne-hiver`;
     ═══════════════════════════════ */
     function renderInventory(){
       const el=document.getElementById('potagerInventory');
-      if(!el)return;
+      if(!el||el.dataset.rendered)return;
+      el.dataset.rendered='1';
       el.innerHTML='<div class="potager-inv-grid">'+
         '<div class="potager-inv-card"><div class="potager-inv-card-title">🍎 Fruitiers établis</div><div class="potager-inv-list">Abricotiers Hunza · Pêchers · Poiriers · Pommier · Cognassier · Pruniers · Amandier · Kaki · Figuiers · Grenadier · Feijoa · Mûrier blanc · Argousier · Camérisier · Noisetiers · Jujubier Lang · Kiwi · Goji · Poivrier Sichuan</div></div>'+
         '<div class="potager-inv-card"><div class="potager-inv-card-title">🫐 Petits fruits</div><div class="potager-inv-list">Cassis (plusieurs) · Groseilliers · Caseille · Framboisiers · Fraisiers</div></div>'+
@@ -2180,26 +2213,35 @@ ENGRAIS VERTS : phacélie, moutarde, sarrasin en couvre-sol automne-hiver`;
       const apiKey=getApiKey();
       if(!apiKey)return;
 
-      // Load done state from Google Sheets (cross-device)
-      try{
-        const doneData=await gasGet('getPotagerDone');
-        if(doneData&&doneData.doneMap){
-          localStorage.setItem('macro-dash-potager-done',JSON.stringify(doneData.doneMap));
-        }
-      }catch(e){}
+      // Parallel load of cross-device data
+      const [doneData,ajoutsData,cachedData]=await Promise.all([
+        gasGet('getPotagerDone').catch(()=>null),
+        gasGet('getPotagerAjouts').catch(()=>null),
+        force?Promise.resolve(null):gasGet('getPotager').catch(()=>null)
+      ]);
 
-      // Load dynamic additions
-      await loadPotagerAjouts();
+      // Apply done state
+      try{if(doneData&&doneData.doneMap)localStorage.setItem('macro-dash-potager-done',JSON.stringify(doneData.doneMap))}catch(e){}
+
+      // Apply ajouts
+      if(ajoutsData&&ajoutsData.ajouts){
+        potagerAjouts=ajoutsData.ajouts;
+        try{localStorage.setItem('macro-dash-potager-ajouts',JSON.stringify(potagerAjouts))}catch(e){}
+      }else{
+        try{potagerAjouts=JSON.parse(localStorage.getItem('macro-dash-potager-ajouts')||'[]')}catch(e){potagerAjouts=[]}
+      }
+      renderAjouts();
 
       if(!force){
+        // Try remote cache
+        if(cachedData&&cachedData.ts&&(Date.now()-cachedData.ts<POTAGER_TTL)){
+          parsePotagerTasks(cachedData.text);
+          renderPotagerTasks();
+          updatePotagerAge(cachedData.ts);
+          return;
+        }
+        // Try local cache
         try{
-          const cached=await gasGet('getPotager');
-          if(cached&&cached.ts&&(Date.now()-cached.ts<POTAGER_TTL)){
-            parsePotagerTasks(cached.text);
-            renderPotagerTasks();
-            updatePotagerAge(cached.ts);
-            return;
-          }
           const local=JSON.parse(localStorage.getItem(POTAGER_CACHE_KEY)||'null');
           if(local&&local.ts&&(Date.now()-local.ts<POTAGER_TTL)){
             parsePotagerTasks(local.text);
@@ -2674,6 +2716,8 @@ RÈGLES SUPPLÉMENTAIRES :
 
     async function loadPlan(force){
       await loadPlanNotes();
+      // If we already have plan data in memory and not forcing, just render
+      if(!force&&planData&&planData.zones){renderPlan();return}
       if(!force){
         try{
           const remote=await gasGet('getPlan');
@@ -2955,21 +2999,6 @@ RÈGLES :
        POTAGER — AJOUTS DYNAMIQUES
     ═══════════════════════════════ */
     let potagerAjouts=[];
-
-    async function loadPotagerAjouts(){
-      try{
-        const data=await gasGet('getPotagerAjouts');
-        if(data&&Array.isArray(data.ajouts)){
-          potagerAjouts=data.ajouts;
-          localStorage.setItem('macro-dash-potager-ajouts',JSON.stringify(potagerAjouts));
-        }else{
-          potagerAjouts=JSON.parse(localStorage.getItem('macro-dash-potager-ajouts')||'[]');
-        }
-      }catch(e){
-        try{potagerAjouts=JSON.parse(localStorage.getItem('macro-dash-potager-ajouts')||'[]')}catch(e2){potagerAjouts=[]}
-      }
-      renderAjouts();
-    }
 
     function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
