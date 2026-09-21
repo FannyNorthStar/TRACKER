@@ -428,6 +428,11 @@
     .potager-radar-section{margin-top:.6rem}
     .potager-radar-title{font-size:.7rem;font-weight:600;color:var(--text-muted);margin-bottom:.4rem}
     .potager-radar-wrap{border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#1a1a2e}
+    /* ── Collapsible weather sub-sections ── */
+    .wx-collapsible{max-height:2000px;overflow:hidden;transition:max-height .3s ease,opacity .3s ease;opacity:1}
+    .collapsed .wx-collapsible{max-height:0;opacity:0;margin:0;padding:0}
+    .collapsed .wx-chev{transform:rotate(-90deg)}
+    .wx-chev{transition:transform .2s}
 
     /* ── History section ── */
     .history-section{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
@@ -720,9 +725,14 @@
       <!-- Astro bar: moon + sunrise/sunset -->
       <div class="potager-astro-bar" id="potagerAstroBar"></div>
 
-      <!-- Pluie temps réel (ex-dashboard) -->
+      <!-- Pluie temps réel (ex-dashboard) — collapsible -->
       <div class="weather-section" id="weatherSection" style="margin-top:.5rem">
-        <div class="weather-grid">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none" onclick="this.parentElement.classList.toggle('collapsed')">
+          <div class="weather-panel-title" style="margin:0">🌧️ Pluie détaillée · 24h · 3 jours · historique</div>
+          <span style="font-size:.6rem;color:var(--text-hint);transition:transform .2s" class="wx-chev">▾</span>
+        </div>
+        <div class="wx-collapsible">
+        <div class="weather-grid" style="margin-top:.5rem">
           <div class="weather-panel">
             <div class="weather-panel-title">Pluie tombée</div>
             <div style="display:flex;gap:.5rem;margin-bottom:.5rem" id="weatherPast"></div>
@@ -738,6 +748,7 @@
           </div>
         </div>
         <div id="weatherAlert"></div>
+        </div>
       </div>
 
       <!-- 10 jours jardinage -->
@@ -748,11 +759,16 @@
         </div>
       </div>
 
-      <!-- Radar pluie (defer src until tab visible) -->
+      <!-- Radar pluie (defer src until tab visible) — collapsible -->
       <div class="potager-radar-section">
-        <div class="potager-radar-title">🛰️ Radar pluie — temps réel</div>
-        <div class="potager-radar-wrap">
-          <iframe id="potagerRadarFrame" data-src="https://www.rainviewer.com/map.html?loc=44.58,2.07,9&oFa=1&oC=1&oU=1&oCS=1&oF=0&oAP=1&c=1&o=83&lm=1&layer=radar&sm=1&sn=1" width="100%" height="320" frameborder="0" style="border-radius:8px" allow="geolocation"></iframe>
+        <div class="potager-radar-title" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="this.parentElement.classList.toggle('collapsed')">
+          <span>🛰️ Radar pluie — temps réel</span>
+          <span style="font-size:.6rem;color:var(--text-hint)" class="wx-chev">▾</span>
+        </div>
+        <div class="wx-collapsible">
+          <div class="potager-radar-wrap" style="margin-top:.4rem">
+            <iframe id="potagerRadarFrame" data-src="https://www.rainviewer.com/map.html?loc=44.58,2.07,9&oFa=1&oC=1&oU=1&oCS=1&oF=0&oAP=1&c=1&o=83&lm=1&layer=radar&sm=1&sn=1" width="100%" height="320" frameborder="0" style="border-radius:8px" allow="geolocation"></iframe>
+          </div>
         </div>
       </div>
     </div>
@@ -1700,7 +1716,7 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
           const r2=await fetch('https://api.openai.com/v1/chat/completions',{
             method:'POST',
             headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-            body:JSON.stringify({model:'gpt-4o',messages:[{role:'system',content:climateSys},{role:'user',content:climateUser}],max_tokens:2000})
+            body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:climateSys},{role:'user',content:climateUser}],max_tokens:2000})
           });
           if(r2.ok){const d2=await r2.json();text=d2.choices?.[0]?.message?.content||''}
         }
@@ -1797,6 +1813,7 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
       document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
       const el=document.getElementById('tab-'+tab);
       if(el)el.classList.add('active');
+      window.scrollTo({top:0,behavior:'instant'});
       if(tab==='potager'){
         const monthNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
         const now=new Date();
@@ -2357,7 +2374,7 @@ Langue : français. COMMENCE par [TACHES].`;
         const response=await fetch('https://api.openai.com/v1/chat/completions',{
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-          body:JSON.stringify({model:'gpt-4o',messages:[{role:'system',content:potagerSys},{role:'user',content:userMsg}],max_tokens:3000})
+          body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:potagerSys},{role:'user',content:userMsg}],max_tokens:3000})
         });
         if(response.ok){
           const data=await response.json();
@@ -2533,6 +2550,97 @@ Langue : français. COMMENCE par [TACHES].`;
       loadHowTo(taskId);
     }
 
+    function extractRelevantProfile(taskText){
+      // Extract only the GARDEN_PROFILE sections relevant to this task
+      // This saves ~3000 tokens per howto call
+      const t=taskText.toLowerCase();
+      const sections=GARDEN_PROFILE.split('\n\n');
+      const always=[]; // Always include header + climate
+      const matched=[];
+
+      // Keywords to match sections
+      const keywords={
+        'pêch':'noyau|pêch',
+        'abricot':'noyau|abricot|hunza',
+        'prunier':'noyau|prunier|prune',
+        'cerisier':'noyau|cerisier|cerise',
+        'amandier':'noyau|amandier|amande|exception',
+        'pommier':'pépins|pommier|pomme',
+        'poirier':'pépins|poirier|poire',
+        'cognassier':'pépins|cognassier|coing',
+        'figuier':'figuier|figue|bifère',
+        'kaki':'kaki',
+        'grenadier':'grenadier|grenade',
+        'olivier':'olivier|olive|arbequine',
+        'vigne':'vigne|muscat|guyot|raisin',
+        'néflier':'néflier|japon|inversé',
+        'asiminier':'asiminier|october moon',
+        'kiwi':'kiwi|actinidia',
+        'noisetier':'noisetier|noisette',
+        'feijoa':'feijoa',
+        'mûrier':'mûrier|blanc',
+        'argousier':'argousier',
+        'goji':'goji',
+        'jujubier':'jujubier|jujube',
+        'camérisier':'camérisier',
+        'agrume':'agrume|yuzu|citron|kumquat|kalamansi|hivernage',
+        'cassis':'cassis|caseille|groseill|petit',
+        'frambois':'frambois',
+        'crocus':'crocus|safran',
+        'artichaut':'artichaut|cardon|butter|protection',
+        'houblon':'houblon',
+        'tomate':'tomate|solanac',
+        'poivron':'poivron|piment',
+        'aubergine':'aubergine',
+        'courgette':'courgette|courge|cucurbit',
+        'melon':'melon|pastèque',
+        'concombre':'concombre',
+        'haricot':'haricot|légumineu',
+        'maïs':'maïs|popcorn',
+        'ail':'ail|planter.*ail|ail.*planter',
+        'pdt':'pdt|pomme.*terre|patate',
+        'radis':'radis|daikon',
+        'basilic':'basilic|aromat|herbe',
+        'semis':'semis|semer',
+        'taille':'taille|tailler|couper',
+        'récolte':'récolt|cueill|mûr|maturité',
+        'arrosage':'arros|dry.*farm|eau|irrigat',
+        'paillage':'paill|mulch|broyat|brf',
+        'engrais':'engrais.*vert|couvert|phacélie|moutarde',
+      };
+
+      sections.forEach(s=>{
+        const sl=s.toLowerCase();
+        // Always include first section (location/climate) and maturity header
+        if(sl.includes('capdenac') && sl.includes('zone 8a')) { always.push(s); return; }
+        if(sl.includes('espaces :')) { always.push(s); return; }
+        // Check if section matches task
+        for(const[key,pattern] of Object.entries(keywords)){
+          if(t.match(new RegExp(key,'i'))){
+            if(sl.match(new RegExp(pattern.split('|').join('|'),'i'))){
+              matched.push(s);
+              return;
+            }
+          }
+        }
+        // Also match if the section directly mentions words from the task
+        const taskWords=t.split(/\s+/).filter(w=>w.length>3);
+        for(const w of taskWords){
+          if(sl.includes(w) && !['pour','dans','avec','cette','faire','plant','bien'].includes(w)){
+            matched.push(s);
+            return;
+          }
+        }
+      });
+
+      // Deduplicate and limit
+      const result=[...always,...matched];
+      const unique=[...new Set(result)];
+      // If nothing matched, include first 3 sections as fallback
+      if(unique.length<=2) return GARDEN_PROFILE.split('\n\n').slice(0,5).join('\n\n');
+      return unique.join('\n\n');
+    }
+
     async function loadHowTo(taskId){
       const apiKey=getApiKey();
       if(!apiKey){document.getElementById('settingsBtn').click();return}
@@ -2545,13 +2653,17 @@ Langue : français. COMMENCE par [TACHES].`;
       panel.innerHTML='<div style="display:flex;align-items:center;gap:.5rem;font-size:.68rem;color:var(--text-muted)"><span class="potager-howto-spinner"></span>Génération du guide…</div>';
       panel.classList.add('open');
 
+      // Extract only relevant GARDEN_PROFILE sections (~500 tokens instead of ~3600)
+      const taskText=(task.cat+' '+task.task+' '+task.detail).toLowerCase();
+      const relevantProfile=extractRelevantProfile(taskText);
+
       const now=new Date();
       const moisNow=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'][now.getMonth()];
 
       const howtoPrompt=`Tu es un expert en permaculture et jardinage adapté au climat de Capdenac-Gare (Aveyron, vallée du Lot, zone 8a-8b, étés très chauds et secs).
 
-Contexte jardin :
-${GARDEN_PROFILE}
+Contexte jardin (extraits pertinents) :
+${relevantProfile}
 
 Nous sommes en ${moisNow} ${now.getFullYear()}.
 
@@ -2870,7 +2982,7 @@ RÈGLES :
         const response=await fetch('https://api.openai.com/v1/chat/completions',{
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-          body:JSON.stringify({model:'gpt-4o',messages:[{role:'user',content:planPrompt}],max_tokens:4000,temperature:0.2})
+          body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'user',content:planPrompt}],max_tokens:4000,temperature:0.2})
         });
         if(!response.ok){
           const errData=await response.json().catch(()=>({}));
