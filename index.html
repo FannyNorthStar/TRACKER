@@ -418,6 +418,17 @@
     .plan-summary{font-size:.72rem;color:var(--text-muted);margin-bottom:.8rem;padding:.5rem .7rem;background:var(--bg-card-alt);border-radius:7px;border-left:3px solid var(--accent);line-height:1.6}
     @media(max-width:640px){.plan-plant-grid{grid-template-columns:1fr}}
 
+    /* ── Astro bar (moon + sun) ── */
+    .potager-astro-bar{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.6rem;padding:.5rem .7rem;background:var(--bg-card-alt);border:1px solid var(--border);border-radius:8px;font-size:.66rem;color:var(--text-muted);align-items:center}
+    .potager-astro-item{display:flex;align-items:center;gap:.3rem;white-space:nowrap}
+    .potager-astro-sep{width:1px;height:14px;background:var(--border);flex-shrink:0}
+    @media(max-width:480px){.potager-astro-sep{display:none}.potager-astro-bar{gap:.35rem .8rem}}
+
+    /* ── Rain radar ── */
+    .potager-radar-section{margin-top:.6rem}
+    .potager-radar-title{font-size:.7rem;font-weight:600;color:var(--text-muted);margin-bottom:.4rem}
+    .potager-radar-wrap{border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#1a1a2e}
+
     /* ── History section ── */
     .history-section{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
     .history-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;cursor:pointer;user-select:none;transition:background .2s}
@@ -510,6 +521,16 @@
       <div id="actionsList"></div>
     </div>
 
+    <!-- ═══ AI SUMMARY ═══ -->
+    <section class="ai-section" id="aiSection">
+      <div class="ai-header">
+        <div class="ai-title">🤖 Analyse IA <span style="font-weight:400;font-size:.62rem;color:var(--text-hint)">(GPT-4o + web · situation actuelle)</span></div>
+        <button class="ai-btn" id="aiBtn" onclick="runAnalysis()">Analyser</button>
+      </div>
+      <div class="ai-content empty" id="aiContent">Clique sur « Analyser » pour obtenir un résumé de la situation macro. Configure ta clé API OpenAI via ⚙️.</div>
+      <div class="ai-meta" id="aiMeta"></div>
+    </section>
+
     <!-- ═══ MÉTÉO CAPDENAC ═══ -->
     <div class="weather-section" id="weatherSection">
       <div class="weather-header">
@@ -547,16 +568,6 @@
         <div class="climate-placeholder">Chargement au premier lancement…</div>
       </div>
     </div>
-
-    <!-- ═══ AI SUMMARY ═══ -->
-    <section class="ai-section" id="aiSection">
-      <div class="ai-header">
-        <div class="ai-title">🤖 Analyse IA <span style="font-weight:400;font-size:.62rem;color:var(--text-hint)">(GPT-4o + web · situation actuelle)</span></div>
-        <button class="ai-btn" id="aiBtn" onclick="runAnalysis()">Analyser</button>
-      </div>
-      <div class="ai-content empty" id="aiContent">Clique sur « Analyser » pour obtenir un résumé de la situation macro. Configure ta clé API OpenAI via ⚙️.</div>
-      <div class="ai-meta" id="aiMeta"></div>
-    </section>
 
     <!-- ═══ 1. STRESS & INDICATEURS AVANCÉS ═══ -->
     <section class="section section--stress" id="sec-stress">
@@ -727,6 +738,17 @@
     <div class="potager-weather" id="potagerWeather">
       <div class="potager-weather-title">☀️ Météo jardin — 10 prochains jours</div>
       <div class="potager-weather-grid" id="potagerWeatherGrid"></div>
+
+      <!-- Astro bar: moon + sunrise/sunset -->
+      <div class="potager-astro-bar" id="potagerAstroBar"></div>
+
+      <!-- Rain radar -->
+      <div class="potager-radar-section">
+        <div class="potager-radar-title">🛰️ Radar pluie — temps réel</div>
+        <div class="potager-radar-wrap">
+          <iframe id="potagerRadarFrame" src="https://www.rainviewer.com/map.html?loc=44.58,2.07,9&oFa=1&oC=1&oU=1&oCS=1&oF=0&oAP=1&c=1&o=83&lm=1&layer=radar&sm=1&sn=1" width="100%" height="320" frameborder="0" style="border-radius:8px" loading="lazy" allow="geolocation"></iframe>
+        </div>
+      </div>
     </div>
 
     <!-- Sub-navigation -->
@@ -1784,10 +1806,11 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
     ═══════════════════════════════ */
     async function loadPotagerWeather(){
       try{
-        // Fetch daily + hourly data for rain windows
-        const [rDaily,rHourly]=await Promise.all([
-          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max&timezone=Europe/Paris&forecast_days=10'),
-          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&hourly=precipitation,weather_code&timezone=Europe/Paris&forecast_days=10')
+        // Fetch daily + hourly + astronomy data
+        const [rDaily,rHourly,rAstro]=await Promise.all([
+          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max,sunrise,sunset&timezone=Europe/Paris&forecast_days=10'),
+          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&hourly=precipitation,weather_code&timezone=Europe/Paris&forecast_days=10'),
+          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&daily=sunrise,sunset&timezone=Europe/Paris&forecast_days=1')
         ]);
         if(!rDaily.ok)return;
         const d=await rDaily.json();
@@ -1916,7 +1939,73 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
           '</div>';
         }
         grid.innerHTML=html;
+
+        // ── Astro bar: sunrise/sunset + moon phase ──
+        renderAstroBar(d);
       }catch(e){console.error('Potager weather:',e)}
+    }
+
+    function getMoonPhase(date){
+      // Simplified moon phase calculation
+      const known=new Date(2000,0,6,18,14); // Known new moon: Jan 6 2000 18:14 UTC
+      const cycle=29.53058770576;
+      const diff=(date.getTime()-known.getTime())/86400000;
+      const phase=((diff%cycle)+cycle)%cycle;
+      const pct=phase/cycle;
+      // Moon emoji + name
+      if(pct<0.0339)return{emoji:'🌑',name:'Nouvelle lune',phase:pct};
+      if(pct<0.216)return{emoji:'🌒',name:'Premier croissant',phase:pct};
+      if(pct<0.283)return{emoji:'🌓',name:'Premier quartier',phase:pct};
+      if(pct<0.466)return{emoji:'🌔',name:'Gibbeuse croissante',phase:pct};
+      if(pct<0.533)return{emoji:'🌕',name:'Pleine lune',phase:pct};
+      if(pct<0.716)return{emoji:'🌖',name:'Gibbeuse décroissante',phase:pct};
+      if(pct<0.783)return{emoji:'🌗',name:'Dernier quartier',phase:pct};
+      if(pct<0.966)return{emoji:'🌘',name:'Dernier croissant',phase:pct};
+      return{emoji:'🌑',name:'Nouvelle lune',phase:pct};
+    }
+
+    function findNextMoonEvent(startDate,targetPhase,name){
+      // Find next new moon (0) or full moon (0.5) from startDate
+      const cycle=29.53058770576;
+      const known=new Date(2000,0,6,18,14);
+      const diffDays=(startDate.getTime()-known.getTime())/86400000;
+      const currentPhase=((diffDays%cycle)+cycle)%cycle;
+      let daysUntil=(targetPhase*cycle-currentPhase+cycle)%cycle;
+      if(daysUntil<0.5)daysUntil+=cycle; // skip if we're basically on it
+      const eventDate=new Date(startDate.getTime()+daysUntil*86400000);
+      return{date:eventDate,name:name};
+    }
+
+    function renderAstroBar(dailyData){
+      const bar=document.getElementById('potagerAstroBar');
+      if(!bar)return;
+      const now=new Date();
+
+      // Sunrise / sunset from first day of forecast
+      let sunriseStr='', sunsetStr='';
+      if(dailyData.daily.sunrise&&dailyData.daily.sunrise[0]){
+        const sr=new Date(dailyData.daily.sunrise[0]);
+        sunriseStr=sr.getHours()+'h'+String(sr.getMinutes()).padStart(2,'0');
+      }
+      if(dailyData.daily.sunset&&dailyData.daily.sunset[0]){
+        const ss=new Date(dailyData.daily.sunset[0]);
+        sunsetStr=ss.getHours()+'h'+String(ss.getMinutes()).padStart(2,'0');
+      }
+
+      // Moon
+      const moon=getMoonPhase(now);
+      const nextNew=findNextMoonEvent(now,0,'🌑 Nouvelle lune');
+      const nextFull=findNextMoonEvent(now,0.5,'🌕 Pleine lune');
+      const fmtDate=(d)=>d.getDate()+'/'+(d.getMonth()+1);
+
+      let items=[];
+      if(sunriseStr)items.push('<span class="potager-astro-item">🌅 Lever '+sunriseStr+'</span>');
+      if(sunsetStr)items.push('<span class="potager-astro-item">🌇 Coucher '+sunsetStr+'</span>');
+      items.push('<span class="potager-astro-sep"></span>');
+      items.push('<span class="potager-astro-item">'+moon.emoji+' '+moon.name+'</span>');
+      items.push('<span class="potager-astro-item" style="font-size:.6rem;color:var(--text-hint)">🌑 Nouv. '+fmtDate(nextNew.date)+' · 🌕 Pleine '+fmtDate(nextFull.date)+'</span>');
+
+      bar.innerHTML=items.join('');
     }
 
     /* ═══════════════════════════════
