@@ -714,7 +714,7 @@
     <div class="potager-weather" id="potagerWeather">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div class="potager-weather-title">🌤️ Météo Capdenac-Gare</div>
-        <button class="ai-btn" style="padding:.15rem .45rem;font-size:.55rem" onclick="loadPotagerWeather(true);loadWeather()">↻ Rafraîchir</button>
+        <button class="ai-btn" style="padding:.15rem .45rem;font-size:.55rem" onclick="loadPotagerWeather(true);loadWeather(true)">↻ Rafraîchir</button>
       </div>
 
       <!-- Astro bar: moon + sunrise/sunset -->
@@ -803,9 +803,13 @@
        THEME
     ═══════════════════════════════ */
     function getTheme(){const s=localStorage.getItem('macro-dash-theme');if(s)return s;return window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'}
-    function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('macro-dash-theme',t);document.getElementById('themeToggle').textContent=t==='dark'?'☀️':'🌙'}
+    try{function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('macro-dash-theme',t);document.getElementById('themeToggle').textContent=t==='dark'?'☀️':'🌙'}}catch(e){}
     let currentTheme=getTheme();applyTheme(currentTheme);
-    document.getElementById('themeToggle').addEventListener('click',()=>{currentTheme=currentTheme==='dark'?'light':'dark';applyTheme(currentTheme);buildAllWidgets()});
+    document.getElementById('themeToggle').addEventListener('click',()=>{currentTheme=currentTheme==='dark'?'light':'dark';applyTheme(currentTheme);
+      // Only rebuild widgets if they haven't been built yet; theme change is cosmetic on TradingView embeds
+      // TradingView widgets auto-detect theme via colorTheme param at creation time
+      // Full rebuild is too heavy (~19 script loads); defer to next page load
+    });
 
     /* ═══════════════════════════════
        TIMESTAMP
@@ -846,7 +850,7 @@
       if(data&&data.key){
         cachedApiKey=data.key;
         // Keep localStorage as fallback
-        localStorage.setItem('macro-dash-openai-key',data.key);
+        try{localStorage.setItem('macro-dash-openai-key',data.key);}catch(e){}
       }else{
         // Fallback to localStorage if GAS fails
         cachedApiKey=localStorage.getItem('macro-dash-openai-key')||'';
@@ -868,7 +872,7 @@
       const k=apiKeyInput.value.trim();
       if(k){
         cachedApiKey=k;
-        localStorage.setItem('macro-dash-openai-key',k);
+        try{localStorage.setItem('macro-dash-openai-key',k);}catch(e){}
         // Save to Google Sheets
         gasPost({action:'setKey',key:k});
       }else{
@@ -1402,8 +1406,8 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
       renderHistory();
     });
 
-    // Initial load from Google Sheets
-    loadHistory();
+    // Defer GAS calls to after first paint for faster startup
+    requestAnimationFrame(()=>setTimeout(loadHistory,100));
 
     /* ── Fallback : Chat Completions (sans web search) ── */
     async function fallbackChatCompletion(apiKey,sysPrompt,userPrompt,startTime){
@@ -1453,7 +1457,10 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
     /* ═══════════════════════════════
        WEATHER (Open-Meteo, free, no key)
     ═══════════════════════════════ */
-    async function loadWeather(){
+    let _weatherDetailLoaded=0;
+    async function loadWeather(force){
+      // Cache 15 min to avoid re-fetching on every tab switch
+      if(!force&&Date.now()-_weatherDetailLoaded<900000)return;
       try{
         const lat=44.58,lon=2.07;
         const r=await fetch(`https://api.open-meteo.com/v1/meteofrance?latitude=${lat}&longitude=${lon}&hourly=precipitation,weather_code,precipitation_probability&daily=precipitation_sum,weather_code,precipitation_probability_max&timezone=Europe/Paris&forecast_days=4&past_days=2`);
@@ -1547,6 +1554,7 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
         }else{
           alertEl.innerHTML='';
         }
+        _weatherDetailLoaded=Date.now();
       }catch(e){
         console.error('Weather:',e);
       }
@@ -1566,7 +1574,7 @@ COMMENCE ta réponse par [NIVEAU: — pas d'introduction, pas de préambule.`;
         if(keys.length>30){
           keys.slice(0,keys.length-30).forEach(k=>delete hist[k]);
         }
-        localStorage.setItem('macro-dash-precip',JSON.stringify(hist));
+        try{localStorage.setItem('macro-dash-precip',JSON.stringify(hist));}catch(e){}
       }catch(e){}
     }
 
@@ -1706,7 +1714,7 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
         }
 
         const cached={ts:Date.now(),text:text};
-        localStorage.setItem(CLIMATE_CACHE_KEY,JSON.stringify(cached));
+        try{localStorage.setItem(CLIMATE_CACHE_KEY,JSON.stringify(cached));}catch(e){}
         // Save to Google Sheets for cross-device access
         await gasPost({action:'setClimate',ts:cached.ts,text:cached.text});
         renderClimate(cached);
@@ -1778,8 +1786,8 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
       }
     }
 
-    // Auto-load climate on startup (lightweight — only reads cache, no API call if fresh)
-    loadClimate(false);
+    // Defer to after first paint
+    requestAnimationFrame(()=>setTimeout(()=>loadClimate(false),200));
 
     /* ═══════════════════════════════
        TAB SWITCHING
@@ -2363,7 +2371,7 @@ Langue : français. COMMENCE par [TACHES].`;
           return;
         }
         const cached={ts:Date.now(),text:text};
-        localStorage.setItem(POTAGER_CACHE_KEY,JSON.stringify(cached));
+        try{localStorage.setItem(POTAGER_CACHE_KEY,JSON.stringify(cached));}catch(e){}
         await gasPost({action:'setPotager',ts:cached.ts,text:cached.text});
 
         parsePotagerTasks(text);
@@ -2418,7 +2426,7 @@ Langue : français. COMMENCE par [TACHES].`;
       for(const key of Object.keys(howtoCache)){
         if(!newIds.has(key)){delete howtoCache[key];cleaned=true}
       }
-      if(cleaned){try{localStorage.setItem('macro-dash-potager-howto',JSON.stringify(howtoCache))}catch(e){}}
+      try{if(cleaned){try{localStorage.setItem('macro-dash-potager-howto',JSON.stringify(howtoCache))}catch(e){}}}catch(e){}
 
       // Parse summary
       const sumMatch=raw.match(/\[POTAGER_SUMMARY\]\s*([\s\S]*?)(?:\[\/POTAGER_SUMMARY\]|$)/i);
@@ -2692,7 +2700,7 @@ RÈGLES SUPPLÉMENTAIRES :
     }
 
     async function savePlanNotes(){
-      localStorage.setItem(PLAN_NOTES_KEY,JSON.stringify(planNotes));
+      try{localStorage.setItem(PLAN_NOTES_KEY,JSON.stringify(planNotes));}catch(e){}
       await gasPost({action:'setPlanNotes',notes:planNotes});
     }
 
@@ -3026,14 +3034,14 @@ RÈGLES :
       if(!text)return;
       potagerAjouts.push({date:new Date().toISOString(),text:text});
       input.value='';
-      localStorage.setItem('macro-dash-potager-ajouts',JSON.stringify(potagerAjouts));
+      try{localStorage.setItem('macro-dash-potager-ajouts',JSON.stringify(potagerAjouts));}catch(e){}
       await gasPost({action:'setPotagerAjouts',ajouts:potagerAjouts});
       renderAjouts();
     }
 
     async function removePotagerAjout(idx){
       potagerAjouts.splice(idx,1);
-      localStorage.setItem('macro-dash-potager-ajouts',JSON.stringify(potagerAjouts));
+      try{localStorage.setItem('macro-dash-potager-ajouts',JSON.stringify(potagerAjouts));}catch(e){}
       await gasPost({action:'setPotagerAjouts',ajouts:potagerAjouts});
       renderAjouts();
     }
@@ -3109,9 +3117,9 @@ RÈGLES :
       miniChart('chart-btc','BITSTAMP:BTCUSD','3M');
     }
 
+    // Stagger boot to prioritize first paint
     buildAllWidgets();
-    // Load API key from Google Sheets on startup
-    loadApiKey();
+    requestAnimationFrame(()=>loadApiKey());
   </script>
 </body>
 </html>
