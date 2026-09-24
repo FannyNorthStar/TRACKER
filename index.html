@@ -485,8 +485,8 @@
 
   <!-- Tab Navigation -->
   <nav class="tab-nav">
-    <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">🌡️ Dashboard</button>
-    <button class="tab-btn" data-tab="potager" onclick="switchTab('potager')">🌱 Potager</button>
+    <button class="tab-btn active" data-tab="potager" onclick="switchTab('potager')">🌱 Potager</button>
+    <button class="tab-btn" data-tab="dashboard" onclick="switchTab('dashboard')">🌡️ Dashboard</button>
   </nav>
 
   <!-- Settings Modal -->
@@ -508,7 +508,7 @@
   </div>
 
   <!-- ═══ TAB: DASHBOARD ═══ -->
-  <div id="tab-dashboard" class="tab-content active">
+  <div id="tab-dashboard" class="tab-content">
   <main class="main">
 
     <!-- ═══ THREAT LEVEL ═══ -->
@@ -694,7 +694,7 @@
   </div><!-- /tab-dashboard -->
 
   <!-- ═══ TAB: POTAGER ═══ -->
-  <div id="tab-potager" class="tab-content">
+  <div id="tab-potager" class="tab-content active">
   <main class="main">
 
     <div class="potager-header">
@@ -3232,6 +3232,8 @@ RÈGLES :
     // Stagger boot to prioritize first paint
     buildAllWidgets();
     requestAnimationFrame(()=>loadApiKey());
+    // Auto-load potager since it's now the default tab
+    requestAnimationFrame(()=>switchTab('potager'));
   </script>
 </body>
 </html>
