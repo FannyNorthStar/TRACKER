@@ -1860,7 +1860,7 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
       try{
         // 2 fetches only (sunrise/sunset included in daily)
         const [rDaily,rHourly]=await Promise.all([
-          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max,sunrise,sunset&timezone=Europe/Paris&forecast_days=10'),
+          fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,sunrise,sunset&timezone=Europe/Paris&forecast_days=10'),
           fetch('https://api.open-meteo.com/v1/forecast?latitude=44.58&longitude=2.07&hourly=precipitation,weather_code&timezone=Europe/Paris&forecast_days=10')
         ]);
         if(!rDaily.ok)return;
@@ -1954,12 +1954,13 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
           const rain=d.daily.precipitation_sum[i]||0;
           const prob=d.daily.precipitation_probability_max[i]||0;
           const wind=d.daily.wind_speed_10m_max[i]||0;
+          const windDir=d.daily.wind_direction_10m_dominant?d.daily.wind_direction_10m_dominant[i]:null;
           const code=d.daily.weather_code[i]||0;
           const dayKey=d.daily.time[i];
           const gardenOk=rain<15&&wind<30&&tmax>8&&tmax<38;
           const rainDesc=describeRain(dayKey,code);
           const gardenAvoid=gardenHours(dayKey);
-          window._potagerForecast.push({date:dayKey,label,tmax,tmin,rain,prob,wind,code,gardenOk,rainDesc,gardenAvoid});
+          window._potagerForecast.push({date:dayKey,label,tmax,tmin,rain,prob,wind,windDir,code,gardenOk,rainDesc,gardenAvoid});
         }
 
         renderWeatherCards(dailyData);
@@ -1974,6 +1975,15 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
       const grid=document.getElementById('potagerWeatherGrid');
       if(!grid||!window._potagerForecast)return;
       const wIcon=(c)=>c>=95?'⛈️':c>=80?'🌧️':c>=61?'🌧️':c>=51?'🌦️':c>=45?'🌫️':c>=3?'⛅':c>=1?'🌤️':'☀️';
+      // Wind: degree → arrow pointing WHERE the wind blows TO (meteorological convention: 0°=N means wind FROM north, blows south)
+      const windArrow=(deg)=>{
+        if(deg===null||deg===undefined)return '';
+        // Arrows point in the direction the wind travels (from→to), so rotate 180°
+        const arrows=['↓','↙','←','↖','↑','↗','→','↘'];
+        const labels=['N','NE','E','SE','S','SO','O','NO'];
+        const idx=Math.round(deg/45)%8;
+        return arrows[idx]+' '+labels[idx];
+      };
       let html='';
       window._potagerForecast.forEach(f=>{
         const avoidWindow=gardenHoursForEntry(f);
@@ -1983,6 +1993,7 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
         }else if(f.rain>0){
           rainLine='<div class="potager-weather-day-rain">'+f.rain.toFixed(1)+'mm</div>';
         }
+        const windLine='<div style="font-size:.55rem;color:var(--text-muted);margin-top:.1rem">'+windArrow(f.windDir)+' '+Math.round(f.wind)+' km/h</div>';
         let tagClass=f.gardenOk?'garden-ok':'garden-no';
         let tagText='';
         if(!f.gardenOk){tagText='Défavorable'}
@@ -1993,6 +2004,7 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
           '<div class="potager-weather-day-label">'+f.label+'</div>'+
           '<div class="potager-weather-day-icon">'+wIcon(f.code)+'</div>'+
           '<div class="potager-weather-day-temp">'+Math.round(f.tmin)+'° / '+Math.round(f.tmax)+'°</div>'+
+          windLine+
           rainLine+
           '<div class="potager-weather-day-tag '+tagClass+'">'+tagText+'</div>'+
         '</div>';
