@@ -1909,21 +1909,23 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
           return type+' '+parts.join(' et ');
         }
 
-        // Helper: find garden-ok hours (no rain, 7h-20h range)
+        // Helper: find garden-ok hours (no rain, 7h-21h range — nobody gardens before 7h or after 21h)
         function gardenHours(dayKey){
           const hours=hourlyByDay[dayKey];
           if(!hours||hours.length===0)return null;
           const rainHours=new Set(hours.map(h=>h.hour));
-          // Filter to daylight gardening hours (7-20)
+          // Filter to daylight gardening hours (7-21)
           const okSlots=[];
-          for(let hr=7;hr<20;hr++){
+          for(let hr=7;hr<21;hr++){
             if(!rainHours.has(hr))okSlots.push(hr);
           }
           if(okSlots.length===0)return 'Toute la journée';
-          if(okSlots.length>=13)return null; // all ok
+          if(okSlots.length>=14)return null; // all ok
+          // If only 3h or less of OK slots → basically unfavorable
+          if(okSlots.length<=3)return 'Toute la journée';
           // Find the avoid window instead (simpler for the user)
           const avoidHours=[];
-          for(let hr=7;hr<20;hr++){
+          for(let hr=7;hr<21;hr++){
             if(rainHours.has(hr))avoidHours.push(hr);
           }
           if(avoidHours.length===0)return null;
@@ -1956,7 +1958,8 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
           const dayKey=d.daily.time[i];
           const gardenOk=rain<15&&wind<30&&tmax>8&&tmax<38;
           const rainDesc=describeRain(dayKey,code);
-          window._potagerForecast.push({date:dayKey,label,tmax,tmin,rain,prob,wind,code,gardenOk,rainDesc});
+          const gardenAvoid=gardenHours(dayKey);
+          window._potagerForecast.push({date:dayKey,label,tmax,tmin,rain,prob,wind,code,gardenOk,rainDesc,gardenAvoid});
         }
 
         renderWeatherCards(dailyData);
@@ -1983,9 +1986,10 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
         let tagClass=f.gardenOk?'garden-ok':'garden-no';
         let tagText='';
         if(!f.gardenOk){tagText='Défavorable'}
+        else if(avoidWindow==='Toute la journée'){tagText='Défavorable';tagClass='garden-no'}
         else if(avoidWindow){tagText='OK · éviter '+avoidWindow;tagClass='garden-partial'}
         else{tagText='Jardinage OK'}
-        html+='<div class="potager-weather-day '+(f.gardenOk?(avoidWindow?'partial':'good'):'bad')+'">'+
+        html+='<div class="potager-weather-day '+(tagClass==='garden-no'?'bad':(avoidWindow?'partial':'good'))+'">'+
           '<div class="potager-weather-day-label">'+f.label+'</div>'+
           '<div class="potager-weather-day-icon">'+wIcon(f.code)+'</div>'+
           '<div class="potager-weather-day-temp">'+Math.round(f.tmin)+'° / '+Math.round(f.tmax)+'°</div>'+
@@ -1997,11 +2001,34 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
     }
     // Simplified avoidWindow from cached forecast (no hourly data needed)
     function gardenHoursForEntry(f){
+      // Use pre-computed gardenAvoid if available (from hourly data)
+      if(f.gardenAvoid!==undefined)return f.gardenAvoid;
       if(!f.rainDesc||!f.gardenOk)return null;
-      // Extract hour ranges from rainDesc like "Orage 16h–18h"
+      // Fallback: parse hour ranges from rainDesc and clip to gardening hours 7h–21h
       const m=f.rainDesc.match(/(\d+)h[–-](\d+)h/g);
       if(!m)return null;
-      return m.join(' et ');
+      // Build set of rain hours, clipped to 7-21
+      const rainHrs=new Set();
+      m.forEach(range=>{
+        const parts=range.match(/(\d+)h[–-](\d+)h/);
+        if(!parts)return;
+        const s=parseInt(parts[1]),e=parseInt(parts[2]);
+        for(let h=Math.max(s,7);h<Math.min(e,21);h++)rainHrs.add(h);
+      });
+      if(rainHrs.size===0)return null; // rain only outside gardening hours
+      // If ≤3h of OK slots left → basically unfavorable
+      const okCount=14-rainHrs.size;
+      if(okCount<=3)return 'Toute la journée';
+      // Build avoid windows from clipped hours
+      const sorted=[...rainHrs].sort((a,b)=>a-b);
+      const windows=[];
+      let ws=sorted[0],we=sorted[0];
+      for(let i=1;i<sorted.length;i++){
+        if(sorted[i]<=we+1){we=sorted[i]}
+        else{windows.push([ws,we+1]);ws=sorted[i];we=sorted[i]}
+      }
+      windows.push([ws,we+1]);
+      return windows.map(w=>w[0]+'h–'+w[1]+'h').join(' et ');
     }
 
     function getMoonPhase(date){
