@@ -2068,14 +2068,30 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
       const now=new Date();
 
       // Sunrise / sunset from first day of forecast
+      let srDate=null, ssDate=null;
       let sunriseStr='', sunsetStr='';
       if(dailyData.daily.sunrise&&dailyData.daily.sunrise[0]){
-        const sr=new Date(dailyData.daily.sunrise[0]);
-        sunriseStr=sr.getHours()+'h'+String(sr.getMinutes()).padStart(2,'0');
+        srDate=new Date(dailyData.daily.sunrise[0]);
+        sunriseStr=srDate.getHours()+'h'+String(srDate.getMinutes()).padStart(2,'0');
       }
       if(dailyData.daily.sunset&&dailyData.daily.sunset[0]){
-        const ss=new Date(dailyData.daily.sunset[0]);
-        sunsetStr=ss.getHours()+'h'+String(ss.getMinutes()).padStart(2,'0');
+        ssDate=new Date(dailyData.daily.sunset[0]);
+        sunsetStr=ssDate.getHours()+'h'+String(ssDate.getMinutes()).padStart(2,'0');
+      }
+
+      // Derived: dawn (~30min before sunrise), solar noon (midpoint), dusk (~30min after sunset)
+      let dawnStr='', noonStr='', duskStr='';
+      if(srDate){
+        const dawn=new Date(srDate.getTime()-30*60000);
+        dawnStr=dawn.getHours()+'h'+String(dawn.getMinutes()).padStart(2,'0');
+      }
+      if(srDate&&ssDate){
+        const noon=new Date((srDate.getTime()+ssDate.getTime())/2);
+        noonStr=noon.getHours()+'h'+String(noon.getMinutes()).padStart(2,'0');
+      }
+      if(ssDate){
+        const dusk=new Date(ssDate.getTime()+30*60000);
+        duskStr=dusk.getHours()+'h'+String(dusk.getMinutes()).padStart(2,'0');
       }
 
       // Moon
@@ -2084,9 +2100,13 @@ COMMENCE ta réponse par [CLIMATE] — pas d'introduction.`;
       const nextFull=findNextMoonEvent(now,0.5,'🌕 Pleine lune');
       const fmtDate=(d)=>d.getDate()+'/'+(d.getMonth()+1);
 
+      // Build items in chronological order of the day
       let items=[];
+      if(dawnStr)items.push('<span class="potager-astro-item">🌆 Aube '+dawnStr+'</span>');
       if(sunriseStr)items.push('<span class="potager-astro-item">🌅 Lever '+sunriseStr+'</span>');
+      if(noonStr)items.push('<span class="potager-astro-item">☀️ Midi solaire '+noonStr+'</span>');
       if(sunsetStr)items.push('<span class="potager-astro-item">🌇 Coucher '+sunsetStr+'</span>');
+      if(duskStr)items.push('<span class="potager-astro-item">🌃 Crépuscule '+duskStr+'</span>');
       items.push('<span class="potager-astro-sep"></span>');
       items.push('<span class="potager-astro-item">'+moon.emoji+' '+moon.name+'</span>');
       items.push('<span class="potager-astro-item" style="font-size:.6rem;color:var(--text-hint)">🌑 Nouv. '+fmtDate(nextNew.date)+' · 🌕 Pleine '+fmtDate(nextFull.date)+'</span>');
